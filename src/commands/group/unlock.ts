@@ -1,5 +1,4 @@
 import { defineCommand } from "@/core/types";
-
 export default defineCommand({
   name: "unlock",
   description: "Buka setting grup (semua member bisa edit info)",

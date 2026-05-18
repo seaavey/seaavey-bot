@@ -1,6 +1,5 @@
 import util from "node:util";
 import { defineCommand } from "@/core/types";
-
 export default defineCommand({
   name: "=>",
   description: "Eval async JavaScript code",

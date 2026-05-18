@@ -1,7 +1,6 @@
 import { closePoll, createPoll, getPoll, votePoll } from "@/infra/database";
-import { type Button, sendInteractive } from "@/handlers/interactive";
 import { defineCommand } from "@/core/types";
-
+import { type Button, sendInteractive } from "@/handlers/interactive";
 export default defineCommand({
   name: "poll",
   description: "Buat/vote/tutup polling. Format: .poll Pertanyaan? | Opsi1 | Opsi2",

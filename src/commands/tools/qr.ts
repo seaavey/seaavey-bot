@@ -1,5 +1,4 @@
 import { defineCommand } from "@/core/types";
-
 export default defineCommand({
   name: "qr",
   description: "Buat QR code dari teks/URL. Contoh: .qr https://google.com",

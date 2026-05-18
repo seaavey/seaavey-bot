@@ -1,7 +1,6 @@
 import { addXp } from "@/infra/database";
-import { getRandomNumber } from "@/utils/helper";
 import { defineCommand } from "@/core/types";
-
+import { getRandomNumber } from "@/utils/helper";
 const choices = ["batu", "gunting", "kertas"] as const;
 const emojis = { batu: "🪨", gunting: "✂️", kertas: "📄" };
 

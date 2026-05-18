@@ -1,6 +1,5 @@
 import { api } from "@/infra/api";
 import { defineCommand } from "@/core/types";
-
 interface SCResult {
   title: string;
   url: string;

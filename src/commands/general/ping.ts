@@ -1,5 +1,4 @@
 import { defineCommand } from "@/core/types";
-
 export default defineCommand({
   name: "ping",
   description: "Cek kecepatan respon bot",

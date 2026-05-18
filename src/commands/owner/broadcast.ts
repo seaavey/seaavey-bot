@@ -1,5 +1,4 @@
 import { defineCommand } from "@/core/types";
-
 export default defineCommand({
   name: "broadcast",
   description: "Broadcast message to all groups (owner only)",

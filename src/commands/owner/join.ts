@@ -1,5 +1,4 @@
 import { defineCommand } from "@/core/types";
-
 export default defineCommand({
   name: "join",
   description: "Join group via invite link (owner only)",

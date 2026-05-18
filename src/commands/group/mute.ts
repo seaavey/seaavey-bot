@@ -1,5 +1,4 @@
 import { defineCommand } from "@/core/types";
-
 export default defineCommand({
   name: "mute",
   description: "Tutup grup (hanya admin yang bisa chat)",

@@ -1,7 +1,6 @@
 import { addXp } from "@/infra/database";
-import { getRandomItem } from "@/utils/helper";
 import { defineCommand } from "@/core/types";
-
+import { getRandomItem } from "@/utils/helper";
 const questions = [
   { q: "Apa bahasa resmi Brasil?", o: ["Spanyol", "Portugis", "Inggris", "Prancis"], a: 1 },
   { q: "Berapa jumlah tulang manusia dewasa?", o: ["186", "206", "226", "256"], a: 1 },

@@ -1,6 +1,5 @@
 import { addAutoReply, getAutoReplies, removeAutoReply } from "@/infra/database";
 import { defineCommand } from "@/core/types";
-
 export default defineCommand({
   name: "autoreply",
   description: "Kelola auto-reply grup. Sub: add, del, list",

@@ -1,5 +1,4 @@
 import { defineCommand } from "@/core/types";
-
 export default defineCommand({
   name: "hidetag",
   description: "Tag semua member tanpa mention visible",

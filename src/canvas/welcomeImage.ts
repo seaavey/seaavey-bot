@@ -1,5 +1,4 @@
 import sharp from "sharp";
-
 export async function generateWelcomeImage(
   ppUrl: string | null,
   userName: string,

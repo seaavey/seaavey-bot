@@ -1,13 +1,13 @@
+import { Image } from "node-webpmux";
+import { execSync } from "node:child_process";
+import { join } from "node:path";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 /**
  * @module convert
  * @description Image/video to sticker converter using ffmpeg + node-webpmux
  */
 
-import { execSync } from "node:child_process";
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
-import { Image } from "node-webpmux";
 
 interface StickerOptions {
   pack?: string;

@@ -1,6 +1,5 @@
 import { addWallet, getEconomy } from "@/infra/database";
 import { defineCommand } from "@/core/types";
-
 const SHOP_ITEMS = [
   { id: "1", name: "🎣 Fishing Rod", price: 5000, desc: "Alat pancing" },
   { id: "2", name: "⛏️ Pickaxe", price: 8000, desc: "Alat tambang" },

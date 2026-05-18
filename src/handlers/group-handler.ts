@@ -1,5 +1,5 @@
-import type { WASocket } from "baileys";
 import db, { getGroup, updateMemberChat } from "@/infra/database";
+import type { WASocket } from "baileys";
 import { getNumber } from "@/utils/helper";
 import { logger } from "@/core/logger";
 export async function handleGroupParticipants(

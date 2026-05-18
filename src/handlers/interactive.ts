@@ -1,3 +1,4 @@
+import {
 /**
  * @module interactive
  * @description WhatsApp Interactive Message Builder
@@ -6,7 +7,6 @@
  * @license MIT
  */
 
-import {
   type BinaryNode,
   generateMessageID,
   prepareWAMessageMedia,

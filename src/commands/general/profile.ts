@@ -1,6 +1,6 @@
 import db, { getUser } from "@/infra/database";
-import { getNumber } from "@/utils/helper";
 import { defineCommand } from "@/core/types";
+import { getNumber } from "@/utils/helper";
 export default defineCommand({
   name: "profile",
   description: "Lihat profile card / rank kamu",

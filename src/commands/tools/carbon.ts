@@ -1,5 +1,4 @@
 import { defineCommand } from "@/core/types";
-
 export default defineCommand({
   name: "carbon",
   description: "Buat screenshot kode aesthetic. Contoh: .carbon console.log('hello')",

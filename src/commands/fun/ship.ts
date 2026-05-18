@@ -1,5 +1,5 @@
-import { getNumber, getRandomNumber } from "@/utils/helper";
 import { defineCommand } from "@/core/types";
+import { getNumber, getRandomNumber } from "@/utils/helper";
 export default defineCommand({
   name: "ship",
   description: "Cek kecocokan 2 orang. Tag 2 user.",

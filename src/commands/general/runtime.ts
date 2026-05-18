@@ -1,5 +1,4 @@
 import { defineCommand } from "@/core/types";
-
 const startTime = Date.now();
 
 export default defineCommand({

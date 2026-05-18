@@ -1,6 +1,6 @@
-import { setAfk } from "@/infra/database";
-import { getNumber } from "@/utils/helper";
 import { defineCommand } from "@/core/types";
+import { getNumber } from "@/utils/helper";
+import { setAfk } from "@/infra/database";
 export default defineCommand({
   name: "afk",
   description: "Set status AFK",

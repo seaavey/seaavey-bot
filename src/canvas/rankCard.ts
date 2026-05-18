@@ -1,5 +1,4 @@
 import sharp from "sharp";
-
 export async function generateRankCard(
   ppUrl: string | null,
   userName: string,

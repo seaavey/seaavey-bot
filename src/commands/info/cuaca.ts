@@ -1,5 +1,4 @@
 import { defineCommand } from "@/core/types";
-
 export default defineCommand({
   name: "cuaca",
   description: "Cek cuaca suatu kota. Contoh: .cuaca Jakarta",

@@ -1,7 +1,6 @@
 import { addXp } from "@/infra/database";
-import { getNumber, getRandomNumber } from "@/utils/helper";
 import { defineCommand } from "@/core/types";
-
+import { getNumber, getRandomNumber } from "@/utils/helper";
 const sessions = new Map<
   string,
   { challenger: string; target: string; hp: Record<string, number>; turn: string; timeout: Timer }

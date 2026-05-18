@@ -1,6 +1,5 @@
-import { getRandomItem } from "@/utils/helper";
 import { defineCommand } from "@/core/types";
-
+import { getRandomItem } from "@/utils/helper";
 const questions = [
   { a: "Bisa terbang tapi gak bisa berenang", b: "Bisa berenang tapi gak bisa jalan" },
   { a: "Kaya tapi gak punya teman", b: "Miskin tapi punya banyak teman" },

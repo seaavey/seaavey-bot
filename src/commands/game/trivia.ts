@@ -1,7 +1,6 @@
 import { addXp } from "@/infra/database";
-import { getRandomItem } from "@/utils/helper";
 import { defineCommand } from "@/core/types";
-
+import { getRandomItem } from "@/utils/helper";
 const questions = [
   { q: "Ibukota Indonesia?", a: "jakarta" },
   { q: "Planet terbesar di tata surya?", a: "jupiter" },

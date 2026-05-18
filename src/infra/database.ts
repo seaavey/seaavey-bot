@@ -1,7 +1,5 @@
 import { Database } from "bun:sqlite";
-
 import { getRandomNumber } from "@/utils/helper";
-
 const db = new Database("data.db");
 
 db.run("PRAGMA journal_mode = WAL");

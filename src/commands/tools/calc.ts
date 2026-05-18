@@ -1,5 +1,4 @@
 import { defineCommand } from "@/core/types";
-
 export default defineCommand({
   name: "calc",
   description: "Kalkulator. Contoh: .calc 2+2*5",

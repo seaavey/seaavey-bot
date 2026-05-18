@@ -1,6 +1,5 @@
-import { getNumber, getRandomItem, getRandomNumber } from "@/utils/helper";
 import { defineCommand } from "@/core/types";
-
+import { getNumber, getRandomItem, getRandomNumber } from "@/utils/helper";
 const categories = [
   "Kegantengan",
   "Kecantikan",

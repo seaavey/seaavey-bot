@@ -1,5 +1,4 @@
 import { defineCommand } from "@/core/types";
-
 interface Gempa {
   Tanggal: string;
   Jam: string;

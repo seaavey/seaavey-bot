@@ -1,6 +1,5 @@
 import { config } from "@/core/config";
 import { defineCommand } from "@/core/types";
-
 const p = config.prefix;
 
 export default defineCommand({

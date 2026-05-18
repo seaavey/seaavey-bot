@@ -1,5 +1,4 @@
 import { defineCommand } from "@/core/types";
-
 interface GitHubUser {
   login: string;
   name: string | null;

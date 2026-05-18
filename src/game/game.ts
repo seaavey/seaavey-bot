@@ -7,7 +7,6 @@ import { checkTebakGambar } from "../commands/game/tebakgambar";
 import { checkTebakKata } from "../commands/game/tebakkata";
 import { checkTekaTeki } from "../commands/game/tekateki";
 import { checkTrivia } from "../commands/game/trivia";
-
 export function checkGameAnswer(jid: string, text: string, sender: string): string | null {
   const input = text.trim();
   if (!input) return null;

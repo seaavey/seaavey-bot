@@ -1,6 +1,5 @@
 import { commands } from "@/infra/loader";
 import { defineCommand } from "@/core/types";
-
 export default defineCommand({
   name: "totalfitur",
   description: "Hitung total command yang tersedia",

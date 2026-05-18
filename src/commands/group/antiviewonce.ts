@@ -1,6 +1,5 @@
-import { getGroup } from "@/infra/database";
 import { defineCommand } from "@/core/types";
-
+import { getGroup } from "@/infra/database";
 export default defineCommand({
   name: "antiviewonce",
   description: "Toggle anti-viewonce on/off. Pesan view once akan di-forward ulang.",

@@ -1,6 +1,5 @@
 import db from "@/infra/database";
 import { defineCommand } from "@/core/types";
-
 db.run(`
   CREATE TABLE IF NOT EXISTS notes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

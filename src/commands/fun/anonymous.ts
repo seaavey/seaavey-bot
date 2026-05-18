@@ -1,5 +1,4 @@
 import { defineCommand } from "@/core/types";
-
 export default defineCommand({
   name: "anonymous",
   description: "Kirim pesan anonim ke member grup. Format: .anonymous @tag pesan",

@@ -1,6 +1,6 @@
 import db, { getSiders, updateMemberChat } from "@/infra/database";
-import { getNumber } from "@/utils/helper";
 import { defineCommand } from "@/core/types";
+import { getNumber } from "@/utils/helper";
 export default defineCommand({
   name: "sider",
   description: "List member yang tidak chat selama 3+ hari",

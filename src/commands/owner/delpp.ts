@@ -1,5 +1,4 @@
 import { defineCommand } from "@/core/types";
-
 export default defineCommand({
   name: "delpp",
   description: "Remove bot profile picture (owner only)",

@@ -1,6 +1,5 @@
-import type { WASocket } from "baileys";
 import type { ParsedMessage } from "./helper";
-
+import type { WASocket } from "baileys";
 export interface Command {
   name: string;
   category: string;

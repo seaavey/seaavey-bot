@@ -1,6 +1,5 @@
 import { api } from "@/infra/api";
 import { defineCommand } from "@/core/types";
-
 export default defineCommand({
   name: "threadsdl",
   description: "Download media dari Threads",

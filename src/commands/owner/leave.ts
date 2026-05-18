@@ -1,5 +1,4 @@
 import { defineCommand } from "@/core/types";
-
 export default defineCommand({
   name: "leave",
   description: "Bot leave from current group (owner only)",

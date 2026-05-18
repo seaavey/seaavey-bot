@@ -1,6 +1,5 @@
 import { api } from "@/infra/api";
 import { defineCommand } from "@/core/types";
-
 export default defineCommand({
   name: "scdl",
   description: "Download lagu dari SoundCloud",

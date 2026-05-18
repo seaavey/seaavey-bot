@@ -1,5 +1,4 @@
 import { defineCommand } from "@/core/types";
-
 export default defineCommand({
   name: "meme",
   description: "Generate meme. Contoh: .meme text atas | text bawah",

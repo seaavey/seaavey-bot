@@ -1,6 +1,5 @@
 import { config } from "@/core/config";
 import { defineCommand } from "@/core/types";
-
 export default defineCommand({
   name: "confess",
   description: "Kirim pesan anonim ke seseorang. Gunakan di private chat.",

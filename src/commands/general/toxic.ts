@@ -1,8 +1,7 @@
 import { appendFileSync, readFileSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
 import { config } from "@/core/config";
 import { defineCommand } from "@/core/types";
-
+import { join } from "node:path";
 const FILE_PATH = join(import.meta.dir, "..", "..", "assets", "toxic.txt");
 
 export default defineCommand({

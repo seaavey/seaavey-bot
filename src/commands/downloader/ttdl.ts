@@ -1,6 +1,5 @@
 import { api } from "@/infra/api";
 import { defineCommand } from "@/core/types";
-
 interface TikTokData {
   author: string;
   title: string;

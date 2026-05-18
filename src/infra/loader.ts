@@ -1,10 +1,9 @@
-import { watch } from "node:fs";
-import { readdir } from "node:fs/promises";
+import type { Command } from "@/core/types";
 import { basename, dirname, join } from "node:path";
 import { isDev } from "@/core/config";
 import { logger } from "@/core/logger";
-import type { Command } from "@/core/types";
-
+import { readdir } from "node:fs/promises";
+import { watch } from "node:fs";
 const COMMANDS_DIR = join(import.meta.dir, "..", "commands");
 
 export const commands = new Map<string, Command>();

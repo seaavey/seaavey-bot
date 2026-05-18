@@ -1,7 +1,6 @@
-import { downloadMediaMessage } from "baileys";
 import { config } from "@/core/config";
 import { defineCommand } from "@/core/types";
-
+import { downloadMediaMessage } from "baileys";
 export default defineCommand({
   name: "removebg",
   description: "Hapus background gambar. Reply/kirim gambar.",

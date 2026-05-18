@@ -1,6 +1,5 @@
-import { setGroup } from "@/infra/database";
 import { defineCommand } from "@/core/types";
-
+import { setGroup } from "@/infra/database";
 export default defineCommand({
   name: "set",
   description: "Set group settings (welcomeMsg, goodbyeMsg, warnMax)",

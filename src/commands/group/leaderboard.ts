@@ -1,6 +1,6 @@
 import db from "@/infra/database";
-import { getNumber } from "@/utils/helper";
 import { defineCommand } from "@/core/types";
+import { getNumber } from "@/utils/helper";
 export default defineCommand({
   name: "leaderboard",
   description: "Top 10 member paling aktif di group",

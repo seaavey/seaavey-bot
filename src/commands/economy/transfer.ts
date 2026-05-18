@@ -1,6 +1,6 @@
+import { defineCommand } from "@/core/types";
 import { getEconomy, transferMoney } from "@/infra/database";
 import { getNumber } from "@/utils/helper";
-import { defineCommand } from "@/core/types";
 export default defineCommand({
   name: "transfer",
   description: "Transfer uang ke user lain",

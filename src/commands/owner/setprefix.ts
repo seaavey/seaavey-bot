@@ -1,6 +1,5 @@
 import { config } from "@/core/config";
 import { defineCommand } from "@/core/types";
-
 export default defineCommand({
   name: "setprefix",
   description: "Change bot prefix (owner only)",

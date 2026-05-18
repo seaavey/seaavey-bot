@@ -1,6 +1,5 @@
 import { addToxicWord, getGroup, getToxicWords, removeToxicWord, setGroup } from "@/infra/database";
 import { defineCommand } from "@/core/types";
-
 export default defineCommand({
   name: "antitoxic",
   description: "Kelola antitoxic & word filter. Sub: on/off, add, del, list",

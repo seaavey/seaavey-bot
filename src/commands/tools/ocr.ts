@@ -1,6 +1,5 @@
-import { downloadMediaMessage } from "baileys";
 import { defineCommand } from "@/core/types";
-
+import { downloadMediaMessage } from "baileys";
 export default defineCommand({
   name: "ocr",
   description: "Extract teks dari gambar. Reply gambar dengan .ocr",

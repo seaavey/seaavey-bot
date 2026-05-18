@@ -1,6 +1,5 @@
 import { addXp } from "@/infra/database";
 import { defineCommand } from "@/core/types";
-
 export default defineCommand({
   name: "coinflip",
   description: "Tebak heads atau tails",

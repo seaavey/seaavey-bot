@@ -1,5 +1,4 @@
 import { defineCommand } from "@/core/types";
-
 export default defineCommand({
   name: "kurs",
   description: "Cek kurs mata uang terhadap IDR",

@@ -1,5 +1,4 @@
 import { defineCommand } from "@/core/types";
-
 export default defineCommand({
   name: "translate",
   description: "Terjemahkan teks. Contoh: .translate en Halo dunia",

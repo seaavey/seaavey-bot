@@ -1,6 +1,6 @@
 import { addXp } from "@/infra/database";
-import { getRandomNumber } from "@/utils/helper";
 import { defineCommand } from "@/core/types";
+import { getRandomNumber } from "@/utils/helper";
 export default defineCommand({
   name: "dice",
   description: "Tebak angka dadu (1-6)",

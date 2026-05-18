@@ -1,5 +1,4 @@
 import { defineCommand } from "@/core/types";
-
 interface NpmPackage {
   name: string;
   description: string;

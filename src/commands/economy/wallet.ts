@@ -1,6 +1,5 @@
-import { getEconomy } from "@/infra/database";
 import { defineCommand } from "@/core/types";
-
+import { getEconomy } from "@/infra/database";
 export default defineCommand({
   name: "wallet",
   description: "Cek saldo kamu",

@@ -1,6 +1,5 @@
-import { downloadMediaMessage, type WAMessage } from "baileys";
 import { defineCommand } from "@/core/types";
-
+import { downloadMediaMessage, type WAMessage } from "baileys";
 export default defineCommand({
   name: "setpp",
   description: "Set bot profile picture (owner only)",

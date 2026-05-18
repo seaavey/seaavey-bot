@@ -1,7 +1,6 @@
+import { defineCommand } from "@/core/types";
 import { readFileSync } from "node:fs";
 import { sendInteractive } from "@/handlers/interactive";
-import { defineCommand } from "@/core/types";
-
 export default defineCommand({
   name: "button",
   description: "",

@@ -1,7 +1,6 @@
-import { mkdirSync } from "node:fs";
 import pino from "pino";
 import { isDev } from "@/core/config";
-
+import { mkdirSync } from "node:fs";
 mkdirSync("logs", { recursive: true });
 
 const today = new Date().toISOString().slice(0, 10);

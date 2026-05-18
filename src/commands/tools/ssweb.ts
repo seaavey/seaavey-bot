@@ -1,6 +1,5 @@
 import { api } from "@/infra/api";
 import { defineCommand } from "@/core/types";
-
 export default defineCommand({
   name: "ssweb",
   description: "Screenshot website. Contoh: .ssweb https://google.com",

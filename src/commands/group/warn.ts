@@ -1,6 +1,6 @@
 import { addWarn, getGroup, getWarns } from "@/infra/database";
-import { getNumber } from "@/utils/helper";
 import { defineCommand } from "@/core/types";
+import { getNumber } from "@/utils/helper";
 export default defineCommand({
   name: "warn",
   description: "Beri peringatan ke member",

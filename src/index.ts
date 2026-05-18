@@ -1,15 +1,14 @@
-import { existsSync } from "node:fs";
-import { createInterface } from "node:readline";
-import type { Boom } from "@hapi/boom";
-import makeWASocket, { DisconnectReason, useMultiFileAuthState } from "baileys";
 import * as QRCode from "qrcode";
-import { updateMemberChat } from "@/infra/database";
+import makeWASocket, { DisconnectReason, useMultiFileAuthState } from "baileys";
+import type { Boom } from "@hapi/boom";
+import { createInterface } from "node:readline";
+import { existsSync } from "node:fs";
 import { handleGroupParticipants } from "@/handlers/group-handler";
+import { handleMessagesUpdate, handleMessagesUpsert } from "@/handlers/message-handler";
 import { loadCommands } from "@/infra/loader";
 import { logger } from "@/core/logger";
-import { handleMessagesUpdate, handleMessagesUpsert } from "@/handlers/message-handler";
 import { startSchedulers } from "@/infra/scheduler";
-
+import { updateMemberChat } from "@/infra/database";
 async function startBot() {
   await loadCommands();
 

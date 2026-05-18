@@ -1,6 +1,5 @@
-import { readFileSync } from "node:fs";
 import { join } from "node:path";
-
+import { readFileSync } from "node:fs";
 export const isDev = process.env.NODE_ENV !== "production";
 
 interface Config {

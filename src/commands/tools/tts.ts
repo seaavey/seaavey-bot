@@ -1,5 +1,4 @@
 import { defineCommand } from "@/core/types";
-
 export default defineCommand({
   name: "tts",
   description: "Text to Speech. Contoh: .tts halo dunia",

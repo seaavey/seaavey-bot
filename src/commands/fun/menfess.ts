@@ -1,6 +1,5 @@
 import { config } from "@/core/config";
 import { defineCommand } from "@/core/types";
-
 export default defineCommand({
   name: "menfess",
   description: "Kirim pesan rahasia ke nomor WA via bot (anonim). Gunakan di private chat.",

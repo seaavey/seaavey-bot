@@ -1,5 +1,4 @@
 import { defineCommand } from "@/core/types";
-
 export default defineCommand({
   name: "short",
   description: "Perpendek URL. Contoh: .short https://google.com",

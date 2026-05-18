@@ -1,5 +1,4 @@
 import { defineCommand } from "@/core/types";
-
 export default defineCommand({
   name: "shutdown",
   description: "Shutdown bot (owner only)",

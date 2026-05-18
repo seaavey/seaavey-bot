@@ -1,10 +1,9 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import { addXp } from "@/infra/database";
-import { getRandomItem } from "@/utils/helper";
-import { logger } from "@/core/logger";
 import { defineCommand } from "@/core/types";
-
+import { getRandomItem } from "@/utils/helper";
+import { join } from "node:path";
+import { logger } from "@/core/logger";
+import { readFileSync } from "node:fs";
 const sessions = new Map<string, { answer: string; timeout: Timer; sender?: string }>();
 
 // Load local database

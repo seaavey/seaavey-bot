@@ -1,5 +1,4 @@
 import { defineCommand } from "@/core/types";
-
 export default defineCommand({
   name: "jadwalsholat",
   description: "Jadwal sholat hari ini. Contoh: .jadwalsholat Jakarta",

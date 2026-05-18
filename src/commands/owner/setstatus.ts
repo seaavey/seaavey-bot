@@ -1,5 +1,4 @@
 import { defineCommand } from "@/core/types";
-
 export default defineCommand({
   name: "setstatus",
   description: "Set bot bio/status (owner only)",

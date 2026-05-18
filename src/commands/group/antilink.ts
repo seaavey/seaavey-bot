@@ -1,6 +1,5 @@
-import { getGroup, setGroup } from "@/infra/database";
 import { defineCommand } from "@/core/types";
-
+import { getGroup, setGroup } from "@/infra/database";
 export default defineCommand({
   name: "antilink",
   description: "Toggle antilink on/off",
