@@ -1,7 +1,7 @@
 import type { WASocket } from "baileys";
-import { getPendingReminders, markReminderDone } from "@/database";
-import { getNumber } from "@/helper";
-import { logger } from "@/logger";
+import { getPendingReminders, markReminderDone } from "@/infra/database";
+import { getNumber } from "@/utils/helper";
+import { logger } from "@/core/logger";
 export function startSchedulers(sock: WASocket) {
   // Reminder checker
   setInterval(async () => {
@@ -22,7 +22,7 @@ export function startSchedulers(sock: WASocket) {
   // Schedule checker
   setInterval(async () => {
     try {
-      const { getPendingSchedules, markScheduleDone } = await import("@/database");
+      const { getPendingSchedules, markScheduleDone } = await import("@/infra/database");
       const schedules = getPendingSchedules();
       for (const s of schedules) {
         markScheduleDone(s.id);

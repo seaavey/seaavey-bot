@@ -1,5 +1,5 @@
 import util from "node:util";
-import { defineCommand } from "@/types";
+import { defineCommand } from "@/core/types";
 
 export default defineCommand({
   name: ">",

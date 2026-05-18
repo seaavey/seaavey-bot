@@ -1,6 +1,6 @@
-import { addWallet, getEconomy, setLastDaily } from "@/database";
-import { getRandomNumber } from "@/helper";
-import { defineCommand } from "@/types";
+import { addWallet, getEconomy, setLastDaily } from "@/infra/database";
+import { getRandomNumber } from "@/utils/helper";
+import { defineCommand } from "@/core/types";
 export default defineCommand({
   name: "daily",
   description: "Klaim hadiah harian",

@@ -1,5 +1,5 @@
-import { getGroup } from "@/database";
-import { defineCommand } from "@/types";
+import { getGroup } from "@/infra/database";
+import { defineCommand } from "@/core/types";
 
 export default defineCommand({
   name: "antiviewonce",
@@ -10,7 +10,7 @@ export default defineCommand({
 
     const group = getGroup(msg.jid);
     const newVal = group.antiviewonce ? 0 : 1;
-    const { setGroup } = await import("@/database");
+    const { setGroup } = await import("@/infra/database");
     setGroup(msg.jid, "antiviewonce", newVal);
     await msg.reply(`✅ Anti-ViewOnce ${newVal ? "diaktifkan" : "dinonaktifkan"}.`);
   },

@@ -1,6 +1,6 @@
-import { removeWarns } from "@/database";
-import { getNumber } from "@/helper";
-import { defineCommand } from "@/types";
+import { removeWarns } from "@/infra/database";
+import { getNumber } from "@/utils/helper";
+import { defineCommand } from "@/core/types";
 export default defineCommand({
   name: "unwarn",
   description: "Hapus semua warn member",

@@ -1,5 +1,5 @@
-import { commands } from "@/loader";
-import { defineCommand } from "@/types";
+import { commands } from "@/infra/loader";
+import { defineCommand } from "@/core/types";
 
 export default defineCommand({
   name: "totalfitur",

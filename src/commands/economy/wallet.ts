@@ -1,5 +1,5 @@
-import { getEconomy } from "@/database";
-import { defineCommand } from "@/types";
+import { getEconomy } from "@/infra/database";
+import { defineCommand } from "@/core/types";
 
 export default defineCommand({
   name: "wallet",

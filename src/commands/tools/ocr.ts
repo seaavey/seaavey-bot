@@ -1,5 +1,5 @@
 import { downloadMediaMessage } from "baileys";
-import { defineCommand } from "@/types";
+import { defineCommand } from "@/core/types";
 
 export default defineCommand({
   name: "ocr",

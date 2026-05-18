@@ -1,5 +1,5 @@
-import db from "@/database";
-import { defineCommand } from "@/types";
+import db from "@/infra/database";
+import { defineCommand } from "@/core/types";
 
 db.run(`
   CREATE TABLE IF NOT EXISTS notes (

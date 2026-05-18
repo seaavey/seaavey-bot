@@ -1,5 +1,5 @@
-import { getNumber } from "@/helper";
-import { defineCommand } from "@/types";
+import { getNumber } from "@/utils/helper";
+import { defineCommand } from "@/core/types";
 
 const sessions = new Map<string, { title: string; members: Set<string>; creator: string }>();
 

@@ -1,5 +1,5 @@
-import { addSchedule, deleteSchedule, getSchedules } from "@/database";
-import { defineCommand } from "@/types";
+import { addSchedule, deleteSchedule, getSchedules } from "@/infra/database";
+import { defineCommand } from "@/core/types";
 
 function parseTime(input: string): number | null {
   const match = input.match(/^(\d+)(m|h|d)$/);

@@ -1,6 +1,6 @@
 import { mkdirSync } from "node:fs";
 import pino from "pino";
-import { isDev } from "@/config";
+import { isDev } from "@/core/config";
 
 mkdirSync("logs", { recursive: true });
 

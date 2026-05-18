@@ -1,5 +1,5 @@
-import { addWallet, getEconomy } from "@/database";
-import { defineCommand } from "@/types";
+import { addWallet, getEconomy } from "@/infra/database";
+import { defineCommand } from "@/core/types";
 
 const SHOP_ITEMS = [
   { id: "1", name: "🎣 Fishing Rod", price: 5000, desc: "Alat pancing" },

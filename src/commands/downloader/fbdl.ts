@@ -1,5 +1,5 @@
-import { api } from "@/api";
-import { defineCommand } from "@/types";
+import { api } from "@/infra/api";
+import { defineCommand } from "@/core/types";
 
 interface FBData {
   url: string;

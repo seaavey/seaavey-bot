@@ -1,5 +1,5 @@
-import { getRandomItem } from "@/helper";
-import { defineCommand } from "@/types";
+import { getRandomItem } from "@/utils/helper";
+import { defineCommand } from "@/core/types";
 
 const truths = [
   "Siapa orang yang paling sering kamu stalking di sosmed?",

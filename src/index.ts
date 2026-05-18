@@ -3,12 +3,12 @@ import { createInterface } from "node:readline";
 import type { Boom } from "@hapi/boom";
 import makeWASocket, { DisconnectReason, useMultiFileAuthState } from "baileys";
 import * as QRCode from "qrcode";
-import { updateMemberChat } from "@/database";
-import { handleGroupParticipants } from "@/group-handler";
-import { loadCommands } from "@/loader";
-import { logger } from "@/logger";
-import { handleMessagesUpdate, handleMessagesUpsert } from "@/message-handler";
-import { startSchedulers } from "@/scheduler";
+import { updateMemberChat } from "@/infra/database";
+import { handleGroupParticipants } from "@/handlers/group-handler";
+import { loadCommands } from "@/infra/loader";
+import { logger } from "@/core/logger";
+import { handleMessagesUpdate, handleMessagesUpsert } from "@/handlers/message-handler";
+import { startSchedulers } from "@/infra/scheduler";
 
 async function startBot() {
   await loadCommands();

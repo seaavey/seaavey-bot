@@ -1,5 +1,5 @@
-import { setGroup } from "@/database";
-import { defineCommand } from "@/types";
+import { setGroup } from "@/infra/database";
+import { defineCommand } from "@/core/types";
 
 export default defineCommand({
   name: "set",

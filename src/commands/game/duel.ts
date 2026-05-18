@@ -1,6 +1,6 @@
-import { addXp } from "@/database";
-import { getNumber, getRandomNumber } from "@/helper";
-import { defineCommand } from "@/types";
+import { addXp } from "@/infra/database";
+import { getNumber, getRandomNumber } from "@/utils/helper";
+import { defineCommand } from "@/core/types";
 
 const sessions = new Map<
   string,

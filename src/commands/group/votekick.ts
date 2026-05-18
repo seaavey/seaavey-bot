@@ -1,5 +1,5 @@
-import { getNumber } from "@/helper";
-import { defineCommand } from "@/types";
+import { getNumber } from "@/utils/helper";
+import { defineCommand } from "@/core/types";
 
 const votes = new Map<string, { target: string; voters: Set<string>; timeout: Timer }>();
 

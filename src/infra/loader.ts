@@ -1,9 +1,9 @@
 import { watch } from "node:fs";
 import { readdir } from "node:fs/promises";
 import { basename, dirname, join } from "node:path";
-import { isDev } from "@/config";
-import { logger } from "@/logger";
-import type { Command } from "@/types";
+import { isDev } from "@/core/config";
+import { logger } from "@/core/logger";
+import type { Command } from "@/core/types";
 
 const COMMANDS_DIR = join(import.meta.dir, "..", "commands");
 

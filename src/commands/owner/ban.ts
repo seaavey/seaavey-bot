@@ -1,5 +1,5 @@
-import { isBanned, setBanned } from "@/database";
-import { defineCommand } from "@/types";
+import { isBanned, setBanned } from "@/infra/database";
+import { defineCommand } from "@/core/types";
 
 export default defineCommand({
   name: "ban",

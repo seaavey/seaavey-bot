@@ -1,4 +1,4 @@
-import { config } from "@/config";
+import { config } from "@/core/config";
 
 const BASE_URL = "https://api.seaavey.com";
 

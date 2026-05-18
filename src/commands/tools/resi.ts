@@ -1,4 +1,4 @@
-import { defineCommand } from "@/types";
+import { defineCommand } from "@/core/types";
 
 const couriers: Record<string, string> = {
   jne: "jne",

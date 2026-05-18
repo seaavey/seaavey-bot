@@ -1,5 +1,5 @@
-import { getRandomItem } from "@/helper";
-import { defineCommand } from "@/types";
+import { getRandomItem } from "@/utils/helper";
+import { defineCommand } from "@/core/types";
 
 const questions = [
   { a: "Bisa terbang tapi gak bisa berenang", b: "Bisa berenang tapi gak bisa jalan" },

@@ -1,5 +1,5 @@
-import { addToxicWord, getGroup, getToxicWords, removeToxicWord, setGroup } from "@/database";
-import { defineCommand } from "@/types";
+import { addToxicWord, getGroup, getToxicWords, removeToxicWord, setGroup } from "@/infra/database";
+import { defineCommand } from "@/core/types";
 
 export default defineCommand({
   name: "antitoxic",

@@ -1,6 +1,6 @@
 import { writeFile } from "node:fs/promises";
 import { downloadMediaMessage, proto, type WAMessage, type WASocket } from "baileys";
-import { config, isDev } from "@/config";
+import { config, isDev } from "@/core/config";
 import db, {
   addHit,
   findAutoReply,
@@ -11,11 +11,11 @@ import db, {
   isToxicMessage,
   removeAfk,
   updateMemberChat,
-} from "@/database";
-import { checkGameAnswer } from "@/game";
-import { getNumber, parseMessage } from "@/helper";
-import { commands } from "@/loader";
-import { logger } from "@/logger";
+} from "@/infra/database";
+import { checkGameAnswer } from "@/game/game";
+import { getNumber, parseMessage } from "@/utils/helper";
+import { commands } from "@/infra/loader";
+import { logger } from "@/core/logger";
 
 const messageStore = new Map<string, WAMessage>();
 const spamTracker = new Map<string, number[]>();

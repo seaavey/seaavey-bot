@@ -1,5 +1,5 @@
 import type { AnyMessageContent, proto, WAMessage, WASocket } from "baileys";
-import { config } from "@/config";
+import { config } from "@/core/config";
 
 export interface ParsedMessage {
   id: string | undefined;

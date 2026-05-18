@@ -1,6 +1,6 @@
-import { config } from "@/config";
-import { getNumber } from "@/helper";
-import { defineCommand } from "@/types";
+import { config } from "@/core/config";
+import { getNumber } from "@/utils/helper";
+import { defineCommand } from "@/core/types";
 export default defineCommand({
   name: "report",
   description: "Laporkan bug/saran ke owner. Contoh: .report bot error di command sticker",

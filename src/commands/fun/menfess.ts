@@ -1,5 +1,5 @@
-import { config } from "@/config";
-import { defineCommand } from "@/types";
+import { config } from "@/core/config";
+import { defineCommand } from "@/core/types";
 
 export default defineCommand({
   name: "menfess",

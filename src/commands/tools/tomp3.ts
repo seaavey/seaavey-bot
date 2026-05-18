@@ -1,6 +1,6 @@
 import { downloadMediaMessage, type WAMessage } from "baileys";
-import { toMp3 } from "@/convert";
-import { defineCommand } from "@/types";
+import { toMp3 } from "@/utils/convert";
+import { defineCommand } from "@/core/types";
 
 export default defineCommand({
   name: "tomp3",

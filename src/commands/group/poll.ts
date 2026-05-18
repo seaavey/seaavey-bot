@@ -1,6 +1,6 @@
-import { closePoll, createPoll, getPoll, votePoll } from "@/database";
-import { type Button, sendInteractive } from "@/interactive";
-import { defineCommand } from "@/types";
+import { closePoll, createPoll, getPoll, votePoll } from "@/infra/database";
+import { type Button, sendInteractive } from "@/handlers/interactive";
+import { defineCommand } from "@/core/types";
 
 export default defineCommand({
   name: "poll",

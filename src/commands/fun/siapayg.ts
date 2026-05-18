@@ -1,5 +1,5 @@
-import { getNumber, getRandomItem } from "@/helper";
-import { defineCommand } from "@/types";
+import { getNumber, getRandomItem } from "@/utils/helper";
+import { defineCommand } from "@/core/types";
 export default defineCommand({
   name: "siapayg",
   description: "Random pilih member grup. Contoh: .siapayg paling ganteng",

@@ -1,9 +1,9 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { addXp } from "@/database";
-import { getRandomItem } from "@/helper";
-import { logger } from "@/logger";
-import { defineCommand } from "@/types";
+import { addXp } from "@/infra/database";
+import { getRandomItem } from "@/utils/helper";
+import { logger } from "@/core/logger";
+import { defineCommand } from "@/core/types";
 
 const sessions = new Map<string, { answer: string; timeout: Timer; sender?: string }>();
 

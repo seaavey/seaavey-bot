@@ -1,7 +1,7 @@
-import { getUser } from "@/database";
-import { getNumber } from "@/helper";
-import { logger } from "@/logger";
-import { defineCommand } from "@/types";
+import { getUser } from "@/infra/database";
+import { getNumber } from "@/utils/helper";
+import { logger } from "@/core/logger";
+import { defineCommand } from "@/core/types";
 export default defineCommand({
   name: "level",
   description: "Cek level dan XP kamu",

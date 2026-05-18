@@ -19,7 +19,7 @@
     // Path alias
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/lib/*"],
+      "@/*": ["./src/*"],
       "@canvas/*": ["./src/canvas/*"]
     },
 
