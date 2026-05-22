@@ -1,6 +1,4 @@
-import { defineCommand } from "@/core/types";
-import { addXp } from "@/infra/database";
-import { getRandomItem, loadGameData } from "@/utils/helper";
+import { createWordGame } from "@/game/word-game-factory";
 
 interface WaifuData {
   img: string;
@@ -8,49 +6,19 @@ interface WaifuData {
   seri: string;
 }
 
-const localData = loadGameData<WaifuData>("tebakwaifu.json");
-
-const sessions = new Map<string, { answer: string; timeout: Timer; sender?: string }>();
-
-export default defineCommand({
+const { command, checkAnswer } = createWordGame<WaifuData>({
   name: "Tebak Waifu",
-  alias: ["tw", "tebakwaifu"],
+  triggers: ["tebakwaifu", "tw"],
   description: "Tebak nama waifu dari foto (Ketik 'hint' untuk bantuan)",
-  handler: async (sock, msg) => {
-    if (sessions.has(msg.jid)) return msg.reply("⏳ Masih ada soal yang belum dijawab!");
-    if (!localData.length) return msg.reply("❌ Data waifu belum tersedia.");
-
-    const item = getRandomItem(localData);
-
-    const jid = msg.jid;
-    const timeout = setTimeout(() => {
-      sessions.delete(jid);
-      sock.sendMessage(jid, {
-        text: `⏰ Habis! Jawabannya: *${item.jawaban}* (${item.seri})`,
-      });
-    }, 60_000);
-
-    sessions.set(jid, { answer: item.jawaban.toLowerCase(), timeout, sender: msg.sender });
-
-    await msg.send({
-      image: { url: item.img },
-      caption: `🌸 *Tebak Waifu!*\n\nSiapa nama waifu ini?\n\nWaktu 60s!\n(Ketik *.tebakwaifu hint*)`,
-    });
-  },
+  dataFile: "tebakwaifu.json",
+  emoji: "🌸",
+  reward: 20,
+  question: (_item) => "Siapa nama waifu ini?",
+  answer: (item) => item.jawaban,
+  image: (item) => item.img,
+  timeoutMessage: (item, _ans) => `⏰ Habis! Jawabannya: *${item.jawaban}* (${item.seri})`,
+  correctMessage: (item, _ans) => `✅ Benar! Jawabannya *${item.jawaban}* (+20 XP)`,
 });
 
-export function checkTebakWaifu(jid: string, text: string, sender: string): string | null {
-  const session = sessions.get(jid);
-  if (!session) return null;
-  if (!jid.endsWith("@g.us") && sender !== session.sender) return null;
-
-  const input = text.toLowerCase().trim();
-  if (input === "hint") return "💡 Hint tidak tersedia untuk game ini.";
-
-  if (input !== session.answer) return null;
-
-  clearTimeout(session.timeout);
-  sessions.delete(jid);
-  addXp(sender, 20);
-  return `✅ Benar! Jawabannya *${session.answer}* (+20 XP)`;
-}
+export default command;
+export const checkTebakWaifu = checkAnswer;
