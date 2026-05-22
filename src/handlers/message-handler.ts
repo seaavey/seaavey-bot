@@ -2,62 +2,24 @@ import { writeFile } from "node:fs/promises";
 import { proto, type WAMessage, type WASocket } from "baileys";
 import { config, isDev } from "@/core/config";
 import { logger } from "@/core/logger";
-import { checkGameAnswer } from "@/game/game";
-import db, {
-  addHit,
-  findAutoReply,
-  getAfk,
-  getGroup,
-  getUser,
-  isBanned,
-  isToxicMessage,
-  removeAfk,
-  updateMemberChat,
-} from "@/infra/database";
+import type { MessageContext } from "@/handlers/message-context";
+import db from "@/infra/db/client";
 import { commands } from "@/infra/loader";
-import { formatTime, getNumber, parseMessage } from "@/utils/helper";
+import { getGroup, updateMemberChat } from "@/infra/repositories/group-repo";
+import { addHit, getUser, isBanned } from "@/infra/repositories/user-repo";
+import { runMiddlewares } from "@/middleware";
+import { getNumber, parseMessage } from "@/utils/helper";
+import { TtlMap } from "@/utils/ttl-map";
 
-const messageStore = new Map<string, WAMessage>();
-const spamTracker = new Map<string, number[]>();
-const MSG_TTL = 10 * 60 * 1000;
+const messageStore = new TtlMap<string, WAMessage>(10 * 60 * 1000);
 
-// Cleanup message store
-setInterval(() => {
-  const now = Date.now();
-  for (const [id, msg] of messageStore) {
-    const ts = (msg.messageTimestamp as number) * 1000;
-    if (now - ts > MSG_TTL) messageStore.delete(id);
-  }
-}, 60_000);
+export function getStoredMessage(id: string) {
+  return messageStore.get(id);
+}
 
 export async function handleMessagesUpsert(sock: WASocket, messages: WAMessage[]) {
   for (const msg of messages) {
     if (msg.key.fromMe) continue;
-
-    // Anti ViewOnce
-    const viewOnce =
-      msg.message?.viewOnceMessage?.message || msg.message?.viewOnceMessageV2?.message;
-    if (viewOnce) {
-      const ownerJid = `${config.owner[0]}@s.whatsapp.net`;
-      const sender = msg.key.participant || msg.key.remoteJid || "";
-      await sock.sendMessage(ownerJid, {
-        text: `👁️ *View Once Detected*\n\n👤 ${sender}\n📍 ${msg.key.remoteJid}`,
-      });
-      await sock.sendMessage(ownerJid, { forward: { key: msg.key, message: viewOnce } });
-
-      if (msg.key.remoteJid?.endsWith("@g.us")) {
-        const grp = getGroup(msg.key.remoteJid);
-        if (grp.antiviewonce) {
-          await sock.sendMessage(msg.key.remoteJid, {
-            text: `👁️ *View Once Opened*\n\n👤 @${getNumber(sender)} mengirim pesan view once:`,
-            mentions: [sender],
-          });
-          await sock.sendMessage(msg.key.remoteJid, {
-            forward: { key: msg.key, message: viewOnce },
-          });
-        }
-      }
-    }
 
     if (msg.key.id) messageStore.set(msg.key.id, msg);
     if (isDev) writeFile("message.txt", JSON.stringify(msg, null, 2));
@@ -68,7 +30,6 @@ export async function handleMessagesUpsert(sock: WASocket, messages: WAMessage[]
       updateMemberChat(parse.jid, parse.sender);
       const group = getGroup(parse.jid);
 
-      // Auto-register members
       const count = db
         .query("SELECT COUNT(*) as c FROM group_members WHERE groupJid = ?")
         .get(parse.jid) as { c: number };
@@ -79,84 +40,15 @@ export async function handleMessagesUpsert(sock: WASocket, messages: WAMessage[]
         }
       }
 
-      // Antilink
-      if (group.antilink && !parse.isAdmin && /https?:\/\/\S+/i.test(parse.body)) {
-        await sock.sendMessage(parse.jid, { delete: msg.key });
-        await sock.sendMessage(parse.jid, {
-          text: `⚠️ @${getNumber(parse.sender)} link tidak diperbolehkan!`,
-          mentions: [parse.sender],
-        });
-        continue;
-      }
-
-      // Antispam
-      if (group.antispam && !parse.isAdmin) {
-        const key = `${parse.jid}:${parse.sender}`;
-        const now = Date.now();
-        const timestamps = spamTracker.get(key) || [];
-        timestamps.push(now);
-        const recent = timestamps.filter((t) => now - t < 10_000);
-        spamTracker.set(key, recent);
-        if (recent.length >= 5) {
-          spamTracker.delete(key);
-          await sock.sendMessage(parse.jid, { delete: msg.key });
-          await sock.sendMessage(parse.jid, {
-            text: `⚠️ @${getNumber(parse.sender)} jangan spam!`,
-            mentions: [parse.sender],
-          });
-          continue;
-        }
-      }
-
-      // Antitoxic
-      if (group.antitoxic && !parse.isAdmin) {
-        const customToxic = isToxicMessage(parse.jid, parse.body);
-        if (config.toxicRegex.test(parse.body) || customToxic) {
-          await sock.sendMessage(parse.jid, { delete: msg.key });
-          await sock.sendMessage(parse.jid, {
-            text: `⚠️ @${getNumber(parse.sender)} jaga bicaramu!`,
-            mentions: [parse.sender],
-          });
-          continue;
-        }
-      }
+      const ctx: MessageContext = { sock, raw: msg, parse, group };
+      const result = await runMiddlewares(ctx);
+      if (result === "stop") continue;
+    } else {
+      const ctx: MessageContext = { sock, raw: msg, parse };
+      const result = await runMiddlewares(ctx);
+      if (result === "stop") continue;
     }
 
-    // AFK & Game & Auto-reply
-    const senderAfk = getAfk(parse.sender);
-    if (senderAfk) {
-      removeAfk(parse.sender);
-      await sock.sendMessage(parse.jid, {
-        text: `👋 @${getNumber(parse.sender)} sudah kembali! (AFK ${formatTime(Date.now() - senderAfk.timestamp)})`,
-        mentions: [parse.sender],
-      });
-    }
-
-    if (parse.body && !parse.body.startsWith(config.prefix)) {
-      for (const m of parse.mentioned) {
-        const afk = getAfk(m);
-        if (afk) {
-          await sock.sendMessage(parse.jid, {
-            text: `💤 @${getNumber(m)} sedang AFK\nAlasan: ${afk.reason}\nSejak: ${formatTime(Date.now() - afk.timestamp)} lalu`,
-            mentions: [m],
-          });
-        }
-      }
-
-      const gameResult = checkGameAnswer(parse.jid, parse.body, parse.sender);
-      if (gameResult) {
-        await sock.sendMessage(parse.jid, { text: gameResult }, { quoted: msg });
-        continue;
-      }
-
-      if (parse.isGroup) {
-        const autoReply = findAutoReply(parse.jid, parse.body);
-        if (autoReply)
-          await sock.sendMessage(parse.jid, { text: autoReply.response }, { quoted: msg });
-      }
-    }
-
-    // Command Handler
     let cmdName: string | undefined;
     if (parse.body.startsWith("=> ") || parse.body === "=>") cmdName = "=>";
     else if (parse.body.startsWith("> ") || parse.body === ">") cmdName = ">";
