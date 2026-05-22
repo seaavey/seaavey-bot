@@ -6,6 +6,7 @@ import * as QRCode from "qrcode";
 import { logger } from "@/core/logger";
 import { handleGroupParticipants } from "@/handlers/group-handler";
 import { handleMessagesUpdate, handleMessagesUpsert } from "@/handlers/message-handler";
+import { invalidateGroupMetadata } from "@/infra/cache/group-metadata-cache";
 import { setGroup, updateMemberChat } from "@/infra/database";
 import { loadCommands } from "@/infra/loader";
 import { startSchedulers } from "@/infra/scheduler";
@@ -81,6 +82,7 @@ async function startBot() {
   // Group Events
   sock.ev.on("groups.upsert", async (groups) => {
     for (const group of groups) {
+      invalidateGroupMetadata(group.id);
       setGroup(group.id, "name", group.subject || "");
       for (const p of group.participants) {
         updateMemberChat(group.id, p.phoneNumber || p.id);

@@ -1,5 +1,9 @@
 import type { WASocket } from "baileys";
 import { logger } from "@/core/logger";
+import {
+  getCachedGroupMetadata,
+  invalidateGroupMetadata,
+} from "@/infra/cache/group-metadata-cache";
 import db, { getGroup, updateMemberChat } from "@/infra/database";
 import { getNumber, getProfilePictureUrl } from "@/utils/helper";
 
@@ -9,6 +13,7 @@ export async function handleGroupParticipants(
 ) {
   if (action !== "add" && action !== "remove") return;
 
+  invalidateGroupMetadata(id);
   const group = getGroup(id);
 
   for (const p of participants) {
@@ -27,7 +32,7 @@ export async function handleGroupParticipants(
   if (action === "add" && group.welcome) {
     try {
       const { generateWelcomeImage } = await import("@/canvas/welcomeImage");
-      const metadata = await sock.groupMetadata(id);
+      const metadata = await getCachedGroupMetadata(sock, id);
       for (const m of mentions) {
         const ppUrl = await getProfilePictureUrl(sock, m);
         const imageBuffer = await generateWelcomeImage(ppUrl, getNumber(m), metadata.subject);
@@ -50,7 +55,7 @@ export async function handleGroupParticipants(
   if (action === "remove" && group.goodbye) {
     try {
       const { generateGoodbyeImage } = await import("@/canvas/welcomeImage");
-      const metadata = await sock.groupMetadata(id);
+      const metadata = await getCachedGroupMetadata(sock, id);
       for (const m of mentions) {
         const ppUrl = await getProfilePictureUrl(sock, m);
         const imageBuffer = await generateGoodbyeImage(ppUrl, getNumber(m), metadata.subject);

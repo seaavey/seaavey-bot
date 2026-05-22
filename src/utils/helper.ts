@@ -3,6 +3,7 @@ import { join } from "node:path";
 import type { AnyMessageContent, proto, WAMessage, WASocket } from "baileys";
 import { config } from "@/core/config";
 import { logger } from "@/core/logger";
+import { getCachedGroupMetadata } from "@/infra/cache/group-metadata-cache";
 
 export interface ParsedMessage {
   id: string | undefined;
@@ -69,7 +70,7 @@ export async function parseMessage(sock: WASocket, msg: WAMessage): Promise<Pars
   let isBotAdmin = false;
 
   if (isGroup) {
-    const metadata = await sock.groupMetadata(jid);
+    const metadata = await getCachedGroupMetadata(sock, jid);
     const participant = metadata.participants.find(
       (p) =>
         p.id.replace(/:.+@/, "@") === senderId ||
