@@ -1,12 +1,10 @@
 import { writeFile } from "node:fs/promises";
 import { proto, type WAMessage, type WASocket } from "baileys";
-import { config, isDev } from "@/core/config";
-import { logger } from "@/core/logger";
+import { isDev } from "@/core/config";
+import { dispatchCommand } from "@/handlers/command-dispatcher";
 import type { MessageContext } from "@/handlers/message-context";
 import db from "@/infra/db/client";
-import { commands } from "@/infra/loader";
 import { getGroup, updateMemberChat } from "@/infra/repositories/group-repo";
-import { addHit, getUser, isBanned } from "@/infra/repositories/user-repo";
 import { runMiddlewares } from "@/middleware";
 import { getNumber, parseMessage } from "@/utils/helper";
 import { TtlMap } from "@/utils/ttl-map";
@@ -49,30 +47,7 @@ export async function handleMessagesUpsert(sock: WASocket, messages: WAMessage[]
       if (result === "stop") continue;
     }
 
-    let cmdName: string | undefined;
-    if (parse.body.startsWith("=> ") || parse.body === "=>") cmdName = "=>";
-    else if (parse.body.startsWith("> ") || parse.body === ">") cmdName = ">";
-    else if (parse.body.startsWith(config.prefix))
-      [cmdName] = parse.body.slice(config.prefix.length).split(" ");
-
-    if (!cmdName) continue;
-    if (isBanned(parse.sender)) continue;
-    if (parse.isGroup && getGroup(parse.jid).mute && !parse.isAdmin) continue;
-
-    const cmd = commands.get(cmdName.toLowerCase());
-    if (cmd) {
-      addHit(parse.sender);
-      const user = getUser(parse.sender);
-      const prevLevel = user?.level ?? 0;
-      await cmd.handler(sock, parse).catch((e) => logger.error(e));
-      const after = getUser(parse.sender);
-      if (after && after.level > prevLevel) {
-        await sock.sendMessage(parse.jid, {
-          text: `🎉 *Level Up!*\n\n@${getNumber(parse.sender)} naik ke level *${after.level}*! 🏆`,
-          mentions: [parse.sender],
-        });
-      }
-    }
+    await dispatchCommand(sock, parse);
   }
 }
 

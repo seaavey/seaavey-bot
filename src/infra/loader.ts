@@ -13,19 +13,35 @@ async function loadFile(path: string) {
   const category = basename(dirname(path));
   const mod = await import(path);
   const cmd: Command = mod.default;
-  if (cmd?.name) {
-    cmd.category = category;
-    const trigger = cmd.command?.toLowerCase() ?? basename(path).replace(/\.ts$/, "");
-    if (!cmd.command) cmd.command = trigger;
-    commands.set(trigger, cmd);
-    if (cmd.alias?.length) {
-      for (const a of cmd.alias) {
-        const alias = a.toLowerCase();
-        if (!commands.has(alias)) commands.set(alias, cmd);
-      }
-    }
-    logger.info(`Loaded command: ${cmd.name} [${category}]`);
+  if (!cmd?.name) return;
+
+  cmd.category = category;
+
+  const filenameTrigger = basename(path).replace(/\.ts$/, "").toLowerCase();
+  const triggerSet = new Set<string>();
+
+  if (cmd.triggers?.length) {
+    for (const t of cmd.triggers) triggerSet.add(t.toLowerCase());
   }
+  if (cmd.command) triggerSet.add(cmd.command.toLowerCase());
+  triggerSet.add(filenameTrigger);
+  if (cmd.alias?.length) {
+    for (const a of cmd.alias) triggerSet.add(a.toLowerCase());
+  }
+
+  if (!cmd.command) cmd.command = filenameTrigger;
+
+  for (const trigger of triggerSet) {
+    if (commands.has(trigger) && commands.get(trigger)?.name !== cmd.name) {
+      logger.warn(
+        `Duplicate trigger "${trigger}" from "${cmd.name}" (already registered by "${commands.get(trigger)?.name}")`,
+      );
+      continue;
+    }
+    commands.set(trigger, cmd);
+  }
+
+  logger.info(`Loaded command: ${cmd.name} [${category}]`);
 }
 
 async function scanAll() {
