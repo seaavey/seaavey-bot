@@ -1,32 +1,22 @@
 import { Elysia } from "elysia";
-import { commands } from "@/infra/loader";
+import { listCommands, setCommandEnabled } from "@/services/command-service";
 
 export const commandsRoutes = new Elysia({ prefix: "/api/commands" })
-  .get("/", () => {
-    return Array.from(new Set(commands.values())).map((cmd) => ({
-      name: cmd.name,
-      command: cmd.command ?? cmd.name,
-      category: cmd.category || "general",
-      description: cmd.description || "",
-      enabled: cmd.enabled !== false,
-    }));
-  })
+  .get("/", () => listCommands())
   .patch("/:name", ({ params, body }) => {
-    const cmd = commands.get(params.name.toLowerCase());
-    if (!cmd) return { error: "Command not found" };
     const data = body as { enabled?: boolean };
-    if (data.enabled !== undefined) cmd.enabled = data.enabled;
-    return { name: cmd.name, category: cmd.category, enabled: cmd.enabled };
+    if (data.enabled === undefined) return { error: "Missing enabled field" };
+    const result = setCommandEnabled(params.name, data.enabled);
+    if (!result) return { error: "Command not found" };
+    return result;
   })
   .post("/:name/enable", ({ params }) => {
-    const cmd = commands.get(params.name.toLowerCase());
-    if (!cmd) return { error: "Command not found" };
-    cmd.enabled = true;
-    return { name: cmd.name, enabled: true };
+    const result = setCommandEnabled(params.name, true);
+    if (!result) return { error: "Command not found" };
+    return result;
   })
   .post("/:name/disable", ({ params }) => {
-    const cmd = commands.get(params.name.toLowerCase());
-    if (!cmd) return { error: "Command not found" };
-    cmd.enabled = false;
-    return { name: cmd.name, enabled: false };
+    const result = setCommandEnabled(params.name, false);
+    if (!result) return { error: "Command not found" };
+    return result;
   });
