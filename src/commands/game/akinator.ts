@@ -164,7 +164,9 @@ export async function checkAkinator(
 
       const res = await akinatorAnswer(state.session, option);
       if (!res.status) {
-        return t("game.akinator.processError", { error: res.error || t("game.akinator.unknownError") });
+        return t("game.akinator.processError", {
+          error: res.error || t("game.akinator.unknownError"),
+        });
       }
 
       if (res.data.guess) {
@@ -212,7 +214,9 @@ export async function checkAkinator(
     }
 
     if (confirmed === null) {
-      return t("game.akinator.invalidConfirmation", { name: state.currentGuess?.name ?? t("game.akinator.myGuess") });
+      return t("game.akinator.invalidConfirmation", {
+        name: state.currentGuess?.name ?? t("game.akinator.myGuess"),
+      });
     }
 
     if (confirmed) {
@@ -234,7 +238,10 @@ export async function checkAkinator(
             sessions.delete(key);
             return t("game.akinator.noMoreQuestions");
           }
-          return t("game.akinator.excludeError", { error: res.error || t("game.akinator.unknownError"), name: state.currentGuess?.name ?? "" });
+          return t("game.akinator.excludeError", {
+            error: res.error || t("game.akinator.unknownError"),
+            name: state.currentGuess?.name ?? "",
+          });
         }
 
         const nextSession = res.data;

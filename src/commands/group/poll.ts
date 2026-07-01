@@ -72,8 +72,7 @@ export default defineCommand({
     // Create: .poll Question? | Option1 | Option2
     const text = msg.args.join(" ");
     const parts = text.split("|").map((s: string) => s.trim());
-    if (parts.length < 3)
-      return msg.reply(t("group.poll.help"));
+    if (parts.length < 3) return msg.reply(t("group.poll.help"));
 
     const [question, ...options] = parts;
     const existing = getPoll(msg.jid);

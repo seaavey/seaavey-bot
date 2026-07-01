@@ -20,7 +20,10 @@ export default defineCommand({
     if (msg.args[0] === "accept" && session && session.target === msg.sender) {
       session.turn = session.challenger;
       return msg.reply(
-        t("game.duel.start", { challenger: getNumber(session.challenger), target: getNumber(session.target) }),
+        t("game.duel.start", {
+          challenger: getNumber(session.challenger),
+          target: getNumber(session.target),
+        }),
       );
     }
 
@@ -44,7 +47,15 @@ export default defineCommand({
 
       session.turn = opponent;
       return msg.send({
-        text: t("game.duel.attack", { attacker: getNumber(msg.sender), dmg, challenger: getNumber(session.challenger), challengerHp: session.hp[session.challenger], target: getNumber(session.target), targetHp: session.hp[session.target], next: getNumber(opponent) }),
+        text: t("game.duel.attack", {
+          attacker: getNumber(msg.sender),
+          dmg,
+          challenger: getNumber(session.challenger),
+          challengerHp: session.hp[session.challenger],
+          target: getNumber(session.target),
+          targetHp: session.hp[session.target],
+          next: getNumber(opponent),
+        }),
         mentions: [session.challenger, session.target],
       });
     }
@@ -69,7 +80,10 @@ export default defineCommand({
     });
 
     await msg.send({
-      text: t("game.duel.challenge", { challenger: getNumber(msg.sender), target: getNumber(target) }),
+      text: t("game.duel.challenge", {
+        challenger: getNumber(msg.sender),
+        target: getNumber(target),
+      }),
       mentions: [msg.sender, target],
     });
   },

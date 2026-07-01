@@ -9,8 +9,7 @@ export default defineCommand({
   handler: async (_sock, msg) => {
     const timeStr = msg.args[0];
     const message = msg.args.slice(1).join(" ");
-    if (!timeStr || !message)
-      return msg.reply(t("productivity.remind.format"));
+    if (!timeStr || !message) return msg.reply(t("productivity.remind.format"));
 
     const match = timeStr.match(/^(\d+)(s|m|h|d)$/);
     if (!match) return msg.reply(t("productivity.remind.invalidTime"));

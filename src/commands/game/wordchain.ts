@@ -15,7 +15,10 @@ export default defineCommand({
     if (!word) {
       if (session)
         return msg.reply(
-          t("game.wordchain.status", { word: session.lastWord, letter: session.lastWord.slice(-1).toUpperCase() }),
+          t("game.wordchain.status", {
+            word: session.lastWord,
+            letter: session.lastWord.slice(-1).toUpperCase(),
+          }),
         );
       const jid = msg.jid;
       const timeout = setTimeout(() => {
@@ -58,8 +61,6 @@ export default defineCommand({
     }, 120_000);
 
     addXp(msg.sender, 3);
-    await msg.reply(
-      t("game.wordchain.correct", { word, letter: word.slice(-1).toUpperCase() }),
-    );
+    await msg.reply(t("game.wordchain.correct", { word, letter: word.slice(-1).toUpperCase() }));
   },
 });

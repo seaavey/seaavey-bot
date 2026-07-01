@@ -18,7 +18,9 @@ export default defineCommand({
     const result = await ytmp3(url);
 
     if (!result.status) {
-      return msg.reply(t("downloader.ytmp3.failed", { error: result.error || t("downloader.ytmp3.noMedia") }));
+      return msg.reply(
+        t("downloader.ytmp3.failed", { error: result.error || t("downloader.ytmp3.noMedia") }),
+      );
     }
 
     const { title, thumbnail, downloadUrl, format } = result.data;

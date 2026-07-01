@@ -23,8 +23,7 @@ export default defineCommand({
     if (sub === "add") {
       // .schedule add 30m|daily Pesan yang akan dikirim
       const parts = msg.args.slice(1).join(" ").split("|");
-      if (parts.length < 2)
-        return msg.reply(t("productivity.schedule.addFormat"));
+      if (parts.length < 2) return msg.reply(t("productivity.schedule.addFormat"));
 
       const timeStr = parts[0]?.trim() ?? "";
       const message = parts.slice(1).join("|").trim();

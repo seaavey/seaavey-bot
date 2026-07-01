@@ -51,7 +51,11 @@ export default defineCommand({
     }
 
     await msg.send({
-      text: t("group.votekick.progress", { target: getNumber(target), count: session.voters.size, needed }),
+      text: t("group.votekick.progress", {
+        target: getNumber(target),
+        count: session.voters.size,
+        needed,
+      }),
       mentions: [target],
     });
   },

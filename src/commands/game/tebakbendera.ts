@@ -14,7 +14,9 @@ export default defineCommand({
   handler: async (sock, msg) => {
     if (msg.args[0] === "hint") {
       const hint = gm.getHint(msg.jid);
-      return msg.reply(hint ? t("game.tebakbendera.hint", { hint }) : t("game.tebakbendera.noSession"));
+      return msg.reply(
+        hint ? t("game.tebakbendera.hint", { hint }) : t("game.tebakbendera.noSession"),
+      );
     }
 
     const item = getRandomItem(localData);

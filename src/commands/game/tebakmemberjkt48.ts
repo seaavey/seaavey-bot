@@ -19,7 +19,10 @@ const { command, checkAnswer } = createWordGame<MemberData>({
   answer: (item) => item.jawaban,
   image: (item) => item.img,
   timeoutMessage: (item, _ans) =>
-    t("game.tebakmemberjkt48.timeout", { answer: item.jawaban, nickname: item.nama_panggilan ? ` (${item.nama_panggilan})` : "" }),
+    t("game.tebakmemberjkt48.timeout", {
+      answer: item.jawaban,
+      nickname: item.nama_panggilan ? ` (${item.nama_panggilan})` : "",
+    }),
   correctMessage: (item, _ans) => t("game.tebakmemberjkt48.correct", { answer: item.jawaban }),
 });
 

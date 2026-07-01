@@ -27,9 +27,7 @@ export default defineCommand({
     });
 
     if (!success) return msg.reply(t("game.caklontong.finishPrevious"));
-    await msg.reply(
-      t("game.caklontong.start", { question: item.soal }),
-    );
+    await msg.reply(t("game.caklontong.start", { question: item.soal }));
   },
 });
 

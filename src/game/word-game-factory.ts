@@ -16,7 +16,9 @@ export function createWordGame<T>(config: WordGameConfig<T>) {
     handler: async (sock, msg) => {
       if (msg.args[0] === "hint") {
         const hint = gm.getHint(msg.jid);
-        return msg.reply(hint ? t("game.factory.hint", { hint }) : t("game.factory.noActiveSession"));
+        return msg.reply(
+          hint ? t("game.factory.hint", { hint }) : t("game.factory.noActiveSession"),
+        );
       }
 
       if (!localData.length) return msg.reply(t("game.factory.emptyData"));
@@ -39,11 +41,22 @@ export function createWordGame<T>(config: WordGameConfig<T>) {
       if (imageUrl) {
         await msg.send({
           image: { url: imageUrl },
-          caption: t("game.factory.questionWithImage", { emoji: config.emoji, name: config.name, question: questionText, time: String(timeoutMs / 1000) }),
+          caption: t("game.factory.questionWithImage", {
+            emoji: config.emoji,
+            name: config.name,
+            question: questionText,
+            time: String(timeoutMs / 1000),
+          }),
         });
       } else {
         await msg.reply(
-          t("game.factory.captionNoImage", { emoji: config.emoji, name: config.name, question: questionText, timeout: timeoutMs / 1000, trigger: config.triggers[0] }),
+          t("game.factory.captionNoImage", {
+            emoji: config.emoji,
+            name: config.name,
+            question: questionText,
+            timeout: timeoutMs / 1000,
+            trigger: config.triggers[0],
+          }),
         );
       }
     },

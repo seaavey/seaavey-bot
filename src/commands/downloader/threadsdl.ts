@@ -15,7 +15,11 @@ export default defineCommand({
     const result = await threadsDl(url);
 
     if (!result.status) {
-      return msg.reply(t("downloader.threadsdl.failed", { error: result.error || t("downloader.threadsdl.noMedia") }));
+      return msg.reply(
+        t("downloader.threadsdl.failed", {
+          error: result.error || t("downloader.threadsdl.noMedia"),
+        }),
+      );
     }
 
     for (const media of result.data) {

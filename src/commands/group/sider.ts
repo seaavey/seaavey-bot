@@ -38,7 +38,12 @@ export default defineCommand({
     const list = allSiders.map((jid, i) => `${i + 1}. @${getNumber(jid)}`).join("\n");
 
     await msg.send({
-      text: t("group.sider.list", { days, count: allSiders.length, total: allMembers.length, list }),
+      text: t("group.sider.list", {
+        days,
+        count: allSiders.length,
+        total: allMembers.length,
+        list,
+      }),
       mentions: allSiders,
     });
   },

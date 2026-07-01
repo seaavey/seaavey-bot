@@ -17,6 +17,8 @@ export default defineCommand({
     }
 
     addXpManual(target, amount);
-    await msg.reply(t("owner.addxp.success", { amount: String(amount), target: getNumber(target) }));
+    await msg.reply(
+      t("owner.addxp.success", { amount: String(amount), target: getNumber(target) }),
+    );
   },
 });

@@ -50,7 +50,11 @@ export default defineCommand({
     if (!msg.args[0]) {
       if (session)
         return msg.reply(
-          t("game.hangman.status", { display: render(session.word, session.guessed), lives: session.lives, letters: [...session.guessed].join(", ") || "-" }),
+          t("game.hangman.status", {
+            display: render(session.word, session.guessed),
+            lives: session.lives,
+            letters: [...session.guessed].join(", ") || "-",
+          }),
         );
       const word = getRandomItem(words) as string;
       const jid = msg.jid;
@@ -67,7 +71,8 @@ export default defineCommand({
     if (!session) return msg.reply(t("game.hangman.noSession"));
 
     const letter = msg.args[0].toLowerCase();
-    if (letter.length !== 1 || !/[a-z]/.test(letter)) return msg.reply(t("game.hangman.invalidLetter"));
+    if (letter.length !== 1 || !/[a-z]/.test(letter))
+      return msg.reply(t("game.hangman.invalidLetter"));
     if (session.guessed.has(letter)) return msg.reply(t("game.hangman.duplicateLetter"));
 
     session.guessed.add(letter);
@@ -90,7 +95,11 @@ export default defineCommand({
     }
 
     await msg.reply(
-      t("game.hangman.progress", { display, lives: session.lives, letters: [...session.guessed].join(", ") }),
+      t("game.hangman.progress", {
+        display,
+        lives: session.lives,
+        letters: [...session.guessed].join(", "),
+      }),
     );
   },
 });

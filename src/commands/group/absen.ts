@@ -23,7 +23,9 @@ export default defineCommand({
       const session = sessions.get(msg.jid);
       if (!session) return msg.reply(t("group.absen.noSession"));
       session.members.add(msg.sender);
-      return msg.reply(t("group.absen.present", { user: getNumber(msg.sender), count: session.members.size }));
+      return msg.reply(
+        t("group.absen.present", { user: getNumber(msg.sender), count: session.members.size }),
+      );
     }
 
     if (sub === "tutup" || sub === "close") {

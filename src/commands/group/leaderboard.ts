@@ -19,7 +19,8 @@ export default defineCommand({
     const medals = ["🥇", "🥈", "🥉"];
     const list = top
       .map(
-        (m, i) => `${medals[i] || `${i + 1}.`} @${getNumber(m.memberJid)} — ${m.chatCount} ${t("group.leaderboard.messages")}`,
+        (m, i) =>
+          `${medals[i] || `${i + 1}.`} @${getNumber(m.memberJid)} — ${m.chatCount} ${t("group.leaderboard.messages")}`,
       )
       .join("\n");
 

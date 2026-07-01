@@ -37,7 +37,10 @@ export default defineCommand({
         msg.jid,
         {
           image: result.data.buffer,
-          caption: t("media.upscale.success", { scale: String(result.data.scale), server: result.data.server }),
+          caption: t("media.upscale.success", {
+            scale: String(result.data.scale),
+            server: result.data.server,
+          }),
         },
         { quoted: msg.raw },
       );

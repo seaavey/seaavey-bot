@@ -8,7 +8,8 @@ export default defineCommand({
   description: t("downloader.igdl.desc"),
   handler: async (_sock, msg) => {
     const url = msg.args[0];
-    if (!url) return msg.reply("Send an Instagram URL.\nExample: .igdl https://instagram.com/p/...");
+    if (!url)
+      return msg.reply("Send an Instagram URL.\nExample: .igdl https://instagram.com/p/...");
     await msg.reply("⏳ Downloading...");
     const res = await instagramDl(url);
     if (!res.status) return msg.reply(`❌ Error: ${res.error}`);

@@ -8,8 +8,7 @@ export default defineCommand({
   groupOnly: true,
   handler: async (sock, msg) => {
     const question = msg.args.join(" ");
-    if (!question)
-      return msg.reply(t("fun.siapayg.format"));
+    if (!question) return msg.reply(t("fun.siapayg.format"));
     const metadata = await sock.groupMetadata(msg.jid);
     const members = metadata.participants.map((p) => p.id);
     const chosen = getRandomItem(members) as string;

@@ -17,6 +17,8 @@ export default defineCommand({
     }
 
     addLevel(target, amount);
-    await msg.reply(t("owner.addlevel.success", { amount: String(amount), target: getNumber(target) }));
+    await msg.reply(
+      t("owner.addlevel.success", { amount: String(amount), target: getNumber(target) }),
+    );
   },
 });

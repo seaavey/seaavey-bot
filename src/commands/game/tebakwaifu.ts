@@ -17,7 +17,8 @@ const { command, checkAnswer } = createWordGame<WaifuData>({
   question: (_item) => "Siapa nama waifu ini?",
   answer: (item) => item.jawaban,
   image: (item) => item.img,
-  timeoutMessage: (item, _ans) => t("game.tebakwaifu.timeout", { answer: item.jawaban, series: item.seri }),
+  timeoutMessage: (item, _ans) =>
+    t("game.tebakwaifu.timeout", { answer: item.jawaban, series: item.seri }),
   correctMessage: (item, _ans) => t("game.tebakwaifu.correct", { answer: item.jawaban }),
 });
 

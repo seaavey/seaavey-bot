@@ -96,7 +96,12 @@ export default defineCommand({
       });
 
       return msg.send({
-        text: t("game.tictactoe.start", { playerX: msg.sender.split("@")[0], playerO: isBot ? "Bot" : finalTarget.split("@")[0], board: renderBoard(board), turn: msg.sender.split("@")[0] }),
+        text: t("game.tictactoe.start", {
+          playerX: msg.sender.split("@")[0],
+          playerO: isBot ? "Bot" : finalTarget.split("@")[0],
+          board: renderBoard(board),
+          turn: msg.sender.split("@")[0],
+        }),
         mentions: [msg.sender, ...(isBot ? [] : [finalTarget])],
       });
     }
@@ -134,7 +139,10 @@ export default defineCommand({
       sessions.delete(msg.jid);
       addXp(msg.sender, 20);
       return msg.send({
-        text: t("game.tictactoe.win", { board: renderBoard(session.board), winner: msg.sender.split("@")[0] }),
+        text: t("game.tictactoe.win", {
+          board: renderBoard(session.board),
+          winner: msg.sender.split("@")[0],
+        }),
         mentions: [msg.sender],
       });
     }
@@ -158,13 +166,16 @@ export default defineCommand({
       if (!session.board.some((v) => v !== "X" && v !== "O")) {
         clearTimeout(session.timeout);
         sessions.delete(msg.jid);
-      return msg.reply(t("game.tictactoe.draw", { board: renderBoard(session.board) }));
+        return msg.reply(t("game.tictactoe.draw", { board: renderBoard(session.board) }));
       }
 
       session.turn = session.playerX;
       session.timeout.refresh();
       return msg.send({
-        text: t("game.tictactoe.turn", { board: renderBoard(session.board), player: session.turn.split("@")[0] }),
+        text: t("game.tictactoe.turn", {
+          board: renderBoard(session.board),
+          player: session.turn.split("@")[0],
+        }),
         mentions: [session.turn],
       });
     }
@@ -172,7 +183,10 @@ export default defineCommand({
     session.turn = msg.sender === session.playerX ? session.playerO : session.playerX;
     session.timeout.refresh();
     await msg.send({
-      text: t("game.tictactoe.turn", { board: renderBoard(session.board), player: session.turn.split("@")[0] }),
+      text: t("game.tictactoe.turn", {
+        board: renderBoard(session.board),
+        player: session.turn.split("@")[0],
+      }),
       mentions: [session.turn],
     });
   },

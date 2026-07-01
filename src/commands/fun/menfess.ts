@@ -11,8 +11,7 @@ export default defineCommand({
     const target = msg.args[0];
     const message = msg.args.slice(1).join(" ");
 
-    if (!target || !message)
-      return msg.reply(t("fun.menfess.format"));
+    if (!target || !message) return msg.reply(t("fun.menfess.format"));
 
     const targetJid = `${target.replace(/[^0-9]/g, "")}@s.whatsapp.net`;
 

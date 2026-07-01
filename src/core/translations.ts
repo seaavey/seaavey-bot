@@ -14,7 +14,10 @@ function lookup(obj: Record<string, unknown>, key: string): string | undefined {
   return typeof current === "string" ? current : undefined;
 }
 
-export function t(key: string, params?: Record<string, string | number | undefined | null>): string {
+export function t(
+  key: string,
+  params?: Record<string, string | number | undefined | null>,
+): string {
   let text = lookup(strings, key);
   if (text === undefined) {
     text = `{${key}}`;

@@ -61,7 +61,11 @@ export default defineCommand({
         .join("\n\n");
 
       await msg.reply(
-        t("downloader.spotify.searchResult", { query: result.data.query, tracks, max: String(result.data.tracks.length) }),
+        t("downloader.spotify.searchResult", {
+          query: result.data.query,
+          tracks,
+          max: String(result.data.tracks.length),
+        }),
       );
     }
   },

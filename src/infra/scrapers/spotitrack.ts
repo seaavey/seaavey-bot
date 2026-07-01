@@ -72,9 +72,7 @@ export async function spotitrackTrack(url: string): Promise<ScraperResult<Spotit
       throw new Error(parsed.message || "Tautan Spotify Track tidak valid.");
 
     const info = parsed.data;
-    const artist = Array.isArray(info.artists)
-      ? info.artists.join(", ")
-      : String(info.artists);
+    const artist = Array.isArray(info.artists) ? info.artists.join(", ") : String(info.artists);
 
     const audioRes = await fetch(`${BASE}/api/proxy/download`, {
       method: "POST",
@@ -113,9 +111,7 @@ export async function spotitrackTrack(url: string): Promise<ScraperResult<Spotit
   }
 }
 
-export async function spotitrackPlaylist(
-  url: string,
-): Promise<ScraperResult<SpotitrackPlaylist>> {
+export async function spotitrackPlaylist(url: string): Promise<ScraperResult<SpotitrackPlaylist>> {
   try {
     const token = await getActionToken();
 

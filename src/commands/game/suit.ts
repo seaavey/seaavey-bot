@@ -33,6 +33,8 @@ export default defineCommand({
       result = t("game.suit.lose");
     }
 
-    await msg.reply(t("game.suit.result", { playerEmoji: emojis[player], botEmoji: emojis[bot], result }));
+    await msg.reply(
+      t("game.suit.result", { playerEmoji: emojis[player], botEmoji: emojis[bot], result }),
+    );
   },
 });

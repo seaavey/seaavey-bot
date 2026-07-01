@@ -11,7 +11,9 @@ export default defineCommand({
     const target = msg.mentioned[0] || msg.quoted?.sender;
     const amount = parseInt(msg.args.find((a: string) => /^\d+$/.test(a)) || "0", 10);
     if (!target)
-      return msg.reply("Tag or reply to the user you want to transfer to.\nExample: .transfer @user 1000");
+      return msg.reply(
+        "Tag or reply to the user you want to transfer to.\nExample: .transfer @user 1000",
+      );
     if (amount <= 0) return msg.reply("Enter a valid amount.");
     if (target === msg.jid) return msg.reply("You can't transfer to yourself.");
     const success = transferMoney(msg.jid, target, amount);

@@ -10,8 +10,7 @@ export default defineCommand({
   ownerOnly: true,
   handler: async (sock, msg) => {
     const input = msg.args[0];
-    if (!input)
-      return msg.reply(t("owner.join.format"));
+    if (!input) return msg.reply(t("owner.join.format"));
 
     const match = input.match(InviteUrlRe);
     const code = match ? (match[1] ?? input) : input;
@@ -21,7 +20,10 @@ export default defineCommand({
       if (!groupId) throw new Error("No group ID returned");
       const metadata = await sock.groupMetadata(groupId);
       await msg.reply(
-        t("owner.join.success", { subject: metadata.subject, count: String(metadata.participants.length) }),
+        t("owner.join.success", {
+          subject: metadata.subject,
+          count: String(metadata.participants.length),
+        }),
       );
     } catch {
       await msg.reply(t("owner.join.failed"));

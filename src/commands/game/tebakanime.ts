@@ -18,7 +18,10 @@ const { command, checkAnswer } = createWordGame<AnimeData>({
   answer: (item) => item.jawaban,
   image: (item) => item.img,
   timeoutMessage: (item, _ans) =>
-    t("game.tebakanime.timeout", { answer: item.jawaban, character: item.karakter ? ` (${item.karakter})` : "" }),
+    t("game.tebakanime.timeout", {
+      answer: item.jawaban,
+      character: item.karakter ? ` (${item.karakter})` : "",
+    }),
   correctMessage: (item, _ans) => t("game.tebakanime.correct", { answer: item.jawaban }),
 });
 

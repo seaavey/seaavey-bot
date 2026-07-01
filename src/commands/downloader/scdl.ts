@@ -15,7 +15,9 @@ export default defineCommand({
     const result = await soundcloudDl(url);
 
     if (!result.status) {
-      return msg.reply(t("downloader.scdl.failed", { error: result.error || t("downloader.scdl.noMedia") }));
+      return msg.reply(
+        t("downloader.scdl.failed", { error: result.error || t("downloader.scdl.noMedia") }),
+      );
     }
 
     const { title, artist, duration, artwork, streamUrl } = result.data;

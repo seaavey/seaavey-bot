@@ -15,7 +15,9 @@ export default defineCommand({
     const result = await soundcloudSearch(query, 5);
 
     if (!result.status) {
-      return msg.reply(t("search.soundcloud.failed", { error: result.error || t("search.soundcloud.notFound") }));
+      return msg.reply(
+        t("search.soundcloud.failed", { error: result.error || t("search.soundcloud.notFound") }),
+      );
     }
 
     if (result.data.tracks.length === 0) {

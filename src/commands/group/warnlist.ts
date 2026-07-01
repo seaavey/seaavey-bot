@@ -15,6 +15,8 @@ export default defineCommand({
     const list = warns
       .map((w, i) => `${i + 1}. ${w.reason} (${new Date(w.timestamp).toLocaleDateString("id")})`)
       .join("\n");
-    await msg.reply(t("group.warnlist.list", { target: getNumber(target), count: warns.length, max, list }));
+    await msg.reply(
+      t("group.warnlist.list", { target: getNumber(target), count: warns.length, max, list }),
+    );
   },
 });

@@ -16,7 +16,9 @@ export default defineCommand({
     const result = await ytmp4(url);
 
     if (!result.status) {
-      return msg.reply(t("downloader.ytmp4.failed", { error: result.error || t("downloader.ytmp4.noMedia") }));
+      return msg.reply(
+        t("downloader.ytmp4.failed", { error: result.error || t("downloader.ytmp4.noMedia") }),
+      );
     }
 
     const { title, thumbnail, downloadUrl, format } = result.data;

@@ -17,6 +17,8 @@ export default defineCommand({
     }
 
     setLevel(target, level);
-    await msg.reply(t("owner.setlevel.success", { target: getNumber(target), level: String(level) }));
+    await msg.reply(
+      t("owner.setlevel.success", { target: getNumber(target), level: String(level) }),
+    );
   },
 });

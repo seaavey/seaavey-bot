@@ -13,8 +13,7 @@ export default defineCommand({
 
     if (sub === "add") {
       const parts = msg.args.slice(1).join(" ").split("|");
-      if (parts.length < 2)
-        return msg.reply(t("group.autoreply.addUsage"));
+      if (parts.length < 2) return msg.reply(t("group.autoreply.addUsage"));
       const trigger = parts[0]?.trim() ?? "";
       const response = parts.slice(1).join("|").trim();
       if (!trigger || !response) return msg.reply(t("group.autoreply.invalidAdd"));
