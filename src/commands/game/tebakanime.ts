@@ -13,7 +13,8 @@ const { command, checkAnswer } = createWordGame<AnimeData>({
   dataFile: "tebakanime.json",
   emoji: "🎌",
   reward: 15,
-  question: (item) => `Anime apa ini?${item.karakter ? `\n\nKarakter: ${item.karakter}` : ""}`,
+  question: (item) =>
+    `What anime is this?${item.karakter ? `\n\nCharacter: ${item.karakter}` : ""}`,
   answer: (item) => item.jawaban,
   image: (item) => item.img,
   timeoutMessage: (item, _ans) => `⏰ Time's up! The answer: *${item.jawaban}*`,

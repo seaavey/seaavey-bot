@@ -14,7 +14,7 @@ const { command, checkAnswer } = createWordGame<MemberData>({
   emoji: "👩",
   reward: 20,
   question: (item) =>
-    `Siapa nama member ini?${item.nama_panggilan ? `\n\nClue: ${item.nama_panggilan}` : ""}`,
+    `Who is the name of this member?${item.nama_panggilan ? `\n\nClue: ${item.nama_panggilan}` : ""}`,
   answer: (item) => item.jawaban,
   image: (item) => item.img,
   timeoutMessage: (item, _ans) => `⏰ Time's up! The answer: *${item.jawaban}*`,

@@ -58,7 +58,7 @@ async function pollJob(
 
     await sleep(interval);
   }
-  throw new Error(`Timeout setelah ${timeout / 1000}s`);
+  throw new Error(`Timeout after ${timeout / 1000}s`);
 }
 
 export async function removeWatermark(

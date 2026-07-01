@@ -12,7 +12,7 @@ const { command, checkAnswer } = createWordGame<TebakKalimatData>({
   dataFile: "tebakkalimat.json",
   emoji: "📖",
   reward: 15,
-  question: (item) => `Kalimat: ${item.soal}`,
+  question: (item) => `Sentence: ${item.soal}`,
   answer: (item) => item.jawaban,
 });
 

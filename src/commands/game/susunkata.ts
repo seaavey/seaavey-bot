@@ -13,7 +13,7 @@ const { command, checkAnswer } = createWordGame<SusunKataData>({
   dataFile: "susunkata.json",
   emoji: "🔤",
   reward: 15,
-  question: (item) => `Huruf: *${item.soal}*\nTipe: *${item.tipe}*`,
+  question: (item) => `Letters: *${item.soal}*\nType: *${item.tipe}*`,
   answer: (item) => item.jawaban,
 });
 

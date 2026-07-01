@@ -13,7 +13,7 @@ const { command, checkAnswer } = createWordGame<WaifuData>({
   dataFile: "tebakwaifu.json",
   emoji: "🌸",
   reward: 20,
-  question: (_item) => "Siapa nama waifu ini?",
+  question: (_item) => "Who is this waifu?",
   answer: (item) => item.jawaban,
   image: (item) => item.img,
   timeoutMessage: (item, _ans) => `⏰ Time's up! The answer: *${item.jawaban}*`,

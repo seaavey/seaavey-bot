@@ -12,7 +12,7 @@ const { command, checkAnswer } = createWordGame<TebakLirikData>({
   dataFile: "tebaklirik.json",
   emoji: "🎵",
   reward: 15,
-  question: (item) => `Lirik: ${item.soal}`,
+  question: (item) => `Lyrics: ${item.soal}`,
   answer: (item) => item.jawaban,
 });
 

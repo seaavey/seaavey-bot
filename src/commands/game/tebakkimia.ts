@@ -12,7 +12,7 @@ const { command, checkAnswer } = createWordGame<TebakKimiaData>({
   dataFile: "tebakkimia.json",
   emoji: "⚗️",
   reward: 15,
-  question: (item) => `Unsur: *${item.unsur}*\n\nKetik lambang unsurnya!`,
+  question: (item) => `Element: *${item.unsur}*\n\nType the chemical symbol!`,
   answer: (item) => item.lambang,
   timeoutMessage: (item, ans) => `⏰ Time's up! The answer: *${ans}*`,
   correctMessage: (item, ans) => `✅ Correct! The answer is *${ans.toUpperCase()}* (+15 XP)`,
