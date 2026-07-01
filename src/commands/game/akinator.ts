@@ -1,6 +1,4 @@
 import type { WASocket } from "baileys";
-import axios from "axios";
-import { t } from "@/core/translations";
 import { defineCommand } from "@/core/types";
 import * as userRepo from "@/infra/repositories/user-repo";
 import { logger } from "@/core/logger";
@@ -25,39 +23,26 @@ interface AkinatorSessionState {
 const sessions = new Map<string, AkinatorSessionState>();
 
 async function translateToId(text: string): Promise<string> {
-  if (!text) return text;
-  try {
-    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=id&dt=t&q=${encodeURIComponent(text)}`;
-    const { data } = await axios.get(url);
-    if (data && data[0] && data[0][0] && data[0][0][0]) {
-      return (data[0] as unknown[])
-        .map((x: unknown) => (x as string[])[0])
-        .join("")
-        .trim();
-    }
-    return text;
-  } catch {
-    return text;
-  }
+  return text;
 }
 
 export default defineCommand({
   name: "Akinator",
   alias: ["aki"],
-  description: t("game.akinator.desc"),
+  description: "Play Akinator game",
   handler: async (sock, msg) => {
     const key = `${msg.jid}:${msg.sender}`;
     if (sessions.has(key)) {
-      return msg.reply(t("game.akinator.existing"));
+      return msg.reply(
+        "🚩 Akinator session already active! You must finish or stop it by typing *stop* or *quit*.",
+      );
     }
 
-    await msg.reply(t("game.akinator.searching"));
+    await msg.reply("⏳ Starting Akinator...");
 
     const startRes = await akinatorStart();
     if (!startRes.status) {
-      return msg.reply(
-        t("game.akinator.startError", { error: startRes.error || t("game.akinator.unknownError") }),
-      );
+      return msg.reply(`🚩 Failed to start Akinator game: ${startRes.error || "Unknown error"}`);
     }
 
     const session = startRes.data;
@@ -77,7 +62,7 @@ export default defineCommand({
     state.timeout = setTimeout(() => {
       sessions.delete(key);
       sock.sendMessage(msg.jid, {
-        text: t("game.akinator.timeout"),
+        text: "⏰ Akinator session has ended due to inactivity.",
       });
     }, 120_000);
 
@@ -86,22 +71,26 @@ export default defineCommand({
     if (guess) {
       const translatedName = await translateToId(guess.name);
       const translatedDesc = await translateToId(guess.description);
-      const photoText = guess.photo ? `\n\n🖼️ Foto: ${guess.photo}` : "";
+      const photoText = guess.photo ? `\n\n🖼️ Photo: ${guess.photo}` : "";
       await msg.reply(
-        t("game.akinator.guess", {
-          name: translatedName,
-          desc: translatedDesc || t("game.akinator.noDesc"),
-          photo: photoText,
-        }),
+        `💡 I'm guessing...
+👤 *${translatedName}* (${translatedDesc || "No description"})${photoText}
+
+Is this correct? (yes/no)`,
       );
     } else {
       const translatedQuestion = await translateToId(session.question);
       await msg.reply(
-        t("game.akinator.question", {
-          step: session.step + 1,
-          progression: session.progression,
-          question: translatedQuestion,
-        }),
+        `💡 *Akinator* - Step ${session.step + 1}
+📈 Progress: ${session.progression}%
+
+❓ *${translatedQuestion}*
+
+0. Yes
+1. No
+2. Don't know
+3. Probably
+4. Probably not`,
       );
     }
   },
@@ -121,7 +110,7 @@ export async function checkAkinator(
   if (["exit", "stop", "batal", "cancel", "nyerah", "keluar"].includes(inputLower)) {
     clearTimeout(state.timeout);
     sessions.delete(key);
-    return t("game.akinator.cancelled");
+    return "🚩 Game stopped. Akinator session has been ended.";
   }
 
   if (state.isProcessing) return null;
@@ -147,7 +136,7 @@ export async function checkAkinator(
     }
 
     if (option === null) {
-      return t("game.akinator.invalidOption");
+      return "🚩 Invalid option! Please answer with 0 (Yes), 1 (No), 2 (Don't know), 3 (Probably), or 4 (Probably not).";
     }
 
     state.isProcessing = true;
@@ -157,16 +146,14 @@ export async function checkAkinator(
       state.timeout = setTimeout(() => {
         sessions.delete(key);
         state.sock.sendMessage(jid, {
-          text: t("game.akinator.timeout"),
+          text: "⏰ Akinator session has ended due to inactivity.",
         });
       }, 120_000);
       state.lastActive = Date.now();
 
       const res = await akinatorAnswer(state.session, option);
       if (!res.status) {
-        return t("game.akinator.processError", {
-          error: res.error || t("game.akinator.unknownError"),
-        });
+        return `🚩 Failed to process game: ${res.error || "Unknown error"}`;
       }
 
       if (res.data.guess) {
@@ -175,33 +162,37 @@ export async function checkAkinator(
         state.currentGuess = guess;
         const translatedName = await translateToId(guess.name);
         const translatedDesc = await translateToId(guess.description);
-        const photoText = guess.photo ? `\n\n🖼️ Foto: ${guess.photo}` : "";
-        return t("game.akinator.guess", {
-          name: translatedName,
-          desc: translatedDesc || t("game.akinator.noDesc"),
-          photo: photoText,
-        });
+        const photoText = guess.photo ? `\n\n🖼️ Photo: ${guess.photo}` : "";
+        return `💡 I'm guessing...
+👤 *${translatedName}* (${translatedDesc || "No description"})${photoText}
+
+Is this correct? (yes/no)`;
       } else if (res.data.session) {
         const nextSession = res.data.session;
         state.session = nextSession;
         const translatedQuestion = await translateToId(nextSession.question);
-        return t("game.akinator.question", {
-          step: nextSession.step + 1,
-          progression: nextSession.progression,
-          question: translatedQuestion,
-        });
+        return `💡 *Akinator* - Step ${nextSession.step + 1}
+📈 Progress: ${nextSession.progression}%
+
+❓ *${translatedQuestion}*
+
+0. Yes
+1. No
+2. Don't know
+3. Probably
+4. Probably not`;
       } else {
-        return t("game.akinator.invalidApiResponse");
+        return "🚩 Failed to process game: Invalid API response";
       }
     } catch (err: unknown) {
       const errStr = String(err);
       if (errStr.includes("No more questions")) {
         clearTimeout(state.timeout);
         sessions.delete(key);
-        return t("game.akinator.noMoreQuestions");
+        return "🚩 Game ended: No more questions.";
       }
       logger.error(err, "Akinator answer error");
-      return t("game.akinator.connectionError");
+      return "🚩 Failed to process game: Connection to server lost, try again later";
     } finally {
       state.isProcessing = false;
     }
@@ -214,9 +205,7 @@ export async function checkAkinator(
     }
 
     if (confirmed === null) {
-      return t("game.akinator.invalidConfirmation", {
-        name: state.currentGuess?.name ?? t("game.akinator.myGuess"),
-      });
+      return `🚩 Invalid confirmation! Is this character *${state.currentGuess?.name ?? "my guess"}*? Please reply with Yes or No.`;
     }
 
     if (confirmed) {
@@ -227,7 +216,7 @@ export async function checkAkinator(
       } catch (err) {
         logger.error(err, "Failed to add XP to user in Akinator");
       }
-      return t("game.akinator.win");
+      return "🎉 *Yay!* I guessed correctly! Thanks for playing! (+105 XP)";
     } else {
       state.isProcessing = true;
       try {
@@ -236,12 +225,9 @@ export async function checkAkinator(
           if (res.error && res.error.includes("No more questions")) {
             clearTimeout(state.timeout);
             sessions.delete(key);
-            return t("game.akinator.noMoreQuestions");
+            return "🚩 Game ended: No more questions.";
           }
-          return t("game.akinator.excludeError", {
-            error: res.error || t("game.akinator.unknownError"),
-            name: state.currentGuess?.name ?? "",
-          });
+          return `🚩 Failed to exclude character: ${res.error || "Unknown error"} (Current guess: ${state.currentGuess?.name ?? ""})`;
         }
 
         const nextSession = res.data;
@@ -253,26 +239,31 @@ export async function checkAkinator(
         state.timeout = setTimeout(() => {
           sessions.delete(key);
           state.sock.sendMessage(jid, {
-            text: t("game.akinator.timeout"),
+            text: "⏰ Akinator session has ended due to inactivity.",
           });
         }, 120_000);
         state.lastActive = Date.now();
 
         const translatedQuestion = await translateToId(nextSession.question);
-        return t("game.akinator.question", {
-          step: nextSession.step + 1,
-          progression: nextSession.progression,
-          question: translatedQuestion,
-        });
+        return `💡 *Akinator* - Step ${nextSession.step + 1}
+📈 Progress: ${nextSession.progression}%
+
+❓ *${translatedQuestion}*
+
+0. Yes
+1. No
+2. Don't know
+3. Probably
+4. Probably not`;
       } catch (err: unknown) {
         const errStr = String(err);
         if (errStr.includes("No more questions")) {
           clearTimeout(state.timeout);
           sessions.delete(key);
-          return t("game.akinator.noMoreQuestions");
+          return "🚩 Game ended: No more questions.";
         }
         logger.error(err, "Akinator exclude error");
-        return t("game.akinator.excludeConnError", { name: state.currentGuess?.name ?? "" });
+        return `🚩 Failed to exclude character: Connection lost (Current guess: ${state.currentGuess?.name ?? ""})`;
       } finally {
         state.isProcessing = false;
       }

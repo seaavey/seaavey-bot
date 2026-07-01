@@ -1,6 +1,5 @@
 import axios from "axios";
 
-import { t } from "@/core/translations";
 import type { ScraperResult } from "./index";
 import { scraperError, scraperSuccess } from "./index";
 
@@ -107,9 +106,7 @@ export async function removeBackground(
     );
 
     if (bgCreate.data.code !== 100000) {
-      throw new Error(
-        t("scraper.removebg.createJobFailed", { data: JSON.stringify(bgCreate.data) }),
-      );
+      throw new Error(`BG create-job failed: ${JSON.stringify(bgCreate.data)}`);
     }
 
     const bgJobId = bgCreate.data.result.job_id;
@@ -127,8 +124,7 @@ export async function removeBackground(
       finalResult.output?.url ||
       finalResult.preview_url;
 
-    if (!downloadUrl)
-      throw new Error(t("scraper.removebg.noUrl", { result: JSON.stringify(finalResult) }));
+    if (!downloadUrl) throw new Error(`URL not found: ${JSON.stringify(finalResult)}`);
 
     // Step 5: Download result
     const res = await axios.get(downloadUrl, { responseType: "arraybuffer" });

@@ -1,5 +1,4 @@
 import { downloadMediaMessage, type WAMessage, type proto } from "baileys";
-import { t } from "@/core/translations";
 import { defineCommand } from "@/core/types";
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
@@ -14,7 +13,8 @@ type MediaMessage =
 export default defineCommand({
   name: "Save Media",
   alias: ["savemedia", "svmedia"],
-  description: t("media.savemedia.desc"),
+  description:
+    "Save media (image, video, audio, sticker, document) from message or reply to /dev folder on server",
   usage: "{prefix}savemedia [nama_file]",
   tags: ["media"],
   ownerOnly: true,
@@ -103,10 +103,10 @@ export default defineCommand({
     }
 
     if (!mediaType || !mediaObject) {
-      return msg.reply(t("media.savemedia.noMedia"));
+      return msg.reply("🚩 Reply/send media with caption .savemedia");
     }
 
-    await msg.reply(t("media.savemedia.downloading"));
+    await msg.reply("⏳ Downloading media...");
 
     try {
       const downloadMsg = isQuoted
@@ -121,7 +121,7 @@ export default defineCommand({
       })) as Buffer;
 
       if (!buffer) {
-        throw new Error(t("media.savemedia.downloadFailed"));
+        throw new Error("Failed to download media from WhatsApp server.");
       }
 
       let fileName = msg.args.join("_").trim();
@@ -174,11 +174,14 @@ export default defineCommand({
       };
 
       await msg.reply(
-        t("media.savemedia.saved", { filename: fileName, size: formatSize(buffer.length) }),
+        `✅ Media saved successfully.
+
+📁 *Filename:* ${fileName}
+⚖️ *Size:* ${formatSize(buffer.length)}`,
       );
     } catch (error: unknown) {
       const err = error as Error;
-      await msg.reply(t("media.savemedia.failed", { error: err.message || String(error) }));
+      await msg.reply(`🚩 Failed to save media: ${err.message || String(error)}`);
     }
   },
 });

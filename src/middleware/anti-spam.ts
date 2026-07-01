@@ -1,4 +1,3 @@
-import { t } from "@/core/translations";
 import type { MessageMiddleware } from "@/handlers/message-context";
 import { getNumber } from "@/utils/helper";
 import { TtlMap } from "@/utils/ttl-map";
@@ -21,7 +20,7 @@ export const antiSpam: MessageMiddleware = async (ctx) => {
     spamTracker.delete(key);
     await sock.sendMessage(parse.jid, { delete: raw.key });
     await sock.sendMessage(parse.jid, {
-      text: t("antiSpam.warning", { user: getNumber(parse.sender) }),
+      text: `⚠️ @${getNumber(parse.sender)} don't spam!`,
       mentions: [parse.sender],
     });
     return "stop";

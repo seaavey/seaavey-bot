@@ -1,21 +1,20 @@
 import { downloadMediaMessage, type WAMessage } from "baileys";
-import { t } from "@/core/translations";
 import { defineCommand } from "@/core/types";
 import { removeWatermark } from "@/infra/scrapers";
 
 export default defineCommand({
   name: "Remove Watermark",
   alias: ["removewm", "removewatermark", "unwm"],
-  description: t("media.removewm.desc"),
+  description: "Remove watermark from an image using EzRemove",
   tags: ["media"],
   handler: async (sock, msg) => {
     const imageMsg = msg.message?.imageMessage || msg.quoted?.imageMessage;
 
     if (!imageMsg) {
-      return msg.reply(t("media.removewm.noImage"));
+      return msg.reply("🚩 Reply or send an image with caption .removewm");
     }
 
-    await msg.reply(t("media.removewm.processing"));
+    await msg.reply("⏳ Removing watermark...");
 
     try {
       const message = msg.quoted
@@ -31,7 +30,7 @@ export default defineCommand({
       const result = await removeWatermark(buffer);
 
       if (!result.status) {
-        return msg.reply(t("media.removewm.failed", { error: result.error || "Unknown error" }));
+        return msg.reply(`🚩 Failed: ${result.error || "Unknown error"}`);
       }
 
       await sock.sendMessage(
@@ -43,7 +42,7 @@ export default defineCommand({
       );
     } catch (e: unknown) {
       const errMsg = e instanceof Error ? e.message : String(e);
-      await msg.reply(t("media.removewm.failed", { error: errMsg }));
+      await msg.reply(`🚩 Failed: ${errMsg}`);
     }
   },
 });

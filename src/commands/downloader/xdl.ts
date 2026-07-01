@@ -1,19 +1,18 @@
-import { t } from "@/core/translations";
 import { defineCommand } from "@/core/types";
 import { twitterDl } from "@/infra/scrapers";
 
 export default defineCommand({
   name: "X (Twitter) DL",
   alias: ["xdl", "x(twitter)dl"],
-  description: t("downloader.xdl.desc"),
+  description: "Download media from X/Twitter",
   handler: async (_sock, msg) => {
     const url = msg.args[0];
-    if (!url) return msg.reply(t("downloader.xdl.format"));
+    if (!url) return msg.reply("Format: .xdl <url>");
     if (!url.includes("x.com") && !url.includes("twitter.com"))
-      return msg.reply(t("downloader.xdl.invalidUrl"));
+      return msg.reply("🚩 URL must be from X/Twitter");
     await msg.reply("⏳ Downloading...");
     const res = await twitterDl(url);
-    if (!res.status) return msg.reply(`❌ ${res.error}`);
+    if (!res.status) return msg.reply(`🚩 ${res.error}`);
     const { video, photo, title, author } = res.data;
     if (video) {
       await msg.send({
@@ -26,7 +25,7 @@ export default defineCommand({
         caption: `🐦 ${author ? `@${author}` : ""}${title ? ` — ${title}` : ""}`,
       });
     } else {
-      await msg.reply(t("downloader.xdl.noMedia"));
+      await msg.reply("🚩 No media found in this tweet");
     }
   },
 });

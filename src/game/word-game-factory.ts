@@ -1,4 +1,3 @@
-import { t } from "@/core/translations";
 import { defineCommand } from "@/core/types";
 import { GameManager } from "@/game/game-helper";
 import type { WordGameConfig } from "@/game/types";
@@ -16,12 +15,10 @@ export function createWordGame<T>(config: WordGameConfig<T>) {
     handler: async (sock, msg) => {
       if (msg.args[0] === "hint") {
         const hint = gm.getHint(msg.jid);
-        return msg.reply(
-          hint ? t("game.factory.hint", { hint }) : t("game.factory.noActiveSession"),
-        );
+        return msg.reply(hint ? `💡 Hint: *${hint}*` : "🚩 No active session!");
       }
 
-      if (!localData.length) return msg.reply(t("game.factory.emptyData"));
+      if (!localData.length) return msg.reply("🚩 No data.");
       const item = getRandomItem(localData);
       const answer = config.answer(item);
       const timeoutMs = config.timeoutMs ?? 60000;
@@ -29,11 +26,11 @@ export function createWordGame<T>(config: WordGameConfig<T>) {
       const success = gm.start(msg.jid, answer, msg.sender, () => {
         const timeoutMsg = config.timeoutMessage
           ? config.timeoutMessage(item, answer)
-          : t("game.factory.timeout", { answer });
+          : `⏰ Time's up! The answer: *${answer}*`;
         sock.sendMessage(msg.jid, { text: timeoutMsg });
       });
 
-      if (!success) return msg.reply(t("game.factory.finishPrevious"));
+      if (!success) return msg.reply("⏳ Finish the previous question first!");
 
       const questionText = config.question(item);
       const imageUrl = config.image?.(item);
@@ -41,22 +38,20 @@ export function createWordGame<T>(config: WordGameConfig<T>) {
       if (imageUrl) {
         await msg.send({
           image: { url: imageUrl },
-          caption: t("game.factory.questionWithImage", {
-            emoji: config.emoji,
-            name: config.name,
-            question: questionText,
-            time: String(timeoutMs / 1000),
-          }),
+          caption: `${config.emoji} *${config.name}*
+
+${questionText}
+
+Time ${String(timeoutMs / 1000)}s!`,
         });
       } else {
         await msg.reply(
-          t("game.factory.captionNoImage", {
-            emoji: config.emoji,
-            name: config.name,
-            question: questionText,
-            timeout: timeoutMs / 1000,
-            trigger: config.triggers[0],
-          }),
+          `${config.emoji} *${config.name}*
+
+${questionText}
+
+Time ${timeoutMs / 1000}s!
+(Type *.${config.triggers[0]} hint*)`,
         );
       }
     },
@@ -69,7 +64,7 @@ export function createWordGame<T>(config: WordGameConfig<T>) {
     if (config.correctMessage && item) {
       return config.correctMessage(item, ans);
     }
-    return t("game.factory.correctDefault", { answer: ans.toUpperCase(), xp: config.reward });
+    return `✅ Correct! The answer is *${ans.toUpperCase()}* (+${config.reward} XP)`;
   }
 
   return { command, checkAnswer };

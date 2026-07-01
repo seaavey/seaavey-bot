@@ -1,31 +1,46 @@
-import { t } from "@/core/translations";
 import { defineCommand } from "@/core/types";
 import { addXp } from "@/infra/database";
 import { getRandomItem } from "@/utils/helper";
 
 const questions = [
-  { q: "Apa bahasa resmi Brasil?", o: ["Spanyol", "Portugis", "Inggris", "Prancis"], a: 1 },
-  { q: "Berapa jumlah tulang manusia dewasa?", o: ["186", "206", "226", "256"], a: 1 },
-  { q: "Planet terdekat dari matahari?", o: ["Venus", "Merkurius", "Mars", "Bumi"], a: 1 },
   {
-    q: "Siapa pencipta Linux?",
+    q: "What is the official language of Brazil?",
+    o: ["Spanish", "Portuguese", "English", "French"],
+    a: 1,
+  },
+  { q: "How many bones are in an adult human body?", o: ["186", "206", "226", "256"], a: 1 },
+  { q: "What is the closest planet to the Sun?", o: ["Venus", "Mercury", "Mars", "Earth"], a: 1 },
+  {
+    q: "Who is the creator of Linux?",
     o: ["Bill Gates", "Steve Jobs", "Linus Torvalds", "Dennis Ritchie"],
     a: 2,
   },
-  { q: "Apa ibu kota Australia?", o: ["Sydney", "Melbourne", "Canberra", "Perth"], a: 2 },
-  { q: "Tahun kemerdekaan Indonesia?", o: ["1944", "1945", "1946", "1947"], a: 1 },
+  { q: "What is the capital of Australia?", o: ["Sydney", "Melbourne", "Canberra", "Perth"], a: 2 },
   {
-    q: "Hewan apa yang bisa terbang mundur?",
-    o: ["Elang", "Kolibri", "Burung hantu", "Pelikan"],
+    q: "In what year did Indonesia declare independence?",
+    o: ["1944", "1945", "1946", "1947"],
     a: 1,
   },
-  { q: "Apa unsur kimia dengan simbol 'Au'?", o: ["Perak", "Emas", "Tembaga", "Aluminium"], a: 1 },
   {
-    q: "Benua terkecil di dunia?",
-    o: ["Eropa", "Antartika", "Australia", "Amerika Selatan"],
+    q: "Which animal can fly backwards?",
+    o: ["Eagle", "Hummingbird", "Owl", "Pelican"],
+    a: 1,
+  },
+  {
+    q: "What chemical element has the symbol 'Au'?",
+    o: ["Silver", "Gold", "Copper", "Aluminum"],
+    a: 1,
+  },
+  {
+    q: "What is the smallest continent in the world?",
+    o: ["Europe", "Antarctica", "Australia", "South America"],
     a: 2,
   },
-  { q: "Berapa derajat sudut segitiga?", o: ["90", "180", "270", "360"], a: 1 },
+  {
+    q: "How many degrees are in the sum of angles of a triangle?",
+    o: ["90", "180", "270", "360"],
+    a: 1,
+  },
 ];
 
 const sessions = new Map<string, { answer: number; timeout: Timer; sender?: string }>();
@@ -33,14 +48,13 @@ const sessions = new Map<string, { answer: number; timeout: Timer; sender?: stri
 export default defineCommand({
   name: "Quiz",
   alias: ["quiz"],
-  description: t("game.quiz.desc"),
+  description: "Multiple choice quiz",
   handler: async (sock, msg) => {
     if (sessions.has(msg.jid)) {
       const session = sessions.get(msg.jid);
       if (!session) return;
       const input = msg.args[0]?.toUpperCase();
-      if (!input || !["A", "B", "C", "D"].includes(input))
-        return msg.reply(t("game.quiz.chooseLetter"));
+      if (!input || !["A", "B", "C", "D"].includes(input)) return msg.reply("Answer with A/B/C/D!");
 
       const idx = input.charCodeAt(0) - 65;
       clearTimeout(session.timeout);
@@ -48,9 +62,9 @@ export default defineCommand({
 
       if (idx === session.answer) {
         addXp(msg.sender, 15);
-        return msg.reply(t("game.quiz.correct", { input }));
+        return msg.reply(`✅ Correct! The answer is *${input}* (+15 XP)`);
       }
-      return msg.reply(t("game.quiz.wrong", { answer: String.fromCharCode(65 + session.answer) }));
+      return msg.reply(`🚩 Wrong! The answer is *${String.fromCharCode(65 + session.answer)}*`);
     }
 
     const item = getRandomItem(questions) as (typeof questions)[number];
@@ -60,11 +74,17 @@ export default defineCommand({
     const timeout = setTimeout(() => {
       sessions.delete(jid);
       sock.sendMessage(jid, {
-        text: t("game.quiz.timeout", { answer: String.fromCharCode(65 + item.a) }),
+        text: `⏰ Time's up! The answer is *${String.fromCharCode(65 + item.a)}*`,
       });
     }, 30_000);
     sessions.set(msg.jid, { answer: item.a, timeout });
 
-    await msg.reply(t("game.quiz.question", { question: item.q, options }));
+    await msg.reply(`📝 *Quiz*
+
+${item.q}
+
+${options}
+
+Answer: .quiz [A/B/C/D] (30s)`);
   },
 });

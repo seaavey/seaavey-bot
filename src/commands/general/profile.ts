@@ -1,11 +1,10 @@
-import { t } from "@/core/translations";
 import { defineCommand } from "@/core/types";
 import db, { getUser } from "@/infra/database";
 import { getNumber } from "@/utils/helper";
 export default defineCommand({
   name: "Profile",
   alias: ["pro", "profile"],
-  description: t("general.profile.desc"),
+  description: "View your profile card / rank",
   handler: async (_sock, msg) => {
     const target = msg.mentioned[0] || msg.sender;
     const user = getUser(target);
@@ -28,7 +27,9 @@ export default defineCommand({
       const member = db
         .query("SELECT chatCount FROM group_members WHERE groupJid = ? AND memberJid = ?")
         .get(msg.jid, target) as { chatCount: number } | null;
-      if (member) groupStats = t("general.profile.groupChat", { count: member.chatCount });
+      if (member)
+        groupStats = `
+💬 Group chats: ${member.chatCount} messages`;
     }
 
     const name = getNumber(target);

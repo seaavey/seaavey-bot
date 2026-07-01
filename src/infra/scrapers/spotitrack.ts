@@ -34,7 +34,7 @@ export interface SpotitrackPlaylist {
 
 async function getActionToken(): Promise<string> {
   const res = await fetch(BASE, { headers: { "user-agent": UA } });
-  if (!res.ok) throw new Error("Gagal memuat halaman utama untuk sinkronisasi token.");
+  if (!res.ok) throw new Error("Failed to load main page for token synchronization.");
   const html = await res.text();
   // ponytail: fragile regex — upstream might change inline script shape; upgrade to cheerio if it breaks often
   const match = html.match(/"action"\s*:\s*"([a-f0-9]{40})"/i);
@@ -65,11 +65,11 @@ export async function spotitrackTrack(url: string): Promise<ScraperResult<Spotit
 
     const rawText = await actionRes.text();
     const line = rawText.split("\n").find((l) => l.startsWith("1:"));
-    if (!line) throw new Error("Gagal mengekstrak metadata dari server stream.");
+    if (!line) throw new Error("Failed to extract metadata from server stream.");
 
     const parsed = JSON.parse(line.slice(2));
     if (!parsed.success || !parsed.data)
-      throw new Error(parsed.message || "Tautan Spotify Track tidak valid.");
+      throw new Error(parsed.message || "Invalid Spotify Track link.");
 
     const info = parsed.data;
     const artist = Array.isArray(info.artists) ? info.artists.join(", ") : String(info.artists);
@@ -128,11 +128,11 @@ export async function spotitrackPlaylist(url: string): Promise<ScraperResult<Spo
 
     const rawText = await actionRes.text();
     const line = rawText.split("\n").find((l) => l.startsWith("1:"));
-    if (!line) throw new Error("Gagal mengekstrak metadata playlist.");
+    if (!line) throw new Error("Failed to extract playlist metadata.");
 
     const parsed = JSON.parse(line.slice(2));
     if (!parsed.success || !parsed.data)
-      throw new Error(parsed.message || "Tautan Playlist tidak valid.");
+      throw new Error(parsed.message || "Invalid Playlist link.");
 
     const meta = parsed.data;
     const qs = new URLSearchParams({
@@ -147,7 +147,7 @@ export async function spotitrackPlaylist(url: string): Promise<ScraperResult<Spo
       headers: { accept: "text/event-stream", "user-agent": UA },
     });
 
-    if (!sseRes.ok) throw new Error(`Gagal memproses stream playlist: ${sseRes.status}`);
+    if (!sseRes.ok) throw new Error(`Failed to process playlist stream: ${sseRes.status}`);
 
     const body = sseRes.body;
     if (!body) throw new Error("Response body stream is null.");
@@ -176,7 +176,7 @@ export async function spotitrackPlaylist(url: string): Promise<ScraperResult<Spo
       }
     }
 
-    if (!downloadUrl) throw new Error("Gagal mendapatkan link download ZIP dari event-stream.");
+    if (!downloadUrl) throw new Error("Failed to retrieve ZIP download link from event-stream.");
 
     return scraperSuccess({
       title: meta.name,

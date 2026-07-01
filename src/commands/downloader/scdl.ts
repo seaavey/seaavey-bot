@@ -1,23 +1,20 @@
-import { t } from "@/core/translations";
 import { defineCommand } from "@/core/types";
 import { soundcloudDl } from "@/infra/scrapers";
 
 export default defineCommand({
   name: "SoundCloud DL",
   alias: ["scdl", "soundclouddl"],
-  description: t("downloader.scdl.desc"),
+  description: "Download songs from SoundCloud",
   handler: async (_sock, msg) => {
     const url = msg.args[0];
-    if (!url) return msg.reply(t("downloader.scdl.format"));
+    if (!url) return msg.reply("Format: .scdl <url>");
 
     await msg.reply("⏳ Downloading...");
 
     const result = await soundcloudDl(url);
 
     if (!result.status) {
-      return msg.reply(
-        t("downloader.scdl.failed", { error: result.error || t("downloader.scdl.noMedia") }),
-      );
+      return msg.reply(`🚩 Failed: ${result.error || "Media not found"}`);
     }
 
     const { title, artist, duration, artwork, streamUrl } = result.data;

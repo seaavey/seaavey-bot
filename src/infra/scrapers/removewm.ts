@@ -1,5 +1,4 @@
 import axios from "axios";
-import { t } from "@/core/translations";
 import type { ScraperResult } from "./index";
 import { scraperError, scraperSuccess } from "./index";
 
@@ -76,7 +75,7 @@ export async function removeWatermark(
     });
 
     if (create.data.code !== 100000) {
-      throw new Error(t("scraper.removewm.createJobFailed", { data: JSON.stringify(create.data) }));
+      throw new Error(`Watermark remove create-job failed: ${JSON.stringify(create.data)}`);
     }
 
     const jobId = create.data.result.job_id;
@@ -92,7 +91,7 @@ export async function removeWatermark(
       finalResult.preview_url;
 
     if (!downloadUrl) {
-      throw new Error(t("scraper.removewm.noUrl", { result: JSON.stringify(finalResult) }));
+      throw new Error(`URL not found: ${JSON.stringify(finalResult)}`);
     }
 
     const res = await axios.get(downloadUrl, { responseType: "arraybuffer" });

@@ -1,4 +1,3 @@
-import { t } from "@/core/translations";
 import { createWordGame } from "@/game/word-game-factory";
 
 interface SAHData {
@@ -9,13 +8,13 @@ interface SAHData {
 const { command, checkAnswer } = createWordGame<SAHData>({
   name: "Siapakah Aku",
   triggers: ["siapakahaku", "sah", "siapa"],
-  description: t("game.siapakahaku.desc"),
+  description: "Who am I game (Type 'hint' for help)",
   dataFile: "siapakahaku.json",
   emoji: "🕵️",
   reward: 15,
   question: (item) => `Soal: ${item.soal}`,
   answer: (item) => item.jawaban,
-  correctMessage: (item, _ans) => t("game.siapakahaku.correct", { answer: item.jawaban }),
+  correctMessage: (item, _ans) => `✅ Correct! The answer is *${item.jawaban}* (+15 XP)`,
 });
 
 export default command;

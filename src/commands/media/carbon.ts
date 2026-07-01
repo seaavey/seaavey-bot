@@ -1,17 +1,16 @@
-import { t } from "@/core/translations";
 import { defineCommand } from "@/core/types";
 
 export default defineCommand({
   name: "Carbon",
   alias: ["crb", "carbon"],
-  description: t("media.carbon.desc"),
+  description: "Create aesthetic code screenshot. Example: .carbon console.log('hello')",
   handler: async (_sock, msg) => {
     const code = msg.args.join(" ");
-    if (!code) return msg.reply(t("media.carbon.format"));
-    await msg.reply(t("media.carbon.processing"));
+    if (!code) return msg.reply("Format: .carbon <kode>");
+    await msg.reply("⏳ Creating carbon...");
     const url = `https://carbonara.solopov.dev/api/cook?code=${encodeURIComponent(code)}&theme=monokai&language=auto`;
     const res = await fetch(url);
-    if (!res.ok) return msg.reply(t("media.carbon.failed"));
+    if (!res.ok) return msg.reply("🚩 Failed to create carbon image.");
     const buffer = Buffer.from(await res.arrayBuffer());
     await msg.send({ image: buffer, caption: "💻 Carbon" });
   },

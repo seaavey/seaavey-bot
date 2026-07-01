@@ -1,10 +1,9 @@
 import { defineCommand } from "@/core/types";
-import { t } from "@/core/translations";
 
 export default defineCommand({
   name: "List Group",
   alias: ["lg", "groups", "listgroup"],
-  description: t("owner.listgroup.desc"),
+  description: "List all groups bot joined (owner only)",
   ownerOnly: true,
   handler: async (sock, msg) => {
     const groups = await sock.groupFetchAllParticipating();
@@ -12,6 +11,8 @@ export default defineCommand({
       .map((g, i) => `${i + 1}. ${g.subject} (${g.participants.length} members)`)
       .join("\n");
 
-    await msg.reply(t("owner.listgroup.title", { count: Object.keys(groups).length, list }));
+    await msg.reply(`📋 *Group List (${Object.keys(groups).length})*
+
+${list}`);
   },
 });

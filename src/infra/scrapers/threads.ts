@@ -1,4 +1,3 @@
-import { t } from "@/core/translations";
 import axios from "axios";
 
 import type { ScraperResult } from "./index";
@@ -67,7 +66,7 @@ export async function threadsDl(url: string): Promise<ScraperResult<ThreadsMedia
     const result = uniqueMedia(data.media ?? []);
 
     if (result.length === 0) {
-      return scraperError(t("scraper.threads.noMedia"));
+      return scraperError("No media found");
     }
 
     return scraperSuccess(result);

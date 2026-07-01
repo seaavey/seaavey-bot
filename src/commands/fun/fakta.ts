@@ -1,31 +1,32 @@
-import { t } from "@/core/translations";
 import { defineCommand } from "@/core/types";
 import { getRandomItem } from "@/utils/helper";
 
 const fakta = [
-  "Gurita punya 3 jantung dan darahnya berwarna biru.",
-  "Madu tidak pernah basi. Madu yang ditemukan di makam Mesir kuno masih bisa dimakan.",
-  "Sidik jari koala hampir identik dengan sidik jari manusia.",
-  "Pisang secara teknis adalah buah beri, tapi stroberi bukan.",
-  "Jantung udang terletak di kepalanya.",
-  "Satu hari di Venus lebih lama dari satu tahun di Venus.",
-  "Manusia berbagi 60% DNA dengan pisang.",
-  "Lumba-lumba tidur dengan satu mata terbuka.",
-  "Lebah bisa mengenali wajah manusia.",
-  "Otot terkuat di tubuh manusia adalah lidah.",
-  "Kucing tidak bisa merasakan rasa manis.",
-  "Astronot bertambah tinggi sekitar 5cm di luar angkasa.",
-  "Otak manusia menggunakan 20% dari total energi tubuh.",
-  "Ada lebih banyak bintang di alam semesta daripada butiran pasir di bumi.",
-  "Kecoak bisa hidup tanpa kepala selama seminggu.",
+  "Octopuses have 3 hearts and their blood is blue.",
+  "Honey never spoils. Honey found in ancient Egyptian tombs is still edible.",
+  "Koala fingerprints are almost identical to human fingerprints.",
+  "Bananas are technically berries, but strawberries are not.",
+  "Shrimp hearts are located in their heads.",
+  "A day on Venus is longer than a year on Venus.",
+  "Humans share 60% of their DNA with bananas.",
+  "Dolphins sleep with one eye open.",
+  "Honeybees can recognize human faces.",
+  "The strongest muscle in the human body is the tongue.",
+  "Cats cannot taste sweetness.",
+  "Astronauts grow about 5cm taller in space.",
+  "The human brain uses 20% of the body's total energy.",
+  "There are more stars in the universe than grains of sand on Earth.",
+  "Cockroaches can live without their head for a week.",
 ];
 
 export default defineCommand({
   name: "Fakta",
   alias: ["fakta"],
-  description: t("fun.fakta.description"),
+  description: "Random interesting facts",
   handler: async (_sock, msg) => {
     const f = getRandomItem(fakta);
-    await msg.reply(t("fun.fakta.message", { fact: f }));
+    await msg.reply(`📌 *Random Fact*
+
+${f}`);
   },
 });

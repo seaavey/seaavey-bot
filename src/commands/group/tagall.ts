@@ -1,10 +1,9 @@
 import { defineCommand } from "@/core/types";
-import { t } from "@/core/translations";
 
 export default defineCommand({
   name: "Tag All",
   alias: ["tag", "tagall"],
-  description: t("group.tagall.description"),
+  description: "Tag all group members",
   groupOnly: true,
   adminOnly: true,
   handler: async (sock, msg) => {

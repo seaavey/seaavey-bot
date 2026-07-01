@@ -1,12 +1,11 @@
-import { t } from "@/core/translations";
 import { defineCommand } from "@/core/types";
 import { commands } from "@/infra/loader";
 
 export default defineCommand({
   name: "Total Fitur",
   alias: ["features", "totalfitur"],
-  description: t("general.totalfitur.desc"),
+  description: "Count total available commands",
   handler: async (_sock, msg) => {
-    await msg.reply(t("general.totalfitur.count", { count: String(commands.size) }));
+    await msg.reply(`SeaaveyBot has *${String(commands.size)}* commands!`);
   },
 });

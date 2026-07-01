@@ -41,10 +41,11 @@ interface IWallHaven {
   data: IWallHavenData[];
   meta: IWallHavenMeta;
 }
+
 export default defineCommand({
   name: "Wallpaper",
   alias: ["wallpaper", "wp"],
-  description: "Random mobile wallpaper dari Wallhaven",
+  description: "Random mobile wallpaper from Wallhaven",
   usage: "{prefix}wallpaper",
   tags: ["tools"],
   handler: async (_sock, msg) => {
@@ -53,13 +54,13 @@ export default defineCommand({
     );
 
     if (!data?.data?.[0]?.path) {
-      return msg.reply("❌ Gagal mengambil wallpaper.");
+      return msg.reply("🚩 Failed to fetch wallpaper.");
     }
 
     const wallpaper = data.data[0];
     await msg.send({
       image: { url: wallpaper.path },
-      caption: `🎨 Random Mobile Wallpaper\n\n📐 *Resolusi:* ${wallpaper.resolution}`,
+      caption: `🎨 Random Mobile Wallpaper\n\n📐 *Resolution:* ${wallpaper.resolution}`,
     });
   },
 });

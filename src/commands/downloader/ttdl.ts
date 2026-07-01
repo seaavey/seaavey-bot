@@ -1,4 +1,3 @@
-import { t } from "@/core/translations";
 import { defineCommand } from "@/core/types";
 
 interface TikWMData {
@@ -12,10 +11,10 @@ interface TikWMData {
 export default defineCommand({
   name: "TikTok DL",
   alias: ["tiktokdl"],
-  description: t("downloader.ttdl.desc"),
+  description: "Download TikTok video/images via tikwm.com",
   handler: async (_sock, msg) => {
     const url = msg.body.split(" ").slice(1).join(" ").trim();
-    if (!url) return msg.reply(t("downloader.ttdl.format"));
+    if (!url) return msg.reply("Format: .ttdl <url>");
 
     await msg.reply("⏳ Downloading...");
 
@@ -27,7 +26,7 @@ export default defineCommand({
     };
 
     if (json.code !== 0) {
-      return msg.reply(t("downloader.ttdl.failed", { error: json.msg || "Unknown error" }));
+      return msg.reply(`🚩 Failed: ${json.msg || "Unknown error"}`);
     }
 
     const { data } = json;
@@ -45,7 +44,7 @@ export default defineCommand({
       }
       await msg.reply(`📸 ${data.images.length} images\n\n${data.title}\n👤 ${author}`);
     } else {
-      await msg.reply(t("downloader.ttdl.noMedia"));
+      await msg.reply("🚩 No media found.");
     }
   },
 });

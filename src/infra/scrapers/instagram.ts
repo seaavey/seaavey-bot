@@ -1,7 +1,6 @@
 import axios from "axios";
 import * as cheerio from "cheerio";
 
-import { t } from "@/core/translations";
 import type { ScraperResult } from "./index";
 import { scraperError, scraperSuccess } from "./index";
 
@@ -106,7 +105,7 @@ export async function instagramDl(url: string): Promise<ScraperResult<InstagramM
 
     const $ = cheerio.load(page.data || "");
     const token = $('input[name="token"]').attr("value");
-    if (!token) throw new Error(t("scraper.instagram.tokenNotFound"));
+    if (!token) throw new Error("Token not found");
 
     const cookie = extractCookie(page.headers as Record<string, unknown>);
 
@@ -130,7 +129,7 @@ export async function instagramDl(url: string): Promise<ScraperResult<InstagramM
     });
 
     const results = parseResult(res.data || "");
-    if (!results.length) throw new Error(t("scraper.instagram.noMedia"));
+    if (!results.length) throw new Error("Media not found");
 
     return scraperSuccess(results);
   } catch (e: unknown) {

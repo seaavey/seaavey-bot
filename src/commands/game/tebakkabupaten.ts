@@ -1,4 +1,3 @@
-import { t } from "@/core/translations";
 import { createWordGame } from "@/game/word-game-factory";
 
 interface TebakKabupatenData {
@@ -9,15 +8,15 @@ interface TebakKabupatenData {
 const { command, checkAnswer } = createWordGame<TebakKabupatenData>({
   name: "Tebak Kabupaten",
   triggers: ["tebakkabupaten", "tbkp"],
-  description: t("game.tebakkabupaten.desc"),
+  description: "Guess the district name from its emblem image",
   dataFile: "tebakkabupaten.json",
   emoji: "🏛️",
   reward: 20,
-  question: (_item) => t("game.tebakkabupaten.question"),
+  question: (_item) => "Guess the district/city name from the emblem above!",
   answer: (item) => item.title.replace(/^(Kabupaten|Kota)\s*/i, ""),
   image: (item) => item.url,
-  timeoutMessage: (item) => t("game.tebakkabupaten.timeout", { answer: item.title }),
-  correctMessage: (item, _ans) => t("game.tebakkabupaten.correct", { answer: item.title }),
+  timeoutMessage: (item) => `⏰ Time's up! The answer: *${item.title}*`,
+  correctMessage: (item, _ans) => `✅ Correct! The answer is *${item.title}* (+20 XP)`,
 });
 
 export default command;

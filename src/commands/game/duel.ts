@@ -1,4 +1,3 @@
-import { t } from "@/core/translations";
 import { defineCommand } from "@/core/types";
 import { addXp } from "@/infra/database";
 import { getNumber, getRandomNumber } from "@/utils/helper";
@@ -11,7 +10,7 @@ const sessions = new Map<
 export default defineCommand({
   name: "Duel",
   alias: ["duel"],
-  description: t("game.duel.desc"),
+  description: "Duel against another player",
   handler: async (sock, msg) => {
     const key = msg.jid;
     const session = sessions.get(key);
@@ -20,16 +19,15 @@ export default defineCommand({
     if (msg.args[0] === "accept" && session && session.target === msg.sender) {
       session.turn = session.challenger;
       return msg.reply(
-        t("game.duel.start", {
-          challenger: getNumber(session.challenger),
-          target: getNumber(session.target),
-        }),
+        `⚔️ The duel has begun! @${getNumber(session.challenger)} vs @${getNumber(session.target)}
+
+It is @${getNumber(session.challenger)}'s turn first! Type .duel attack`,
       );
     }
 
     // Attack
     if (msg.args[0] === "attack" && session) {
-      if (session.turn !== msg.sender) return msg.reply(t("game.duel.notYourTurn"));
+      if (session.turn !== msg.sender) return msg.reply("🚩 Not your turn!");
 
       const dmg = getRandomNumber(10, 39);
       const opponent = msg.sender === session.challenger ? session.target : session.challenger;
@@ -40,36 +38,33 @@ export default defineCommand({
         sessions.delete(key);
         addXp(msg.sender, 25);
         return msg.send({
-          text: t("game.duel.win", { attacker: getNumber(msg.sender), dmg }),
+          text: `🏆 @${getNumber(msg.sender)} has won the duel! (+25 XP)`,
           mentions: [msg.sender, opponent],
         });
       }
 
       session.turn = opponent;
       return msg.send({
-        text: t("game.duel.attack", {
-          attacker: getNumber(msg.sender),
-          dmg,
-          challenger: getNumber(session.challenger),
-          challengerHp: session.hp[session.challenger],
-          target: getNumber(session.target),
-          targetHp: session.hp[session.target],
-          next: getNumber(opponent),
-        }),
+        text: `⚔️ @${getNumber(msg.sender)} attacks and deals *${dmg}* damage!
+
+• @${getNumber(session.challenger)}: HP ${session.hp[session.challenger]}
+• @${getNumber(session.target)}: HP ${session.hp[session.target]}
+
+Next turn: @${getNumber(opponent)} (Type .duel attack)`,
         mentions: [session.challenger, session.target],
       });
     }
 
     // Start new duel
-    if (session) return msg.reply(t("game.duel.existing"));
+    if (session) return msg.reply("⏳ There's already a duel in progress!");
     const target = msg.mentioned[0] || msg.quoted?.sender;
-    if (!target) return msg.reply(t("game.duel.mention"));
-    if (target === msg.sender) return msg.reply(t("game.duel.self"));
+    if (!target) return msg.reply("Tag your opponent: .duel @user");
+    if (target === msg.sender) return msg.reply("🚩 Can't duel yourself!");
 
     const jid = msg.jid;
     const timeout = setTimeout(() => {
       sessions.delete(key);
-      sock.sendMessage(jid, { text: t("game.duel.timeout") });
+      sock.sendMessage(jid, { text: "⏰ Time's up! Duel canceled." });
     }, 120_000);
     sessions.set(key, {
       challenger: msg.sender,
@@ -80,10 +75,9 @@ export default defineCommand({
     });
 
     await msg.send({
-      text: t("game.duel.challenge", {
-        challenger: getNumber(msg.sender),
-        target: getNumber(target),
-      }),
+      text: `⚔️ @${getNumber(msg.sender)} has challenged @${getNumber(target)} to a duel!
+
+Type .duel accept to accept (120 seconds)`,
       mentions: [msg.sender, target],
     });
   },

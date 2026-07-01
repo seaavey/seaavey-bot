@@ -1,11 +1,10 @@
 import { defineCommand } from "@/core/types";
 import { pinterestDl } from "@/infra/scrapers";
-import { t } from "@/core/translations";
 
 export default defineCommand({
   name: "Pinterest DL",
   alias: ["pindl", "pinterestdl"],
-  description: t("downloader.pindl.desc"),
+  description: "Download media from Pinterest",
   handler: async (_sock, msg) => {
     const url = msg.args[0];
     if (!url) {
@@ -14,7 +13,7 @@ export default defineCommand({
 
     await msg.reply("⏳ Downloading...");
     const res = await pinterestDl(url);
-    if (!res.status) return msg.reply(`❌ ${res.error}`);
+    if (!res.status) return msg.reply(`🚩 ${res.error}`);
 
     const pin = res.data;
     if (pin.video) {

@@ -1,4 +1,3 @@
-import { t } from "@/core/translations";
 import type { WASocket } from "baileys";
 import db, { getGroup, updateMemberChat } from "@/infra/database";
 import { invalidateGroupMetadata } from "@/infra/group-metadata-cache";
@@ -28,7 +27,7 @@ export async function handleGroupParticipants(
   // Welcome
   if (action === "add" && group.welcome) {
     await sock.sendMessage(id, {
-      text: t("welcome.message", { users: tags }),
+      text: `👋 Welcome ${tags}! Hope you enjoy this group.`,
       mentions,
     });
   }
@@ -36,7 +35,7 @@ export async function handleGroupParticipants(
   // Goodbye
   if (action === "remove" && group.goodbye) {
     await sock.sendMessage(id, {
-      text: t("goodbye.message", { users: tags }),
+      text: `👋 Goodbye ${tags}, see you later.`,
       mentions,
     });
   }

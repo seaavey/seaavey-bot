@@ -1,6 +1,5 @@
 import axios from "axios";
 
-import { t } from "@/core/translations";
 import type { ScraperResult } from "./index";
 import { scraperError, scraperSuccess } from "./index";
 
@@ -72,7 +71,7 @@ export async function pinterestSearch(
       });
     }
 
-    if (!results.length) throw new Error(t("scraper.pinterest.noResults"));
+    if (!results.length) throw new Error("No results found");
     return scraperSuccess(results);
   } catch (e: unknown) {
     const err = e as { message?: string };
@@ -100,7 +99,7 @@ async function fetchPindownToken(): Promise<{ name: string; value: string; cooki
 
   // Match: <input name="XXXX" type="hidden" value="YYYY"/>
   const match = html.match(/<input\s+name="([^"]+)"\s+type="hidden"\s+value="([^"]+)"\s*\/?>/);
-  if (!match || !match[1] || !match[2]) throw new Error(t("scraper.pinterest.pindownToken"));
+  if (!match || !match[1] || !match[2]) throw new Error("Failed to get Pinterest token");
   return { name: match[1], value: match[2], cookie };
 }
 
@@ -132,7 +131,7 @@ export async function pinterestDl(url: string): Promise<ScraperResult<PinterestP
       },
     );
 
-    if (!data.success || !data.html) throw new Error(t("scraper.pinterest.pindownData"));
+    if (!data.success || !data.html) throw new Error("Failed to fetch Pinterest data");
 
     const html = data.html;
 
@@ -154,7 +153,7 @@ export async function pinterestDl(url: string): Promise<ScraperResult<PinterestP
       imageUrl = posterMatch?.[1] || "";
     }
 
-    if (!imageUrl && !videoUrl) throw new Error(t("scraper.pinterest.noMedia"));
+    if (!imageUrl && !videoUrl) throw new Error("Media not found");
 
     const idMatch = url.match(/\/pin\/(\d+)/);
 
