@@ -1,6 +1,5 @@
 import { defineCommand } from "@/core/types";
 import { addWallet, getEconomy } from "@/infra/database";
-import { t } from "@/core/translations";
 
 const SHOP_ITEMS = [
   { id: "1", name: "🎣 Fishing Rod", price: 5000, desc: "Fishing tool" },
@@ -11,7 +10,7 @@ const SHOP_ITEMS = [
 export default defineCommand({
   name: "Shop",
   alias: ["shop"],
-  description: t("economy.shop.desc"),
+  description: "Browse the item shop",
   handler: async (_sock, msg) => {
     const buyId = msg.args[0];
     if (!buyId) {
@@ -21,10 +20,10 @@ export default defineCommand({
       return msg.reply(`🛒 *Shop*\n\n${list}\n\nBuy: .shop <number>`);
     }
     const item = SHOP_ITEMS.find((i) => i.id === buyId);
-    if (!item) return msg.reply("❌ Item not found.");
+    if (!item) return msg.reply("🚩 Item not found.");
     const eco = getEconomy(msg.sender);
     if (eco.wallet < item.price)
-      return msg.reply(`❌ Not enough balance. You need ${item.price.toLocaleString()} coins.`);
+      return msg.reply(`🚩 Not enough balance. You need ${item.price.toLocaleString()} coins.`);
     addWallet(msg.sender, -item.price);
     await msg.reply(`✅ Successfully bought ${item.name}!`);
   },

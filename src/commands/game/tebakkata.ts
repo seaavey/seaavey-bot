@@ -1,4 +1,3 @@
-import { t } from "@/core/translations";
 import { createWordGame } from "@/game/word-game-factory";
 
 interface TBKData {
@@ -15,17 +14,17 @@ function shuffle(word: string): string {
 const { command, checkAnswer } = createWordGame<TBKData>({
   name: "Tebak Kata",
   triggers: ["tebakkata", "tbk"],
-  description: t("game.tebakkata.desc"),
+  description: "Guess the word from scrambled letters",
   dataFile: "tebakkata.json",
   emoji: "🔤",
   reward: 20,
   question: (item) => {
     let s = shuffle(item.word);
     while (s === item.word) s = shuffle(item.word);
-    return `${t("game.tebakkata.question")}\n\n*${s.toUpperCase()}*`;
+    return `${"Arrange these letters:"}\n\n*${s.toUpperCase()}*`;
   },
   answer: (item) => item.word,
-  correctMessage: (item, _ans) => t("game.tebakkata.correct", { answer: item.word }),
+  correctMessage: (item, _ans) => `✅ Correct! The answer is *${item.word}* (+20 XP)`,
 });
 
 export default command;

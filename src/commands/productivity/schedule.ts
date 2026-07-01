@@ -1,4 +1,3 @@
-import { t } from "@/core/translations";
 import { defineCommand } from "@/core/types";
 import { addSchedule, deleteSchedule, getSchedules } from "@/infra/database";
 
@@ -14,7 +13,7 @@ function parseTime(input: string): number | null {
 export default defineCommand({
   name: "Schedule",
   alias: ["sched", "schedule"],
-  description: t("productivity.schedule.desc"),
+  description: "Schedule automatic messages. Sub: add, list, del",
   groupOnly: true,
   adminOnly: true,
   handler: async (_sock, msg) => {
@@ -23,35 +22,39 @@ export default defineCommand({
     if (sub === "add") {
       // .schedule add 30m|daily Pesan yang akan dikirim
       const parts = msg.args.slice(1).join(" ").split("|");
-      if (parts.length < 2) return msg.reply(t("productivity.schedule.addFormat"));
+      if (parts.length < 2) return msg.reply("Format: .schedule add <waktu> | <pesan>");
 
       const timeStr = parts[0]?.trim() ?? "";
       const message = parts.slice(1).join("|").trim();
-      if (!message) return msg.reply(t("productivity.schedule.emptyMessage"));
+      if (!message) return msg.reply("🚩 Message cannot be empty.");
 
       const triggerAt = parseTime(timeStr);
-      if (!triggerAt) return msg.reply(t("productivity.schedule.invalidTime"));
+      if (!triggerAt) return msg.reply("🚩 Invalid time format. Use: 30m, 2h, 1d");
 
       addSchedule(msg.jid, msg.sender, message, triggerAt);
       const date = new Date(triggerAt).toLocaleString("id-ID", { timeZone: "Asia/Jakarta" });
-      await msg.reply(t("productivity.schedule.added", { date, message }));
+      await msg.reply(`✅ Message scheduled!
+⏰ Will be sent: ${date}
+💬 "${message}"`);
     } else if (sub === "list") {
       const schedules = getSchedules(msg.jid);
-      if (!schedules.length) return msg.reply(t("productivity.schedule.empty"));
+      if (!schedules.length) return msg.reply("📭 No active schedules.");
       const list = schedules
         .map((s, i) => {
           const date = new Date(s.triggerAt).toLocaleString("id-ID", { timeZone: "Asia/Jakarta" });
           return `${i + 1}. [ID:${s.id}] ⏰ ${date}\n   💬 "${s.message}"`;
         })
         .join("\n\n");
-      await msg.reply(t("productivity.schedule.list", { list }));
+      await msg.reply(`📋 *Active Schedules*
+
+${list}`);
     } else if (sub === "del") {
       const id = Number.parseInt(msg.args[1] ?? "", 10);
-      if (!id) return msg.reply(t("productivity.schedule.delFormat"));
+      if (!id) return msg.reply("Format: .schedule del <id>");
       deleteSchedule(id);
-      await msg.reply(t("productivity.schedule.deleted", { id: String(id) }));
+      await msg.reply(`✅ Schedule #${String(id)} deleted.`);
     } else {
-      await msg.reply(t("productivity.schedule.help"));
+      await msg.reply("Format: .schedule add <waktu> | <pesan>");
     }
   },
 });

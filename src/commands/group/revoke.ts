@@ -1,15 +1,14 @@
 import { defineCommand } from "@/core/types";
-import { t } from "@/core/translations";
 
 export default defineCommand({
   name: "Revoke",
   alias: ["rev", "revoke"],
-  description: t("group.revoke.description"),
+  description: "Reset group invite link",
   groupOnly: true,
   adminOnly: true,
   botAdmin: true,
   handler: async (sock, msg) => {
     await sock.groupRevokeInvite(msg.jid);
-    await msg.reply(t("group.revoke.done"));
+    await msg.reply("Group invite link has been reset!");
   },
 });

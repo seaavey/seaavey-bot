@@ -1,11 +1,10 @@
 import { defineCommand } from "@/core/types";
-import { t } from "@/core/translations";
 import db from "@/infra/database";
 import { getNumber } from "@/utils/helper";
 export default defineCommand({
   name: "Group Stats",
   alias: ["gstats", "groupstats"],
-  description: t("group.groupstats.description"),
+  description: "Group activity statistics",
   groupOnly: true,
   handler: async (_sock, msg) => {
     const totalMembers = db
@@ -37,14 +36,18 @@ export default defineCommand({
       .join("\n");
 
     await msg.send({
-      text: t("group.groupstats.body", {
-        totalMembers: totalMembers.c,
-        totalChats: (totalChats.c || 0).toLocaleString(),
-        activeToday: activeToday.c,
-        activeWeek: activeWeek.c,
-        inactive: inactive.c,
-        topList,
-      }),
+      text: `📊 *Group Analytics*
+
+👥 Total members: ${totalMembers.c}
+💬 Total messages: ${(totalChats.c || 0).toLocaleString()}
+
+📈 *Activity*
+• Active today: ${activeToday.c}
+• Active this week: ${activeWeek.c}
+• Inactive (>7 days): ${inactive.c}
+
+🏆 *Top 3 Active*
+${topList}`,
       mentions: top3.map((m) => m.memberJid),
     });
   },

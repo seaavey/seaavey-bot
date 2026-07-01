@@ -1,5 +1,4 @@
 import { downloadMediaMessage, type WAMessage } from "baileys";
-import { t } from "@/core/translations";
 import { defineCommand } from "@/core/types";
 import { config } from "@/core/config";
 import { stickerToImage, stickerToVideo } from "@/utils/convert";
@@ -7,26 +6,26 @@ import { stickerToImage, stickerToVideo } from "@/utils/convert";
 export default defineCommand({
   name: "To MP4 / Image",
   alias: ["tomp4", "tovid", "tovideo", "stickertoimg", "stickertovideo"],
-  description: t("converter.tomp4.desc"),
+  description: "Convert sticker to MP4 video or static image locally",
   usage: "{prefix}tomp4",
   tags: ["converter"],
   handler: async (sock, msg) => {
     const sticker = msg.message?.stickerMessage || msg.quoted?.stickerMessage;
 
     if (!sticker) {
-      return msg.reply(t("converter.tomp4.noSticker"));
+      return msg.reply("🚩 Reply to or send a sticker with caption .tomp4");
     }
 
     if (sticker.mimetype && sticker.mimetype !== "image/webp") {
-      return msg.reply(t("converter.tomp4.notWebp"));
+      return msg.reply("🚩 Only WebP stickers (image/webp) are supported.");
     }
 
     if (!sticker.url && !sticker.directPath) {
-      return msg.reply(t("converter.tomp4.invalidPath"));
+      return msg.reply("🚩 Sticker does not have a valid media path.");
     }
 
     if (sticker.fileLength && Number(sticker.fileLength) === 0) {
-      return msg.reply(t("converter.tomp4.emptySticker"));
+      return msg.reply("🚩 Sticker is empty or corrupted.");
     }
 
     // Parse the actual trigger invoked by the user
@@ -46,31 +45,31 @@ export default defineCommand({
       const isStaticRequest = trigger === "stickertoimg" || !sticker.isAnimated;
 
       if (isStaticRequest) {
-        await msg.reply(t("converter.tomp4.convertingImage"));
+        await msg.reply("⏳ Converting sticker to image...");
         const buffer = (await downloadMediaMessage(mediaMsg as WAMessage, "buffer", {
           host: "mmg.whatsapp.net",
         })) as Buffer;
 
-        if (!buffer) throw new Error(t("converter.tomp4.downloadFailed"));
+        if (!buffer) throw new Error("Failed to download sticker.");
         const image = stickerToImage(buffer);
         await msg.send({ image });
       } else {
-        await msg.reply(t("converter.tomp4.convertingVideo"));
+        await msg.reply("⏳ Converting animated sticker to video...");
         const buffer = (await downloadMediaMessage(mediaMsg as WAMessage, "buffer", {
           host: "mmg.whatsapp.net",
         })) as Buffer;
 
-        if (!buffer) throw new Error(t("converter.tomp4.downloadFailed"));
+        if (!buffer) throw new Error("Failed to download sticker.");
         const video = stickerToVideo(buffer);
         await msg.send({
           video,
           mimetype: "video/mp4",
-          caption: t("converter.tomp4.successVideo"),
+          caption: "✅ Successfully converted to video",
         });
       }
     } catch (error: unknown) {
       const err = error as Error;
-      await msg.reply(t("converter.tomp4.failed", { error: err.message }));
+      await msg.reply(`🚩 Failed to convert sticker: ${err.message}`);
     }
   },
 });

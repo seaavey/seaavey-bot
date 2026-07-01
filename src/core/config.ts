@@ -5,7 +5,6 @@ interface Config {
   prefix: string[];
   owner: string[];
   accessMode: "public" | "private" | "self";
-  lang: "id" | "en";
 }
 
 export const config: Config = {
@@ -13,5 +12,4 @@ export const config: Config = {
   prefix: (process.env.PREFIX ?? ".").split(","),
   owner: (process.env.OWNER_NUMBER ?? "62123456789").split(","),
   accessMode: (process.env.ACCESS_MODE ?? "public") as Config["accessMode"],
-  lang: (process.env.LANG ?? "id").toLowerCase() as Config["lang"],
 };

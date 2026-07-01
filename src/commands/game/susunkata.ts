@@ -1,4 +1,3 @@
-import { t } from "@/core/translations";
 import { createWordGame } from "@/game/word-game-factory";
 
 interface SusunKataData {
@@ -10,11 +9,11 @@ interface SusunKataData {
 const { command, checkAnswer } = createWordGame<SusunKataData>({
   name: "Susun Kata",
   triggers: ["susunkata", "sk"],
-  description: t("game.susunkata.desc"),
+  description: "Arrange scrambled letters into the correct word",
   dataFile: "susunkata.json",
   emoji: "🔤",
   reward: 15,
-  question: (item) => `Huruf: *${item.soal}*\nTipe: *${item.tipe}*`,
+  question: (item) => `Letters: *${item.soal}*\nType: *${item.tipe}*`,
   answer: (item) => item.jawaban,
 });
 

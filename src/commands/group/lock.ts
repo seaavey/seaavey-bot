@@ -1,15 +1,14 @@
 import { defineCommand } from "@/core/types";
-import { t } from "@/core/translations";
 
 export default defineCommand({
   name: "Lock",
   alias: ["lock"],
-  description: t("group.lock.description"),
+  description: "Lock group settings (only admins can edit info)",
   groupOnly: true,
   adminOnly: true,
   botAdmin: true,
   handler: async (sock, msg) => {
     await sock.groupSettingUpdate(msg.jid, "locked");
-    await msg.reply(t("group.lock.done"));
+    await msg.reply("Group settings locked, only admins can edit info.");
   },
 });

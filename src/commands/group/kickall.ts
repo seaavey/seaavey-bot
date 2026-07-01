@@ -1,12 +1,11 @@
 import { defineCommand } from "@/core/types";
-import { t } from "@/core/translations";
 
 const pending = new Set<string>();
 
 export default defineCommand({
   name: "Kick All",
   alias: ["ka", "kickall"],
-  description: t("group.kickall.description"),
+  description: "Kick all members except admins (with confirmation)",
   groupOnly: true,
   adminOnly: true,
   botAdmin: true,
@@ -16,7 +15,9 @@ export default defineCommand({
     if (!pending.has(key)) {
       pending.add(key);
       setTimeout(() => pending.delete(key), 30000);
-      return msg.reply(t("group.kickall.confirm"));
+      return msg.reply(
+        "⚠️ *WARNING*\nThis will remove ALL members except admins.\n\nType *.kickall* again within 30 seconds to confirm.",
+      );
     }
 
     pending.delete(key);
@@ -24,14 +25,14 @@ export default defineCommand({
     const metadata = await sock.groupMetadata(msg.jid);
     const members = metadata.participants.filter((p) => !p.admin).map((p) => p.id);
 
-    if (!members.length) return msg.reply(t("group.kickall.noMembers"));
+    if (!members.length) return msg.reply("No members to kick!");
 
-    await msg.reply(t("group.kickall.progress", { count: members.length }));
+    await msg.reply(`Kicking all members (Total: ${members.length} regular members)...`);
 
     for (const member of members) {
       await sock.groupParticipantsUpdate(msg.jid, [member], "remove");
     }
 
-    await msg.reply(t("group.kickall.done", { count: members.length }));
+    await msg.reply(`Done! ${members.length} members have been kicked.`);
   },
 });

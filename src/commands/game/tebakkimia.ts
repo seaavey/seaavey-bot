@@ -1,4 +1,3 @@
-import { t } from "@/core/translations";
 import { createWordGame } from "@/game/word-game-factory";
 
 interface TebakKimiaData {
@@ -9,15 +8,14 @@ interface TebakKimiaData {
 const { command, checkAnswer } = createWordGame<TebakKimiaData>({
   name: "Tebak Kimia",
   triggers: ["tebakkimia", "tbkm"],
-  description: t("game.tebakkimia.desc"),
+  description: "Guess the chemical element symbol (Type 'hint' for help)",
   dataFile: "tebakkimia.json",
   emoji: "⚗️",
   reward: 15,
-  question: (item) => `Unsur: *${item.unsur}*\n\nKetik lambang unsurnya!`,
+  question: (item) => `Element: *${item.unsur}*\n\nType the chemical symbol!`,
   answer: (item) => item.lambang,
-  timeoutMessage: (item, ans) => t("game.tebakkimia.timeout", { answer: ans, name: item.unsur }),
-  correctMessage: (item, ans) =>
-    t("game.tebakkimia.correct", { name: item.unsur, answer: ans.toUpperCase() }),
+  timeoutMessage: (item, ans) => `⏰ Time's up! The answer: *${ans}*`,
+  correctMessage: (item, ans) => `✅ Correct! The answer is *${ans.toUpperCase()}* (+15 XP)`,
 });
 
 export default command;

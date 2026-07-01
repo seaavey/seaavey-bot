@@ -1,87 +1,85 @@
-import { t } from "@/core/translations";
 import { defineCommand } from "@/core/types";
 import { getRandomItem } from "@/utils/helper";
 
 const zodiak: Record<string, string[]> = {
   aries: [
-    "Hari ini energimu tinggi! Cocok untuk memulai proyek baru.",
-    "Jangan terlalu keras kepala hari ini.",
-    "Ada kejutan dari seseorang yang kamu sayang.",
+    "Your energy is high today! Perfect for starting new projects.",
+    "Don't be too stubborn today.",
+    "A surprise is coming from someone you care about.",
   ],
   taurus: [
-    "Keuanganmu stabil hari ini. Jangan boros!",
-    "Saatnya menikmati hal-hal kecil.",
-    "Seseorang memperhatikanmu diam-diam.",
+    "Your finances are stable today. Don't be wasteful!",
+    "Time to enjoy the little things.",
+    "Someone is secretly paying attention to you.",
   ],
   gemini: [
-    "Komunikasimu sedang bagus. Manfaatkan!",
-    "Jangan terlalu overthinking.",
-    "Ada kabar baik dari teman lama.",
+    "Your communication is excellent today. Make use of it!",
+    "Don't overthink things.",
+    "Good news from an old friend is on the way.",
   ],
   cancer: [
-    "Luangkan waktu untuk keluarga hari ini.",
-    "Perasaanmu sensitif, jaga emosi.",
-    "Rezeki datang dari arah tak terduga.",
+    "Make time for family today.",
+    "You might feel sensitive today, keep your emotions in check.",
+    "Good fortune will come from an unexpected direction.",
   ],
   leo: [
-    "Kamu jadi pusat perhatian hari ini!",
-    "Percaya diri boleh, sombong jangan.",
-    "Ada peluang karir yang menarik.",
+    "You are the center of attention today!",
+    "Be confident, but don't be arrogant.",
+    "An exciting career opportunity awaits.",
   ],
   virgo: [
-    "Detail kecil bisa jadi kunci sukses hari ini.",
-    "Jangan terlalu perfeksionis.",
-    "Kesehatan perlu diperhatikan.",
+    "Small details could be the key to success today.",
+    "Try not to be too perfectionist.",
+    "Pay attention to your health.",
   ],
   libra: [
-    "Hari yang cocok untuk bersosialisasi.",
-    "Keputusan penting menanti, pikirkan matang.",
-    "Cinta sedang berpihak padamu.",
+    "A perfect day for socializing.",
+    "An important decision awaits, think it through carefully.",
+    "Love is on your side today.",
   ],
   scorpio: [
-    "Intuisimu tajam hari ini, percayalah.",
-    "Jangan menyimpan dendam.",
-    "Ada misteri yang akan terungkap.",
+    "Trust your sharp intuition today.",
+    "Don't hold onto grudges.",
+    "A mystery is about to be revealed.",
   ],
   sagitarius: [
-    "Petualangan menanti! Jangan takut mencoba.",
-    "Optimismemu menular ke orang lain.",
-    "Belajar hal baru akan membawa keberuntungan.",
+    "Adventure awaits! Don't be afraid to try new things.",
+    "Your optimism is contagious to others.",
+    "Learning something new will bring you luck.",
   ],
   capricorn: [
-    "Kerja kerasmu akan membuahkan hasil.",
-    "Jangan lupa istirahat.",
-    "Seseorang mengagumi dedikasimu.",
+    "Your hard work will pay off.",
+    "Don't forget to take a break.",
+    "Someone admires your dedication.",
   ],
   aquarius: [
-    "Ide kreatifmu sedang mengalir deras.",
-    "Jangan takut berbeda.",
-    "Teman baru akan membawa perspektif segar.",
+    "Your creative ideas are flowing today.",
+    "Don't be afraid to stand out.",
+    "A new friend will bring a fresh perspective.",
   ],
   pisces: [
-    "Imajinasimu tinggi hari ini. Tuangkan ke karya!",
-    "Jangan terlalu melamun.",
-    "Ada pesan penting dari mimpimu.",
+    "Your imagination is high today, channel it into your work!",
+    "Try not to daydream too much.",
+    "A message is waiting for you in your dreams.",
   ],
 };
 
 export default defineCommand({
   name: "Zodiak",
   alias: ["zod", "zodiak"],
-  description: t("fun.zodiak.description"),
+  description: "Check your zodiac prediction",
   handler: async (_sock, msg) => {
     const sign = msg.args[0]?.toLowerCase();
     if (!sign || !zodiak[sign]) {
       const list = Object.keys(zodiak).join(", ");
-      return msg.reply(t("fun.zodiak.format", { list }));
+      return msg.reply(`Format: .zodiak <zodiac_name>\n\nAvailable signs: ${list}`);
     }
     const predictions = zodiak[sign];
     const pred = getRandomItem(predictions);
     await msg.reply(
-      t("fun.zodiak.prediction", {
-        sign: sign.charAt(0).toUpperCase() + sign.slice(1),
-        prediction: pred,
-      }),
+      `🔮 *${sign.toUpperCase()} Horoscope*
+
+${pred}`,
     );
   },
 });

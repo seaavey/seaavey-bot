@@ -1,4 +1,3 @@
-import { t } from "@/core/translations";
 import { defineCommand } from "@/core/types";
 import { safeFetchJSON } from "@/utils/helper";
 
@@ -13,21 +12,20 @@ interface NpmPackage {
 export default defineCommand({
   name: "NPM",
   alias: ["npm"],
-  description: t("info.npm.desc"),
+  description: "NPM package info. Example: .npm express",
   handler: async (_sock, msg) => {
     const pkg = msg.args[0];
-    if (!pkg) return msg.reply(t("info.npm.format"));
+    if (!pkg) return msg.reply("Format: .npm <package>");
     const data = await safeFetchJSON<NpmPackage>(
       `https://registry.npmjs.org/${encodeURIComponent(pkg)}`,
     );
-    if (!data) return msg.reply(t("info.npm.notFound"));
+    if (!data) return msg.reply("🚩 Package not found.");
     await msg.reply(
-      t("info.npm.detail", {
-        name: data.name,
-        description: data.description || "-",
-        latest: data["dist-tags"]?.latest || "?",
-        license: data.license || "?",
-      }),
+      `📦 *${data.name}*
+
+📝 ${data.description || "-"}
+🏷️ Version: ${data["dist-tags"]?.latest || "?"}
+⚖️ License: ${data.license || "?"}`,
     );
   },
 });

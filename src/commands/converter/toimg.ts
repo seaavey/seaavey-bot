@@ -1,12 +1,11 @@
 import { downloadMediaMessage, type WAMessage } from "baileys";
 import { defineCommand } from "@/core/types";
 import { stickerToImage } from "@/utils/convert";
-import { t } from "@/core/translations";
 
 export default defineCommand({
   name: "To Image",
   alias: ["toimage"],
-  description: t("converter.toimg.desc"),
+  description: "Convert sticker to image",
   handler: async (sock, msg) => {
     const sticker = msg.quoted?.stickerMessage;
 
@@ -30,7 +29,7 @@ export default defineCommand({
       return msg.reply("Animated stickers can't be converted to an image.");
     }
 
-    await msg.reply(t("converter.toimg.processing"));
+    await msg.reply("⏳ Converting sticker to image...");
 
     const message = {
       key: { ...msg.key, id: msg.quoted?.id, participant: msg.quoted?.sender },

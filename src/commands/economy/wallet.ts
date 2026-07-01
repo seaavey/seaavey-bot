@@ -1,11 +1,10 @@
 import { defineCommand } from "@/core/types";
 import { getEconomy } from "@/infra/database";
-import { t } from "@/core/translations";
 
 export default defineCommand({
   name: "Wallet",
   alias: ["bal", "saldo", "wallet"],
-  description: t("economy.wallet.desc"),
+  description: "Check your balance",
   handler: async (_sock, msg) => {
     const eco = getEconomy(msg.sender);
     await msg.reply(

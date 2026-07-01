@@ -1,11 +1,10 @@
 import { defineCommand } from "@/core/types";
-import { t } from "@/core/translations";
 import db from "@/infra/database";
 import { getNumber } from "@/utils/helper";
 export default defineCommand({
   name: "Leaderboard",
   alias: ["lb", "top", "leaderboard"],
-  description: t("group.leaderboard.description"),
+  description: "Top 10 most active members in the group",
   groupOnly: true,
   handler: async (_sock, msg) => {
     const top = db
@@ -14,18 +13,20 @@ export default defineCommand({
       )
       .all(msg.jid) as { memberJid: string; chatCount: number }[];
 
-    if (!top.length) return msg.reply(t("group.leaderboard.noData"));
+    if (!top.length) return msg.reply("🚩 No chat data in this group yet.");
 
     const medals = ["🥇", "🥈", "🥉"];
     const list = top
       .map(
         (m, i) =>
-          `${medals[i] || `${i + 1}.`} @${getNumber(m.memberJid)} — ${m.chatCount} ${t("group.leaderboard.messages")}`,
+          `${medals[i] || `${i + 1}.`} @${getNumber(m.memberJid)} — ${m.chatCount} ${"messages"}`,
       )
       .join("\n");
 
     await msg.send({
-      text: t("group.leaderboard.title", { list }),
+      text: `🏆 *Leaderboard*
+
+${list}`,
       mentions: top.map((m) => m.memberJid),
     });
   },

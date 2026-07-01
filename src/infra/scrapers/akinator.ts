@@ -1,7 +1,6 @@
 import axios from "axios";
 import * as cheerio from "cheerio";
 
-import { t } from "@/core/translations";
 import type { ScraperResult } from "./index";
 import { scraperError, scraperSuccess } from "./index";
 
@@ -24,9 +23,9 @@ function isNetworkError(err: unknown): boolean {
 }
 
 function friendlyError(err: unknown): string {
-  if (isNetworkError(err)) return t("scraper.akinator.connectionLost");
+  if (isNetworkError(err)) return "Koneksi ke server Akinator terputus, coba lagi nanti";
   const msg = err instanceof Error ? err.message : String(err);
-  return msg || t("scraper.akinator.serverError");
+  return msg || "Failed to connect to the server";
 }
 
 async function withRetry<T>(fn: () => Promise<T>, retries = 2): Promise<T> {
@@ -79,7 +78,7 @@ function parseGameHtml(html: string): AkinatorSession {
   const question = $("#question-label").text().trim();
 
   if (!session || !signature || !question) {
-    throw new Error(t("scraper.akinator.parseError"));
+    throw new Error("Failed to parse Akinator data");
   }
 
   return {
@@ -150,7 +149,7 @@ export async function akinatorAnswer(
     );
 
     if (data.completion === "KO") {
-      return scraperError(t("scraper.akinator.invalidSession"));
+      return scraperError("Invalid session, restart the game");
     }
 
     if (data.id_proposition) {

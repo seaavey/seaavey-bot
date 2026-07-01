@@ -5,7 +5,6 @@ import { tmpdir } from "node:os";
 import { promisify } from "node:util";
 import axios from "axios";
 
-import { t } from "@/core/translations";
 import type { ScraperResult } from "./index";
 import { scraperError, scraperSuccess } from "./index";
 
@@ -230,13 +229,13 @@ async function ytDlpDownload(
       ...(info.duration != null ? { duration: info.duration } : {}),
     });
   } catch {
-    return scraperError(t("scraper.youtube.ytdlpFailed"));
+    return scraperError("yt-dlp failed. Make sure cookies.txt exists in root project.");
   }
 }
 
 // ─── Public API ─────────────────────────────────────────────────────
 
-const ERROR_MSG = t("scraper.youtube.errorMsg");
+const ERROR_MSG = "Error";
 
 async function runWithFallback(
   url: string,
@@ -285,7 +284,7 @@ async function loaderToDownload(url: string, format: string): Promise<ScraperRes
     };
 
     if (!start.success || !start.id || !start.progress_url) {
-      throw new Error(start.message || t("scraper.youtube.downloadInitFailed"));
+      throw new Error(start.message || "Download initialization failed");
     }
 
     const progressUrl = start.progress_url;
@@ -318,12 +317,12 @@ async function loaderToDownload(url: string, format: string): Promise<ScraperRes
       }
 
       if (prog.success === 0 && prog.text && prog.text !== "Initialising") {
-        throw new Error(t("scraper.youtube.downloadFailed"));
+        throw new Error("Download failed");
       }
     }
 
     if (!downloadUrl) {
-      throw new Error(t("scraper.youtube.timeout"));
+      throw new Error("Timeout: download did not finish");
     }
 
     return scraperSuccess({

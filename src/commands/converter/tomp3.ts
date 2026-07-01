@@ -1,21 +1,20 @@
 import { downloadMediaMessage, type WAMessage } from "baileys";
-import { t } from "@/core/translations";
 import { defineCommand } from "@/core/types";
 import { toMp3 } from "@/utils/convert";
 
 export default defineCommand({
   name: "To MP3",
   alias: ["mp3", "toaudio"],
-  description: t("converter.tomp3.desc"),
+  description: "Convert video/audio to MP3",
   handler: async (sock, msg) => {
     const videoMsg = msg.message?.videoMessage || msg.quoted?.videoMessage;
     const audioMsg = msg.message?.audioMessage || msg.quoted?.audioMessage;
 
     if (!videoMsg && !audioMsg) {
-      return msg.reply(t("converter.tomp3.noMedia"));
+      return msg.reply("Send/reply video or audio with caption .tomp3");
     }
 
-    await msg.reply(t("converter.tomp3.processing"));
+    await msg.reply("⏳ Converting to MP3...");
 
     const message = msg.quoted
       ? ({

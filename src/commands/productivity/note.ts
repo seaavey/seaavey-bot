@@ -1,4 +1,3 @@
-import { t } from "@/core/translations";
 import { defineCommand } from "@/core/types";
 import db from "@/infra/database";
 
@@ -15,30 +14,31 @@ db.run(`
 export default defineCommand({
   name: "Note",
   alias: ["note"],
-  description: t("productivity.note.desc"),
+  description:
+    "Save/retrieve notes. .note save <title> <content> / .note get <title> / .note list / .note del <title>",
   handler: async (_sock, msg) => {
     const sub = msg.args[0]?.toLowerCase();
 
     if (sub === "save") {
       const title = msg.args[1];
       const content = msg.args.slice(2).join(" ");
-      if (!title || !content) return msg.reply(t("productivity.note.saveFormat"));
+      if (!title || !content) return msg.reply("Format: .note save <judul> <isi>");
       db.run("INSERT INTO notes (ownerJid, title, content, timestamp) VALUES (?, ?, ?, ?)", [
         msg.sender,
         title,
         content,
         Date.now(),
       ]);
-      return msg.reply(t("productivity.note.saved", { title }));
+      return msg.reply(`📝 Note *${title}* saved!`);
     }
 
     if (sub === "get") {
       const title = msg.args[1];
-      if (!title) return msg.reply(t("productivity.note.getFormat"));
+      if (!title) return msg.reply("Format: .note get <judul>");
       const note = db
         .query("SELECT content FROM notes WHERE ownerJid = ? AND title = ?")
         .get(msg.sender, title) as { content: string } | null;
-      if (!note) return msg.reply(t("productivity.note.notFound"));
+      if (!note) return msg.reply("🚩 Note not found.");
       return msg.reply(`📝 *${title}*\n\n${note.content}`);
     }
 
@@ -46,18 +46,22 @@ export default defineCommand({
       const notes = db
         .query("SELECT title FROM notes WHERE ownerJid = ? ORDER BY timestamp DESC")
         .all(msg.sender) as { title: string }[];
-      if (!notes.length) return msg.reply(t("productivity.note.empty"));
+      if (!notes.length) return msg.reply("📝 Belum ada note.");
       const list = notes.map((n, i) => `${i + 1}. ${n.title}`).join("\n");
-      return msg.reply(t("productivity.note.list", { list }));
+      return msg.reply(`📝 *Your Notes*
+
+${list}`);
     }
 
     if (sub === "del") {
       const title = msg.args[1];
-      if (!title) return msg.reply(t("productivity.note.delFormat"));
+      if (!title) return msg.reply("Format: .note del <judul>");
       db.run("DELETE FROM notes WHERE ownerJid = ? AND title = ?", [msg.sender, title]);
-      return msg.reply(t("productivity.note.deleted", { title }));
+      return msg.reply(`🗑️ Note *${title}* deleted.`);
     }
 
-    await msg.reply(t("productivity.note.help"));
+    await msg.reply(
+      "Format: .note save <judul> <isi> / .note get <judul> / .note list / .note del <judul>",
+    );
   },
 });

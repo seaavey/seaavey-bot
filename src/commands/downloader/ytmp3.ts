@@ -1,26 +1,23 @@
 import { readFileSync, rmSync } from "node:fs";
 import { dirname } from "node:path";
-import { t } from "@/core/translations";
 import { defineCommand } from "@/core/types";
 import { ytmp3 } from "@/infra/scrapers";
 
 export default defineCommand({
   name: "YT MP3",
   alias: ["ytmp3"],
-  description: t("downloader.ytmp3.desc"),
+  description: "Download audio from YouTube",
   cooldown: 30,
   handler: async (_sock, msg) => {
     const url = msg.args[0];
-    if (!url) return msg.reply(t("downloader.ytmp3.format"));
+    if (!url) return msg.reply("Format: .ytmp3 <url>");
 
     await msg.reply("⏳ Downloading audio...");
 
     const result = await ytmp3(url);
 
     if (!result.status) {
-      return msg.reply(
-        t("downloader.ytmp3.failed", { error: result.error || t("downloader.ytmp3.noMedia") }),
-      );
+      return msg.reply(`🚩 Failed: ${result.error || "Media not found"}`);
     }
 
     const { title, thumbnail, downloadUrl, format } = result.data;

@@ -1,26 +1,25 @@
-import { t } from "@/core/translations";
 import { defineCommand } from "@/core/types";
 import { spotify, spotifySearch } from "@/infra/scrapers";
 
 export default defineCommand({
   name: "Spotify",
   alias: ["spot", "spotify"],
-  description: t("downloader.spotify.desc"),
+  description: "Search or download songs from Spotify",
   handler: async (_sock, msg) => {
     const input = msg.args.join(" ");
     if (!input) {
-      return msg.reply(t("downloader.spotify.format"));
+      return msg.reply("Format: .spotify <url or query>");
     }
 
     const isUrl = input.includes("open.spotify.com");
 
     if (isUrl) {
-      await msg.reply(t("downloader.spotify.fetching"));
+      await msg.reply("⏳ Fetching data from Spotify...");
 
       const result = await spotify(input);
 
       if (!result.status) {
-        return msg.reply(t("downloader.spotify.failed", { error: result.error }));
+        return msg.reply(`🚩 Failed: ${result.error}`);
       }
 
       const { title, artist, album, duration, cover, downloadUrl } = result.data;
@@ -44,16 +43,16 @@ export default defineCommand({
         await msg.send({ audio: { url: downloadUrl }, mimetype: "audio/mpeg" });
       }
     } else {
-      await msg.reply(t("downloader.spotify.searching"));
+      await msg.reply("⏳ Searching on Spotify...");
 
       const result = await spotifySearch(input, 5);
 
       if (!result.status) {
-        return msg.reply(t("downloader.spotify.searchFailed", { error: result.error }));
+        return msg.reply("🚩 Search failed.");
       }
 
       if (result.data.tracks.length === 0) {
-        return msg.reply(t("downloader.spotify.notFound"));
+        return msg.reply("🚩 Track not found.");
       }
 
       const tracks = result.data.tracks
@@ -61,11 +60,11 @@ export default defineCommand({
         .join("\n\n");
 
       await msg.reply(
-        t("downloader.spotify.searchResult", {
-          query: result.data.query,
-          tracks,
-          max: String(result.data.tracks.length),
-        }),
+        `🔍 *Spotify Search Results*
+
+${tracks}
+
+Type number (1-${String(result.data.tracks.length)}) to download.`,
       );
     }
   },

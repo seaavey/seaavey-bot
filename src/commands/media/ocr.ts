@@ -1,15 +1,14 @@
 import { downloadMediaMessage } from "baileys";
-import { t } from "@/core/translations";
 import { defineCommand } from "@/core/types";
 
 export default defineCommand({
   name: "OCR",
   alias: ["ocr"],
-  description: t("media.ocr.desc"),
+  description: "Extract text from image. Reply image with .ocr",
   handler: async (sock, msg) => {
     const imgMsg = msg.message?.imageMessage || msg.quoted?.imageMessage;
-    if (!imgMsg) return msg.reply(t("media.ocr.noImage"));
-    await msg.reply(t("media.ocr.reading"));
+    if (!imgMsg) return msg.reply("🚩 Reply to an image with .ocr");
+    await msg.reply("⏳ Reading text from image...");
     const buffer = await downloadMediaMessage(
       { message: { imageMessage: imgMsg }, key: msg.key },
       "buffer",
@@ -22,7 +21,9 @@ export default defineCommand({
     const res = await fetch("https://api.ocr.space/parse/image", { method: "POST", body: form });
     const data = (await res.json()) as { ParsedResults?: Array<{ ParsedText: string }> };
     const text = data.ParsedResults?.[0]?.ParsedText;
-    if (!text) return msg.reply(t("media.ocr.noText"));
-    await msg.reply(t("media.ocr.result", { text }));
+    if (!text) return msg.reply("🚩 No text detected.");
+    await msg.reply(`📝 *OCR Result*
+
+${text}`);
   },
 });

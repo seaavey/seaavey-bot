@@ -1,18 +1,17 @@
 import { downloadMediaMessage, type WAMessage } from "baileys";
-import { t } from "@/core/translations";
 import { defineCommand } from "@/core/types";
 
 export default defineCommand({
   name: "Set PP",
   alias: ["setpp"],
-  description: t("owner.setpp.desc"),
+  description: "Set bot profile picture (owner only)",
   ownerOnly: true,
   handler: async (sock, msg) => {
     if (!sock.user?.id) return;
 
     const imageMsg = msg.message?.imageMessage || msg.quoted?.imageMessage;
 
-    if (!imageMsg) return msg.reply(t("owner.setpp.format"));
+    if (!imageMsg) return msg.reply("Format: .setpp (reply/send image)");
 
     const message = msg.quoted
       ? ({
@@ -25,6 +24,6 @@ export default defineCommand({
     })) as Buffer;
 
     await sock.updateProfilePicture(sock.user.id, buffer);
-    await msg.reply(t("owner.setpp.success"));
+    await msg.reply("✅ Bot profile picture successfully changed!");
   },
 });

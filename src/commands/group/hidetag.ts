@@ -1,10 +1,9 @@
 import { defineCommand } from "@/core/types";
-import { t } from "@/core/translations";
 
 export default defineCommand({
   name: "Hide Tag",
   alias: ["ht", "hidetag"],
-  description: t("group.hidetag.description"),
+  description: "Tag all members without visible mention",
   groupOnly: true,
   adminOnly: true,
   handler: async (sock, msg) => {

@@ -1,4 +1,3 @@
-import { t } from "@/core/translations";
 import { defineCommand } from "@/core/types";
 import { addXp } from "@/infra/database";
 import { getRandomItem } from "@/utils/helper";
@@ -67,7 +66,7 @@ function botMove(board: string[]): number {
 export default defineCommand({
   name: "Tic Tac Toe",
   alias: ["ttt", "tic", "tictactoe"],
-  description: t("game.tictactoe.desc"),
+  description: "Play tic-tac-toe against bot or other member",
   handler: async (sock, msg) => {
     const session = sessions.get(msg.jid);
 
@@ -75,7 +74,7 @@ export default defineCommand({
       const target = msg.mentioned?.[0] || (msg.args[0] === "bot" ? "bot" : null);
 
       if (msg.args.length > 0 && !target) {
-        return msg.reply(t("game.tictactoe.usage"));
+        return msg.reply("Type .tictactoe or .tictactoe @tag to start.");
       }
 
       const isBot = (target || "bot") === "bot";
@@ -84,7 +83,7 @@ export default defineCommand({
       const board = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
       const timeout = setTimeout(() => {
         sessions.delete(msg.jid);
-        sock.sendMessage(msg.jid, { text: t("game.tictactoe.timeout") });
+        sock.sendMessage(msg.jid, { text: "⏰ Time's up! Tic-Tac-Toe game stopped." });
       }, 120_000);
 
       sessions.set(msg.jid, {
@@ -96,12 +95,12 @@ export default defineCommand({
       });
 
       return msg.send({
-        text: t("game.tictactoe.start", {
-          playerX: msg.sender.split("@")[0],
-          playerO: isBot ? "Bot" : finalTarget.split("@")[0],
-          board: renderBoard(board),
-          turn: msg.sender.split("@")[0],
-        }),
+        text: `🚩: @${msg.sender.split("@")[0]}
+⭕: @${isBot ? "Bot" : finalTarget.split("@")[0]}
+
+${renderBoard(board)}
+
+It is @${msg.sender.split("@")[0]}'s turn!`,
         mentions: [msg.sender, ...(isBot ? [] : [finalTarget])],
       });
     }
@@ -110,12 +109,12 @@ export default defineCommand({
       if (msg.sender !== session.playerX && msg.sender !== session.playerO) return;
       clearTimeout(session.timeout);
       sessions.delete(msg.jid);
-      return msg.reply(t("game.tictactoe.surrender"));
+      return msg.reply("🏳️ Game stopped.");
     }
 
     if (msg.sender !== session.turn) {
       return msg.send({
-        text: t("game.tictactoe.notYourTurn", { player: session.turn.split("@")[0] }),
+        text: `🚩 Not your turn! Wait for @${session.turn.split("@")[0]}`,
         mentions: [session.turn],
       });
     }
@@ -128,7 +127,7 @@ export default defineCommand({
       session.board[pos] === "X" ||
       session.board[pos] === "O"
     ) {
-      return msg.reply(t("game.tictactoe.invalidMove"));
+      return msg.reply("🚩 Invalid position! Choose 1-9 that is still empty.");
     }
 
     const mark = msg.sender === session.playerX ? "X" : "O";
@@ -139,10 +138,9 @@ export default defineCommand({
       sessions.delete(msg.jid);
       addXp(msg.sender, 20);
       return msg.send({
-        text: t("game.tictactoe.win", {
-          board: renderBoard(session.board),
-          winner: msg.sender.split("@")[0],
-        }),
+        text: `${renderBoard(session.board)}
+
+🎉 @${msg.sender.split("@")[0]} wins! (+20 XP)`,
         mentions: [msg.sender],
       });
     }
@@ -150,7 +148,7 @@ export default defineCommand({
     if (!session.board.some((v) => v !== "X" && v !== "O")) {
       clearTimeout(session.timeout);
       sessions.delete(msg.jid);
-      return msg.reply(t("game.tictactoe.draw", { board: renderBoard(session.board) }));
+      return msg.reply("🤝 Draw!");
     }
 
     if (session.playerO === "bot") {
@@ -160,22 +158,19 @@ export default defineCommand({
       if (checkWin(session.board, "O")) {
         clearTimeout(session.timeout);
         sessions.delete(msg.jid);
-        return msg.reply(t("game.tictactoe.botWins", { board: renderBoard(session.board) }));
+        return msg.reply("😢 Bot wins!");
       }
 
       if (!session.board.some((v) => v !== "X" && v !== "O")) {
         clearTimeout(session.timeout);
         sessions.delete(msg.jid);
-        return msg.reply(t("game.tictactoe.draw", { board: renderBoard(session.board) }));
+        return msg.reply("🤝 Draw!");
       }
 
       session.turn = session.playerX;
       session.timeout.refresh();
       return msg.send({
-        text: t("game.tictactoe.turn", {
-          board: renderBoard(session.board),
-          player: session.turn.split("@")[0],
-        }),
+        text: `Turn: @${session.turn.split("@")[0]}`,
         mentions: [session.turn],
       });
     }
@@ -183,10 +178,7 @@ export default defineCommand({
     session.turn = msg.sender === session.playerX ? session.playerO : session.playerX;
     session.timeout.refresh();
     await msg.send({
-      text: t("game.tictactoe.turn", {
-        board: renderBoard(session.board),
-        player: session.turn.split("@")[0],
-      }),
+      text: `Turn: @${session.turn.split("@")[0]}`,
       mentions: [session.turn],
     });
   },

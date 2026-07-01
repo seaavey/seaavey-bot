@@ -8,7 +8,6 @@ import makeWASocket, {
   isJidStatusBroadcast,
 } from "baileys";
 import * as QRCode from "qrcode";
-import { t } from "@/core/translations";
 import { logger, createEventLogger } from "@/core/logger";
 import { handleGroupParticipants } from "@/handlers/group-handler";
 import { handleMessagesUpdate, handleMessagesUpsert } from "@/handlers/message-handler";
@@ -90,7 +89,7 @@ async function startBot() {
         output: process.stdout,
       });
       const input = await new Promise<string>((r) =>
-        rl.question("Masukkan nomor WhatsApp untuk pairing code (kosongkan untuk QR code): ", r),
+        rl.question("Enter WhatsApp number for pairing code (leave empty for QR code): ", r),
       );
       rl.close();
       pairingNumber = input.trim();
@@ -105,8 +104,8 @@ async function startBot() {
         process.stdout.write(`\n📱 Pairing code: ${code}\n\n`);
       } catch (error) {
         const msg = error instanceof Error ? error.message : String(error);
-        logger.error({ error }, "Gagal mendapatkan pairing code");
-        process.stdout.write(`\n❌ Error: ${msg}\n\n`);
+        logger.error({ error }, "Failed to get pairing code");
+        process.stdout.write(`\n🚩 Error: ${msg}\n\n`);
         cachedPairingNumber = null;
       }
     }
@@ -146,12 +145,12 @@ async function startBot() {
 
   // Anti Call
   sock.ev.on("call", async (calls) => {
-    evLog.call.info({ count: calls.length }, "panggilan masuk");
+    evLog.call.info({ count: calls.length }, "incoming call");
     for (const call of calls) {
       if (call.status === "offer") {
         await sock.rejectCall(call.id, call.from);
         await sock.sendMessage(call.from, {
-          text: t("index.callRejected"),
+          text: "🚫 Sorry, the bot does not accept calls. Please send a text message.",
         });
       }
     }
@@ -159,7 +158,7 @@ async function startBot() {
 
   // Group Events
   sock.ev.on("groups.upsert", async (groups) => {
-    evLog.groupsUpsert.info({ count: groups.length }, "group baru/update");
+    evLog.groupsUpsert.info({ count: groups.length }, "new/updated group");
     for (const group of groups) {
       invalidateGroupMetadata(group.id);
       setGroup(group.id, "name", group.subject || "");
@@ -184,11 +183,11 @@ async function startBot() {
 
   // Message Events
   sock.ev.on("messages.upsert", ({ messages }) => {
-    evLog.messagesUpsert.info({ count: messages.length }, "pesan masuk");
+    evLog.messagesUpsert.info({ count: messages.length }, "message received");
     handleMessagesUpsert(sock, messages);
   });
   sock.ev.on("messages.update", (updates) => {
-    evLog.messagesUpdate.info({ count: updates.length }, "pesan diupdate");
+    evLog.messagesUpdate.info({ count: updates.length }, "message updated");
     handleMessagesUpdate(sock, updates);
   });
 }

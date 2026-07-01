@@ -1,24 +1,21 @@
-import { t } from "@/core/translations";
 import { defineCommand } from "@/core/types";
 import { ytmp4 } from "@/infra/scrapers";
 
 export default defineCommand({
   name: "YT MP4",
   alias: ["ytmp4"],
-  description: t("downloader.ytmp4.desc"),
+  description: "Download video from YouTube",
   cooldown: 60,
   handler: async (_sock, msg) => {
     const url = msg.args[0];
-    if (!url) return msg.reply(t("downloader.ytmp4.format"));
+    if (!url) return msg.reply("Format: .ytmp4 <url>");
 
     await msg.reply("⏳ Downloading video...");
 
     const result = await ytmp4(url);
 
     if (!result.status) {
-      return msg.reply(
-        t("downloader.ytmp4.failed", { error: result.error || t("downloader.ytmp4.noMedia") }),
-      );
+      return msg.reply(`🚩 Failed: ${result.error || "Media not found"}`);
     }
 
     const { title, thumbnail, downloadUrl, format } = result.data;

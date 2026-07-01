@@ -1,4 +1,3 @@
-import { t } from "@/core/translations";
 import { defineCommand } from "@/core/types";
 import { addXp } from "@/infra/database";
 import { getRandomItem, getRandomNumber } from "@/utils/helper";
@@ -8,9 +7,9 @@ const sessions = new Map<string, { answer: number; timeout: Timer; sender?: stri
 export default defineCommand({
   name: "Math",
   alias: ["math"],
-  description: t("game.math.desc"),
+  description: "Quick math problems",
   handler: async (sock, msg) => {
-    if (sessions.has(msg.jid)) return msg.reply(t("game.math.existing"));
+    if (sessions.has(msg.jid)) return msg.reply("⏳ There's still an unanswered question!");
 
     const ops = ["+", "-", "×"];
     const op = getRandomItem(ops) as (typeof ops)[number];
@@ -25,12 +24,14 @@ export default defineCommand({
     const jid = msg.jid;
     const timeout = setTimeout(() => {
       sessions.delete(jid);
-      sock.sendMessage(jid, { text: t("game.math.timeout", { answer }) });
+      sock.sendMessage(jid, { text: `⏰ Time's up! The answer is *${answer}*` });
     }, 30_000);
 
     sessions.set(msg.jid, { answer, timeout, sender: msg.sender });
 
-    await msg.reply(t("game.math.question", { a, op, b }));
+    await msg.reply(`🧮 What is *${a} ${op} ${b}* ?
+
+Answer in 30 seconds!`);
   },
 });
 
@@ -43,5 +44,5 @@ export function checkMathAnswer(jid: string, text: string, sender: string): stri
   clearTimeout(session.timeout);
   sessions.delete(jid);
   addXp(sender, 15);
-  return t("game.math.correct", { answer: session.answer });
+  return `✅ Correct! The answer is *${session.answer}* (+15 XP)`;
 }

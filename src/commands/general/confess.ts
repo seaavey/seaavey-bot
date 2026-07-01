@@ -1,11 +1,10 @@
 import { config } from "@/core/config";
 import { defineCommand } from "@/core/types";
-import { t } from "@/core/translations";
 
 export default defineCommand({
   name: "Confess",
   alias: ["confess"],
-  description: t("general.confess.desc"),
+  description: "Send an anonymous message to someone. Use in private chat.",
   privateOnly: true,
   handler: async (sock, msg) => {
     const target = msg.args[0];

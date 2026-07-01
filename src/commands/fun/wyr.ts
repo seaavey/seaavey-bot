@@ -1,28 +1,32 @@
-import { t } from "@/core/translations";
 import { defineCommand } from "@/core/types";
 import { getRandomItem } from "@/utils/helper";
 
 const questions = [
-  { a: "Bisa terbang tapi gak bisa berenang", b: "Bisa berenang tapi gak bisa jalan" },
-  { a: "Kaya tapi gak punya teman", b: "Miskin tapi punya banyak teman" },
-  { a: "Bisa baca pikiran orang", b: "Bisa melihat masa depan" },
-  { a: "Hidup tanpa musik selamanya", b: "Hidup tanpa film/series selamanya" },
-  { a: "Selalu jujur", b: "Selalu berbohong" },
-  { a: "Jadi invisible", b: "Bisa teleportasi" },
-  { a: "Gak bisa pakai HP selamanya", b: "Gak bisa makan makanan favorit selamanya" },
-  { a: "Tinggal di gunung sendirian", b: "Tinggal di kota yang super ramai" },
-  { a: "Punya waktu tapi gak punya uang", b: "Punya uang tapi gak punya waktu" },
-  { a: "Bisa ngomong sama hewan", b: "Bisa ngomong semua bahasa di dunia" },
-  { a: "Hidup di dunia Harry Potter", b: "Hidup di dunia Marvel" },
-  { a: "Jadi orang paling pintar", b: "Jadi orang paling beruntung" },
+  { a: "Be able to fly but not swim", b: "Be able to swim but not walk" },
+  { a: "Be rich with no friends", b: "Be poor with many friends" },
+  { a: "Be able to read minds", b: "Be able to see the future" },
+  { a: "Live without music forever", b: "Live without movies/series forever" },
+  { a: "Always speak the truth", b: "Always tell lies" },
+  { a: "Be invisible", b: "Be able to teleport" },
+  { a: "Never use a phone again", b: "Never eat your favorite food again" },
+  { a: "Live in the mountains alone", b: "Live in a super crowded city" },
+  { a: "Have time but no money", b: "Have money but no time" },
+  { a: "Be able to speak with animals", b: "Be able to speak all human languages" },
+  { a: "Live in the Harry Potter universe", b: "Live in the Marvel universe" },
+  { a: "Be the smartest person", b: "Be the luckiest person" },
 ];
 
 export default defineCommand({
   name: "Would You Rather",
   alias: ["wouldyourather"],
-  description: t("fun.wyr.description"),
+  description: "Play Would You Rather game",
   handler: async (_sock, msg) => {
     const q = getRandomItem(questions) as (typeof questions)[number];
-    await msg.reply(t("fun.wyr.question", { a: q.a, b: q.b }));
+    await msg.reply(`🤔 *Would You Rather*
+
+A: ${q.a}
+B: ${q.b}
+
+Choose A or B!`);
   },
 });

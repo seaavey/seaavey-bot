@@ -1,4 +1,3 @@
-import { t } from "@/core/translations";
 import { defineCommand } from "@/core/types";
 import { addXp } from "@/infra/database";
 import { getRandomItem } from "@/utils/helper";
@@ -36,7 +35,7 @@ function render(word: string, guessed: Set<string>): string {
 export default defineCommand({
   name: "Hangman",
   alias: ["hangman"],
-  description: t("game.hangman.desc"),
+  description: "Guess letters one by one",
   handler: async (sock, msg) => {
     const key = `${msg.jid}:${msg.sender}`;
     const session = sessions.get(key);
@@ -44,36 +43,42 @@ export default defineCommand({
     if (msg.args[0] === "nyerah" && session) {
       clearTimeout(session.timeout);
       sessions.delete(key);
-      return msg.reply(t("game.hangman.surrender", { word: session.word }));
+      return msg.reply(`🏳️ Giving up! The answer: *${session.word}*`);
     }
 
     if (!msg.args[0]) {
       if (session)
         return msg.reply(
-          t("game.hangman.status", {
-            display: render(session.word, session.guessed),
-            lives: session.lives,
-            letters: [...session.guessed].join(", ") || "-",
-          }),
+          `🎯 *Hangman*
+
+${render(session.word, session.guessed)}
+❤️ ${session.lives} lives
+Letters: ${[...session.guessed].join(", ") || "-"}
+
+Type .hangman [letter]`,
         );
       const word = getRandomItem(words) as string;
       const jid = msg.jid;
       const timeout = setTimeout(() => {
         sessions.delete(key);
-        sock.sendMessage(jid, { text: t("game.hangman.timeout", { word }) });
+        sock.sendMessage(jid, { text: `⏰ Time's up! The answer is *${word}*` });
       }, 120_000);
       sessions.set(key, { word, guessed: new Set(), lives: 6, timeout });
       return msg.reply(
-        t("game.hangman.start", { length: word.length, display: render(word, new Set()) }),
+        `🎯 *Hangman* (${word.length} letters)
+
+${render(word, new Set())}
+❤️ 6 lives
+
+Type .hangman [letter]`,
       );
     }
 
-    if (!session) return msg.reply(t("game.hangman.noSession"));
+    if (!session) return msg.reply("Type .hangman to start a new game.");
 
     const letter = msg.args[0].toLowerCase();
-    if (letter.length !== 1 || !/[a-z]/.test(letter))
-      return msg.reply(t("game.hangman.invalidLetter"));
-    if (session.guessed.has(letter)) return msg.reply(t("game.hangman.duplicateLetter"));
+    if (letter.length !== 1 || !/[a-z]/.test(letter)) return msg.reply("🚩 Enter 1 letter!");
+    if (session.guessed.has(letter)) return msg.reply("🚩 Letter already guessed!");
 
     session.guessed.add(letter);
 
@@ -82,7 +87,7 @@ export default defineCommand({
       if (session.lives <= 0) {
         clearTimeout(session.timeout);
         sessions.delete(key);
-        return msg.reply(t("game.hangman.gameOver", { word: session.word }));
+        return msg.reply(`💀 Game over! The answer: *${session.word}*`);
       }
     }
 
@@ -91,15 +96,13 @@ export default defineCommand({
       clearTimeout(session.timeout);
       sessions.delete(key);
       addXp(msg.sender, 20);
-      return msg.reply(t("game.hangman.win", { word: session.word }));
+      return msg.reply(`🎉 Correct! *${session.word}* (+20 XP)`);
     }
 
     await msg.reply(
-      t("game.hangman.progress", {
-        display,
-        lives: session.lives,
-        letters: [...session.guessed].join(", "),
-      }),
+      `🎯 ${display}
+❤️ ${session.lives} lives
+Letters: ${[...session.guessed].join(", ")}`,
     );
   },
 });

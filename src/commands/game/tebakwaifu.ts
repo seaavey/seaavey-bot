@@ -1,4 +1,3 @@
-import { t } from "@/core/translations";
 import { createWordGame } from "@/game/word-game-factory";
 
 interface WaifuData {
@@ -10,16 +9,15 @@ interface WaifuData {
 const { command, checkAnswer } = createWordGame<WaifuData>({
   name: "Tebak Waifu",
   triggers: ["tebakwaifu", "tw"],
-  description: t("game.tebakwaifu.desc"),
+  description: "Guess the waifu name from photo (Type 'hint' for help)",
   dataFile: "tebakwaifu.json",
   emoji: "🌸",
   reward: 20,
-  question: (_item) => "Siapa nama waifu ini?",
+  question: (_item) => "Who is this waifu?",
   answer: (item) => item.jawaban,
   image: (item) => item.img,
-  timeoutMessage: (item, _ans) =>
-    t("game.tebakwaifu.timeout", { answer: item.jawaban, series: item.seri }),
-  correctMessage: (item, _ans) => t("game.tebakwaifu.correct", { answer: item.jawaban }),
+  timeoutMessage: (item, _ans) => `⏰ Time's up! The answer: *${item.jawaban}*`,
+  correctMessage: (item, _ans) => `✅ Correct! The answer is *${item.jawaban}* (+20 XP)`,
 });
 
 export default command;

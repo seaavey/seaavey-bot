@@ -1,7 +1,6 @@
 import axios from "axios";
 import * as cheerio from "cheerio";
 
-import { t } from "@/core/translations";
 import type { ScraperResult } from "./index";
 import { scraperError, scraperSuccess } from "./index";
 
@@ -33,7 +32,7 @@ export async function mediafireDl(url: string): Promise<ScraperResult<MediaFireD
 
     // Check for error pages
     if ($("body").hasClass("errorFileMissing") || $("body").hasClass("errorFileBlocked")) {
-      throw new Error(t("scraper.mediafire.notFound"));
+      throw new Error("File not found or already deleted");
     }
 
     // Extract filename from input#download_input value or page title
@@ -69,7 +68,7 @@ export async function mediafireDl(url: string): Promise<ScraperResult<MediaFireD
       if (match) downloadUrl = match[0];
     }
 
-    if (!downloadUrl) throw new Error(t("scraper.mediafire.noLink"));
+    if (!downloadUrl) throw new Error("Download link not found");
 
     // Extract file size
     const size = $("div.filesize").text().trim() || $("span.file-size").text().trim() || "";

@@ -1,4 +1,3 @@
-import { t } from "@/core/translations";
 import { createWordGame } from "@/game/word-game-factory";
 
 interface TebakLirikData {
@@ -9,11 +8,11 @@ interface TebakLirikData {
 const { command, checkAnswer } = createWordGame<TebakLirikData>({
   name: "Tebak Lirik",
   triggers: ["tebaklirik", "tblr"],
-  description: t("game.tebaklirik.desc"),
+  description: "Guess the missing word from song lyrics (Type 'hint' for help)",
   dataFile: "tebaklirik.json",
   emoji: "🎵",
   reward: 15,
-  question: (item) => `Lirik: ${item.soal}`,
+  question: (item) => `Lyrics: ${item.soal}`,
   answer: (item) => item.jawaban,
 });
 

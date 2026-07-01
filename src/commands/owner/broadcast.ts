@@ -1,13 +1,12 @@
-import { t } from "@/core/translations";
 import { defineCommand } from "@/core/types";
 
 export default defineCommand({
   name: "Broadcast",
   alias: ["bc", "broadcast"],
-  description: t("owner.broadcast.desc"),
+  description: "Broadcast message to all groups (owner only)",
   ownerOnly: true,
   handler: async (sock, msg) => {
-    if (!msg.args.length) return msg.reply(t("owner.broadcast.format"));
+    if (!msg.args.length) return msg.reply("Format: .broadcast <pesan>");
 
     const text = msg.args.join(" ");
     const groups = await sock.groupFetchAllParticipating();
@@ -17,6 +16,6 @@ export default defineCommand({
       await sock.sendMessage(jid, { text: `📢 *Broadcast*\n\n${text}` });
     }
 
-    await msg.reply(t("owner.broadcast.sent", { count: String(jids.length) }));
+    await msg.reply(`✅ Broadcast sent to ${String(jids.length)} groups.`);
   },
 });
