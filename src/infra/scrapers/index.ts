@@ -26,3 +26,4 @@ export { sswebDl } from "./ssweb";
 export { upscaleImage } from "./upscale";
 export { removeBackground } from "./removebg";
 export { akinatorStart, akinatorAnswer, akinatorExclude } from "./akinator";
+export { removeWatermark } from "./removewm";
