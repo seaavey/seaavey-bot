@@ -761,6 +761,12 @@
       "processing": "⏳ Sedang upscale {scale}x...",
       "success": "✅ Upscale {scale}x berhasil!",
       "desc": "Upscale gambar 2x atau 4x menggunakan iLoveIMG"
+    },
+    "removewm": {
+      "noImage": "❌ Balas atau kirim gambar dengan caption .removewm",
+      "processing": "⏳ Menghapus watermark...",
+      "failed": "❌ Gagal: {error}",
+      "desc": "Menghapus watermark dari gambar menggunakan EzRemove"
     }
   },
   "owner": {
@@ -965,6 +971,10 @@
     "removebg": {
       "createJobFailed": "BG create-job gagal: {data}",
       "noUrl": "URL tidak ditemukan: {data}"
+    },
+    "removewm": {
+      "createJobFailed": "Watermark remove create-job failed: {data}",
+      "noUrl": "URL not found: {data}"
     }
   },
   "search": {

@@ -761,6 +761,12 @@
       "processing": "⏳ Upscaling {scale}x...",
       "success": "✅ {scale}x upscale successful!",
       "desc": "Upscale image 2x or 4x using iLoveIMG"
+    },
+    "removewm": {
+      "noImage": "❌ Reply or send an image with caption .removewm",
+      "processing": "⏳ Removing watermark...",
+      "failed": "❌ Failed: {error}",
+      "desc": "Remove watermark from an image using EzRemove"
     }
   },
   "owner": {
@@ -964,6 +970,10 @@
     },
     "removebg": {
       "createJobFailed": "BG create-job failed: {data}",
+      "noUrl": "URL not found: {data}"
+    },
+    "removewm": {
+      "createJobFailed": "Watermark remove create-job failed: {data}",
       "noUrl": "URL not found: {data}"
     }
   },
