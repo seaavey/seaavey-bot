@@ -973,8 +973,8 @@
       "noUrl": "URL tidak ditemukan: {data}"
     },
     "removewm": {
-      "createJobFailed": "Watermark remove create-job failed: {data}",
-      "noUrl": "URL not found: {data}"
+      "createJobFailed": "Gagal membuat job penghapusan watermark: {data}",
+      "noUrl": "URL tidak ditemukan: {data}"
     }
   },
   "search": {

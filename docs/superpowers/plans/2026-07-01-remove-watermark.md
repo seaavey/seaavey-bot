@@ -19,19 +19,22 @@
 ### Task 1: Add Localization/Translation Keys
 
 **Files:**
+
 - Modify: `src/data/lang/en.json:760-766`
 - Modify: `src/data/lang/en.json:965-969`
 - Modify: `src/data/lang/id.json:760-766`
 - Modify: `src/data/lang/id.json:965-969`
 
 **Interfaces:**
+
 - Consumes: None
 - Produces: Translations for `media.removewm` and `scraper.removewm` keys.
 
 - [ ] **Step 1: Add translations to `src/data/lang/en.json`**
-  Modify the `media` block (after `upscale`) and `scraper` block (after `removebg`) to include watermark removal messages.
+      Modify the `media` block (after `upscale`) and `scraper` block (after `removebg`) to include watermark removal messages.
 
-  *Under `commands.media`:*
+  _Under `commands.media`:_
+
   ```json
       "removewm": {
         "noImage": "❌ Reply or send an image with caption .removewm",
@@ -41,7 +44,8 @@
       }
   ```
 
-  *Under `scraper`:*
+  _Under `scraper`:_
+
   ```json
       "removewm": {
         "createJobFailed": "Watermark remove create-job failed: {data}",
@@ -50,9 +54,10 @@
   ```
 
 - [ ] **Step 2: Add translations to `src/data/lang/id.json`**
-  Repeat the same structure for Indonesian translations.
+      Repeat the same structure for Indonesian translations.
 
-  *Under `commands.media`:*
+  _Under `commands.media`:_
+
   ```json
       "removewm": {
         "noImage": "❌ Balas atau kirim gambar dengan caption .removewm",
@@ -62,7 +67,8 @@
       }
   ```
 
-  *Under `scraper`:*
+  _Under `scraper`:_
+
   ```json
       "removewm": {
         "createJobFailed": "Watermark remove create-job failed: {data}",
@@ -71,8 +77,8 @@
   ```
 
 - [ ] **Step 3: Run formatting/validation check**
-  Run: `bun run format:check`
-  Expected: JSON syntax is valid, no formatting errors.
+      Run: `bun run format:check`
+      Expected: JSON syntax is valid, no formatting errors.
 
 - [ ] **Step 4: Commit**
   ```bash
@@ -85,17 +91,20 @@
 ### Task 2: Implement Scraper Backend
 
 **Files:**
+
 - Create: `src/infra/scrapers/removewm.ts`
 - Modify: `src/infra/scrapers/index.ts:25-29`
 
 **Interfaces:**
+
 - Consumes: `t` from `@/core/translations`, `scraperError` and `scraperSuccess` from `@/infra/scrapers/index`
 - Produces: `removeWatermark(imageBuffer: Buffer, filename?: string): Promise<ScraperResult<RemoveWmData>>`
 
 - [ ] **Step 1: Write empty scraper implementation & export it**
-  Create `src/infra/scrapers/removewm.ts` returning a dummy success response.
+      Create `src/infra/scrapers/removewm.ts` returning a dummy success response.
 
-  *`src/infra/scrapers/removewm.ts`:*
+  _`src/infra/scrapers/removewm.ts`:_
+
   ```typescript
   import type { ScraperResult } from "./index";
   import { scraperSuccess } from "./index";
@@ -106,19 +115,20 @@
 
   export async function removeWatermark(
     _imageBuffer: Buffer,
-    _filename = "image.jpg"
+    _filename = "image.jpg",
   ): Promise<ScraperResult<RemoveWmData>> {
     return scraperSuccess({ buffer: Buffer.alloc(0) });
   }
   ```
 
   Export it in `src/infra/scrapers/index.ts`:
+
   ```typescript
   export { removeWatermark } from "./removewm";
   ```
 
 - [ ] **Step 2: Write complete scraper logic**
-  Replace the contents of `src/infra/scrapers/removewm.ts` with the robust Axios upload + polling logic:
+      Replace the contents of `src/infra/scrapers/removewm.ts` with the robust Axios upload + polling logic:
 
   ```typescript
   import axios from "axios";
@@ -161,7 +171,7 @@
 
   async function pollJob(
     url: string,
-    extraHeaders: Record<string, string> = {}
+    extraHeaders: Record<string, string> = {},
   ): Promise<PollJobResult> {
     const start = Date.now();
     const timeout = 90_000;
@@ -188,33 +198,28 @@
 
   export async function removeWatermark(
     imageBuffer: Buffer,
-    filename = "image.jpg"
+    filename = "image.jpg",
   ): Promise<ScraperResult<RemoveWmData>> {
     try {
       const form = new FormData();
       const blob = new Blob([imageBuffer], { type: "image/jpeg" });
       form.append("image_file", blob, filename);
 
-      const create = await axios.post(
-        `${BASE_URL}/ez-remove/watermark-remove/create-job`,
-        form,
-        {
-          headers: { ...HEADERS, "product-serial": SERIAL },
-        }
-      );
+      const create = await axios.post(`${BASE_URL}/ez-remove/watermark-remove/create-job`, form, {
+        headers: { ...HEADERS, "product-serial": SERIAL },
+      });
 
       if (create.data.code !== 100000) {
         throw new Error(
-          t("scraper.removewm.createJobFailed", { data: JSON.stringify(create.data) })
+          t("scraper.removewm.createJobFailed", { data: JSON.stringify(create.data) }),
         );
       }
 
       const jobId = create.data.result.job_id;
 
-      const finalResult = await pollJob(
-        `${BASE_URL}/ez-remove/watermark-remove/get-job/${jobId}`,
-        { "product-serial": SERIAL }
-      );
+      const finalResult = await pollJob(`${BASE_URL}/ez-remove/watermark-remove/get-job/${jobId}`, {
+        "product-serial": SERIAL,
+      });
 
       const downloadUrl =
         finalResult.image_url ||
@@ -248,14 +253,16 @@
 ### Task 3: Test Scraper with Bun Test Suite
 
 **Files:**
+
 - Create: `src/infra/scrapers/__tests__/removewm.test.ts`
 
 **Interfaces:**
+
 - Consumes: `removeWatermark` from `@/infra/scrapers`
 - Produces: Test verification
 
 - [ ] **Step 1: Write unit test file**
-  Create `src/infra/scrapers/__tests__/removewm.test.ts`:
+      Create `src/infra/scrapers/__tests__/removewm.test.ts`:
 
   ```typescript
   import { describe, expect, it } from "bun:test";
@@ -266,7 +273,7 @@
       // Create a dummy 1x1 white JPEG image buffer in memory
       const dummyJpg = Buffer.from(
         "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=",
-        "base64"
+        "base64",
       );
 
       const result = await removeWatermark(dummyJpg);
@@ -283,8 +290,8 @@
   ```
 
 - [ ] **Step 2: Run test suite**
-  Run: `bun test src/infra/scrapers/__tests__/removewm.test.ts`
-  Expected: Test passes successfully or handles API failures cleanly.
+      Run: `bun test src/infra/scrapers/__tests__/removewm.test.ts`
+      Expected: Test passes successfully or handles API failures cleanly.
 
 - [ ] **Step 3: Commit**
   ```bash
@@ -297,14 +304,16 @@
 ### Task 4: Implement Command Handler
 
 **Files:**
+
 - Create: `src/commands/media/removewm.ts`
 
 **Interfaces:**
+
 - Consumes: `downloadMediaMessage` from `baileys`, `defineCommand` from `@/core/types`, `removeWatermark` from `@/infra/scrapers`, `t` from `@/core/translations`
 - Produces: Command registration for `.removewm`
 
 - [ ] **Step 1: Write command file**
-  Create `src/commands/media/removewm.ts`:
+      Create `src/commands/media/removewm.ts`:
 
   ```typescript
   import { downloadMediaMessage, type WAMessage } from "baileys";
@@ -348,7 +357,7 @@
           {
             image: result.data.buffer,
           },
-          { quoted: msg.raw }
+          { quoted: msg.raw },
         );
       } catch (e: unknown) {
         const error = e as Error;
@@ -359,11 +368,13 @@
   ```
 
 - [ ] **Step 2: Verify project compilation and formatting**
-  Run:
+      Run:
+
   ```bash
   bun run format
   bun run lint
   ```
+
   Expected: Files formatted and typescript / eslint compile successfully without errors.
 
 - [ ] **Step 3: Commit**

@@ -34,6 +34,7 @@ sequenceDiagram
 ## Implementation Details
 
 ### 1. Scraper (`src/infra/scrapers/removewm.ts`)
+
 - **Function**: `removeWatermark(imageBuffer: Buffer, filename?: string): Promise<ScraperResult<RemoveWmData>>`
 - **Steps**:
   1. Initialize connection / prepare headers.
@@ -43,9 +44,11 @@ sequenceDiagram
   5. Return the resulting `Buffer` wrapped in `scraperSuccess`.
 
 ### 2. Scraper Exports (`src/infra/scrapers/index.ts`)
+
 - Export `removeWatermark` from `./removewm`.
 
 ### 3. Command Handler (`src/commands/media/removewm.ts`)
+
 - **Trigger**: `.removewm` (aliases: `removewatermark`, `unwm`)
 - **Logic**:
   - Verify that the message contains an image or quotes an image.
@@ -56,12 +59,15 @@ sequenceDiagram
   - Handle errors gracefully.
 
 ### 4. Translations (`src/data/lang/{en.json, id.json}`)
+
 Add the following keys to support multiple languages:
+
 - `media.removewm.desc`: Description of the command.
 - `media.removewm.noImage`: Error shown when no image is targeted.
 - `media.removewm.processing`: Message shown during API processing.
 - `media.removewm.failed`: Message shown when the process fails.
 
 ## Verification & Testing Plan
+
 1. **Lint & Type Check**: Ensure code passes formatting (`bun run format`), linting (`bun run lint`), and typechecking (`bun tsc`).
 2. **Manual Chat Verification**: Run the bot locally and test the `.removewm` command with a watermarked image (both direct and quoted).

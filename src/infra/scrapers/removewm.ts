@@ -23,11 +23,11 @@ export interface RemoveWmData {
 }
 
 interface PollJobResult {
-  status: number;
+  status?: number;
   error?: string;
   image_url?: string;
   result_url?: string;
-  output?: string[];
+  output?: string[] | string;
   preview_url?: string;
   [key: string]: unknown;
 }
@@ -51,11 +51,10 @@ async function pollJob(
 
     const raw = res.data;
     const result = raw.result ?? raw;
-    const status = result?.status;
 
-    if (raw.code === 100000 && result?.output?.[0]) return result;
-    if (status === 3 || (typeof status === "number" && status < 0)) {
-      throw new Error(result.error || "Unknown error");
+    if (raw.code === 100000) return result;
+    if (raw.code !== 300001) {
+      throw new Error(raw.message?.en || raw.message || result?.error || "Unknown error");
     }
 
     await sleep(interval);
@@ -89,7 +88,7 @@ export async function removeWatermark(
     const downloadUrl =
       finalResult.image_url ||
       finalResult.result_url ||
-      finalResult.output?.[0] ||
+      (Array.isArray(finalResult.output) ? finalResult.output[0] : finalResult.output) ||
       finalResult.preview_url;
 
     if (!downloadUrl) {
@@ -101,7 +100,7 @@ export async function removeWatermark(
 
     return scraperSuccess({ buffer });
   } catch (e: unknown) {
-    const err = e as { message?: string };
-    return scraperError(err.message || "Unknown error");
+    const errMessage = e instanceof Error ? e.message : String(e);
+    return scraperError(errMessage);
   }
 }

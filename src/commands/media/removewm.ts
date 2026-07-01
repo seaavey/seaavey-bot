@@ -42,8 +42,8 @@ export default defineCommand({
         { quoted: msg.raw },
       );
     } catch (e: unknown) {
-      const error = e as Error;
-      await msg.reply(t("media.removewm.failed", { error: error.message }));
+      const errMsg = e instanceof Error ? e.message : String(e);
+      await msg.reply(t("media.removewm.failed", { error: errMsg }));
     }
   },
 });
