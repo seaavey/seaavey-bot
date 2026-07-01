@@ -145,7 +145,7 @@ async function startBot() {
 
   // Anti Call
   sock.ev.on("call", async (calls) => {
-    evLog.call.info({ count: calls.length }, "panggilan masuk");
+    evLog.call.info({ count: calls.length }, "incoming call");
     for (const call of calls) {
       if (call.status === "offer") {
         await sock.rejectCall(call.id, call.from);
@@ -158,7 +158,7 @@ async function startBot() {
 
   // Group Events
   sock.ev.on("groups.upsert", async (groups) => {
-    evLog.groupsUpsert.info({ count: groups.length }, "group baru/update");
+    evLog.groupsUpsert.info({ count: groups.length }, "new/updated group");
     for (const group of groups) {
       invalidateGroupMetadata(group.id);
       setGroup(group.id, "name", group.subject || "");
@@ -183,11 +183,11 @@ async function startBot() {
 
   // Message Events
   sock.ev.on("messages.upsert", ({ messages }) => {
-    evLog.messagesUpsert.info({ count: messages.length }, "pesan masuk");
+    evLog.messagesUpsert.info({ count: messages.length }, "message received");
     handleMessagesUpsert(sock, messages);
   });
   sock.ev.on("messages.update", (updates) => {
-    evLog.messagesUpdate.info({ count: updates.length }, "pesan diupdate");
+    evLog.messagesUpdate.info({ count: updates.length }, "message updated");
     handleMessagesUpdate(sock, updates);
   });
 }
