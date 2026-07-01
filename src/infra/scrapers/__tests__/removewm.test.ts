@@ -1,5 +1,4 @@
 import { describe, expect, it, mock } from "bun:test";
-// @ts-expect-error - bypass mock module type import
 import originalAxios from "../../../../node_modules/axios";
 
 mock.module("axios", () => {
