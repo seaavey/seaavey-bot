@@ -12,12 +12,9 @@ const categoryIcons: Record<string, string> = {
   game: "🎯",
   group: "👥",
   owner: "👑",
-  downloader: "📥",
+  download: "📥",
   economy: "💰",
-  info: "ℹ️",
-  search: "🔍",
   tools: "🛠️",
-  productivity: "📋",
 };
 
 export default defineCommand({
