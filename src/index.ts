@@ -4,7 +4,6 @@ import makeWASocket, {
   DisconnectReason,
   useMultiFileAuthState,
   fetchLatestBaileysVersion,
-  Browsers,
   isJidStatusBroadcast,
 } from "baileys";
 import * as QRCode from "qrcode";
@@ -45,7 +44,7 @@ async function startBot() {
 
   const sock = makeWASocket({
     version,
-    browser: Browsers.ubuntu("Chrome"),
+    // browser: Browsers.ubuntu("Chrome"),
     connectTimeoutMs: 60000,
     keepAliveIntervalMs: 30000,
     logger,
@@ -67,7 +66,6 @@ async function startBot() {
   });
   currentSock = sock;
   const evLog = {
-    creds: createEventLogger("creds.update"),
     connection: createEventLogger("connection.update"),
     call: createEventLogger("call"),
     groupsUpsert: createEventLogger("groups.upsert"),
@@ -76,40 +74,7 @@ async function startBot() {
     messagesUpdate: createEventLogger("messages.update"),
   };
 
-  sock.ev.on("creds.update", () => {
-    evLog.creds.info("menyimpan credentials");
-    saveCreds();
-  });
-
-  if (!state.creds.registered && !state.creds.me?.id) {
-    let pairingNumber = cachedPairingNumber;
-    if (pairingNumber === null) {
-      const rl = createInterface({
-        input: process.stdin,
-        output: process.stdout,
-      });
-      const input = await new Promise<string>((r) =>
-        rl.question("Enter WhatsApp number for pairing code (leave empty for QR code): ", r),
-      );
-      rl.close();
-      pairingNumber = input.trim();
-      cachedPairingNumber = pairingNumber;
-    }
-
-    if (pairingNumber) {
-      try {
-        await sock.waitForSocketOpen();
-        const code = await sock.requestPairingCode(pairingNumber);
-        logger.info(`\n📱 Pairing code: ${code}`);
-        process.stdout.write(`\n📱 Pairing code: ${code}\n\n`);
-      } catch (error) {
-        const msg = error instanceof Error ? error.message : String(error);
-        logger.error({ error }, "Failed to get pairing code");
-        process.stdout.write(`\n🚩 Error: ${msg}\n\n`);
-        cachedPairingNumber = null;
-      }
-    }
-  }
+  sock.ev.on("creds.update", () => saveCreds());
 
   sock.ev.on("connection.update", async ({ connection, lastDisconnect, qr }) => {
     evLog.connection.info({ connection, qr: !!qr }, "connection update received");
@@ -142,6 +107,48 @@ async function startBot() {
       startSchedulers(sock);
     }
   });
+
+  if (!state.creds.registered && !state.creds.me?.id) {
+    let pairingNumber = cachedPairingNumber;
+    if (pairingNumber === null) {
+      if (process.stdin.isTTY) {
+        const rl = createInterface({
+          input: process.stdin,
+          output: process.stdout,
+        });
+        const input = await new Promise<string>((resolve) => {
+          rl.question(
+            "Enter WhatsApp number for pairing code (leave empty for QR code): ",
+            (answer) => {
+              resolve(answer);
+            },
+          );
+          rl.once("close", () => {
+            resolve("");
+          });
+        });
+        rl.close();
+        pairingNumber = input.trim();
+      } else {
+        pairingNumber = "";
+      }
+      cachedPairingNumber = pairingNumber;
+    }
+
+    if (pairingNumber) {
+      try {
+        await sock.waitForSocketOpen();
+        const code = await sock.requestPairingCode(pairingNumber);
+        logger.info(`\n📱 Pairing code: ${code}`);
+        process.stdout.write(`\n📱 Pairing code: ${code}\n\n`);
+      } catch (error) {
+        const msg = error instanceof Error ? error.message : String(error);
+        logger.error({ error }, "Failed to get pairing code");
+        process.stdout.write(`\n🚩 Error: ${msg}\n\n`);
+        cachedPairingNumber = null;
+      }
+    }
+  }
 
   // Anti Call
   sock.ev.on("call", async (calls) => {
