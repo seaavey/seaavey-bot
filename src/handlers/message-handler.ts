@@ -7,7 +7,7 @@ import type { MessageContext } from "@/handlers/message-context";
 import db from "@/infra/client";
 import { getCachedGroupMetadata } from "@/infra/group-metadata-cache";
 import { getGroup, updateMemberChat } from "@/infra/repositories/group-repo";
-import { runMiddlewares } from "@/middleware";
+import { runMiddlewares } from "@/handlers/middleware";
 import { getNumber } from "@/utils/helper";
 import { resolveMessage } from "@/utils/message-resolver";
 import { TtlMap } from "@/utils/ttl-map";

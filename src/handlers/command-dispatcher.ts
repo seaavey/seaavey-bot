@@ -2,7 +2,7 @@ import type { WASocket } from "baileys";
 import { config } from "@/core/config";
 import { logger } from "@/core/logger";
 import { checkGuards } from "@/handlers/command-guards";
-import { commands } from "@/infra/loader";
+import { commands } from "@/core/loader";
 import { getGroup } from "@/infra/repositories/group-repo";
 import { addHit, getUser, isBanned } from "@/infra/repositories/user-repo";
 import { getNumber } from "@/utils/helper";

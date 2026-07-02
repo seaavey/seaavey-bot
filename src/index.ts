@@ -13,7 +13,7 @@ import { handleGroupParticipants } from "@/handlers/group-handler";
 import { handleMessagesUpdate, handleMessagesUpsert } from "@/handlers/message-handler";
 import { setGroup, updateMemberChat } from "@/infra/database";
 import { invalidateGroupMetadata } from "@/infra/group-metadata-cache";
-import { loadCommands } from "@/infra/loader";
+import { loadCommands } from "@/core/loader";
 import { startSchedulers } from "@/infra/scheduler";
 
 let isRestarting = false;

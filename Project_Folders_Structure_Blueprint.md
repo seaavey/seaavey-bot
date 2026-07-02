@@ -11,12 +11,12 @@ This document serves as the definitive guide to the folder structure, architectu
 The architecture is designed to be highly modular and extensible, consisting of the following key layers:
 
 1. **Entrypoint (`src/index.ts`)**: Initializes the bot, handles connection updates, auth states (via `auth/`), and event listeners.
-2. **Handlers (`src/handlers/`)**: Dispatches commands, manages group events, and wraps raw WhatsApp messages into a parsed context.
-3. **Middleware (`src/middleware/`)**: A sequential pipeline that intercepts incoming messages for features like anti-spam, anti-link, AFK, and auto-replies before they reach commands.
-4. **Command System (`src/commands/`)**: Commands are structured dynamically in folders under categories. File names map directly to command triggers.
-5. **Infrastructure (`src/infra/`)**: Includes the SQLite database client, individual feature repositories, scrapers, and the task scheduler.
-6. **Game Engine (`src/game/`)**: A dedicated engine for running text-based games, loading game questions from JSON files in `src/data/games/`.
-7. **Utilities (`src/utils/`)**: Helpers, maps, message resolvers, and converters.
+2. **Handlers (`src/handlers/`)**: Dispatches commands, manages group events, wraps raw WhatsApp messages into a parsed context, and hosts the **Middleware pipeline** under `src/handlers/middleware/`.
+3. **Command System (`src/commands/`)**: Commands are structured dynamically in folders under categories. File names map directly to command triggers.
+4. **Infrastructure (`src/infra/`)**: Includes the SQLite database client, individual feature repositories, scrapers, and the task scheduler.
+5. **Game Engine (`src/game/`)**: A dedicated engine for running text-based games, loading game questions from JSON files in `src/game/data/games/`.
+6. **Utilities (`src/utils/`)**: Helpers, maps, message resolvers, and converters.
+7. **Core (`src/core/`)**: Core configurations, loggers, loader, and type definitions.
 
 ---
 
@@ -42,35 +42,35 @@ seaavey-bot/
 │   │   ├── media/              # Media utility & converter tools (sticker, toimg, removebg, upscale)
 │   │   ├── owner/              # Bot owner administrative controls
 │   │   └── tools/              # Calculator, translate, & real-time info (weather, earthquake, npm)
-│   ├── core/                   # Shared configurations and logger setups
+│   ├── core/                   # Shared configurations and loader setup
 │   │   ├── config.ts           # Central configuration parsing from env variables
+│   │   ├── loader.ts           # Command registry & dynamic file loader
 │   │   ├── logger.ts           # Logger setup (Pino + Pino Pretty)
 │   │   └── types.ts            # Core TypeScript interfaces and type declarations
-│   ├── data/                   # Static data files
-│   │   └── games/              # Static game JSON data files (17+ games)
 │   ├── game/                   # Core game engine logic
 │   │   ├── __tests__/          # Game engine tests (bun:test)
+│   │   ├── data/               # Static game data folder
+│   │   │   └── games/          # Static game JSON data files (17+ games)
 │   │   ├── game.ts             # Orchestrator class for managing game sessions
 │   │   └── word-game-factory.ts # Factory pattern for generating word-based game types
 │   ├── handlers/               # Event and message orchestration handlers
 │   │   ├── command-dispatcher.ts # Directs parsed message contexts to correct command files
 │   │   ├── command-guards.ts   # Guard logic (ownerOnly, groupOnly, privateOnly, cooldowns)
 │   │   ├── group-handler.ts    # Welcomes, goodbyes, and group update handlers
-│   │   └── message-handler.ts  # Receives raw messages from Baileys and starts middleware pipeline
+│   │   ├── message-handler.ts  # Receives raw messages from Baileys and starts middleware pipeline
+│   │   └── middleware/         # Interceptor pipeline for incoming messages
+│   │       ├── afk.ts          # AFK state interceptor
+│   │       ├── anti-link.ts    # Anti-Group Link invite interceptor
+│   │       ├── anti-spam.ts    # Message flood control interceptor
+│   │       ├── anti-viewonce.ts # Auto-forward deleted view-once messages
+│   │       ├── auto-reply.ts   # Configured auto-responders
+│   │       └── game-answer.ts  # Active game message interceptor (checks answers)
 │   ├── infra/                  # Shared system components
 │   │   ├── client.ts           # Shared SQLite Database client connection
 │   │   ├── database.ts         # Central re-exporter for data repositories
-│   │   ├── loader.ts           # Command registry & dynamic file loader
 │   │   ├── scheduler.ts        # Dynamic background task runner (runs every 30s)
 │   │   ├── repositories/       # Isolated business-logic data access objects
 │   │   └── scrapers/           # Dynamic scrapers for media downloaders & APIs
-│   ├── middleware/             # Interceptor pipeline for incoming messages
-│   │   ├── afk.ts              # AFK state interceptor
-│   │   ├── anti-link.ts        # Anti-Group Link invite interceptor
-│   │   ├── anti-spam.ts        # Message flood control interceptor
-│   │   ├── anti-viewonce.ts    # Auto-forward deleted view-once messages
-│   │   ├── auto-reply.ts       # Configured auto-responders
-│   │   └── game-answer.ts      # Active game message interceptor (checks answers)
 │   └── utils/                  # Helper functions and small components
 │       ├── convert.ts          # File/buffer format converters (ffmpeg, etc.)
 │       ├── helper.ts           # Clean text formatting, number parsing, etc.
@@ -90,7 +90,7 @@ Contains subfolders corresponding to categories (e.g., `download`, `group`, `eco
   - Dynamic Loading: The loader reads `src/commands/**/*.ts` and automatically adds the file name (excluding extension) as a command trigger.
   - No nested subdirectories beyond category level.
 
-### `src/middleware/`
+### `src/handlers/middleware/`
 
 Contains message interceptors executed in a sequence. The pipeline must yield either `"next"` (continue to next middleware or command dispatcher) or `"stop"` (suppress execution).
 
@@ -187,7 +187,7 @@ export function setSampleValue(key: string, value: string) {
 }
 ```
 
-### Template: New Middleware (`src/middleware/<name>.ts`)
+### Template: New Middleware (`src/handlers/middleware/<name>.ts`)
 
 ```typescript
 import type { MessageMiddleware } from "@/handlers/message-context";

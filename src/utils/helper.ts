@@ -30,7 +30,7 @@ export function formatTime(ms: number): string {
   return `${h > 0 ? `${h} jam ` : ""}${m > 0 ? `${m} menit ` : ""}${s} detik`;
 }
 
-const GAMES_DATA_DIR = join(process.cwd(), "src", "data", "games");
+const GAMES_DATA_DIR = join(process.cwd(), "src", "game", "data", "games");
 
 export function loadGameData<T>(filename: string): T[] {
   try {

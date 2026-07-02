@@ -3,7 +3,7 @@ import { config } from "@/core/config";
 import { type Command, defineCommand } from "@/core/types";
 import { sendInteractive } from "@/handlers/interactive";
 import { getUser } from "@/infra/database";
-import { commands } from "@/infra/loader";
+import { commands } from "@/core/loader";
 import { getNumber } from "@/utils/helper";
 
 const categoryIcons: Record<string, string> = {
