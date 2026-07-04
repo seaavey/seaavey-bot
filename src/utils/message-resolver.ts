@@ -39,6 +39,7 @@ export interface MessageResolver {
   key: WAMessage["key"];
   pushName: string | null | undefined;
   raw: WAMessage;
+  react: (emoji: string) => Promise<void>;
   reply: (text: string) => Promise<void>;
   send: (content: AnyMessageContent) => Promise<void>;
 }
@@ -128,6 +129,9 @@ export async function resolveMessage(sock: WASocket, msg: WAMessage): Promise<Me
     key: msg.key,
     pushName: msg.pushName,
     raw: msg,
+    react: async (emoji) => {
+      await sock.sendMessage(jid, { react: { text: emoji, key: msg.key } });
+    },
     reply: async (text) => {
       const mentions = [...text.matchAll(/@(\d+)/g)].map((m) => `${m[1]}@s.whatsapp.net`);
       await sock.sendMessage(jid, { text, mentions }, { quoted: msg });
