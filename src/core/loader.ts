@@ -11,7 +11,9 @@ export const commands = new Map<string, Command>();
 
 async function loadFile(path: string) {
   const category = basename(dirname(path));
-  const mod = await import(path);
+  // Use a query parameter to bypass Bun's module import caching during development/hot-reload
+  const importPath = isDev ? `${path}?t=${Date.now()}` : path;
+  const mod = await import(importPath);
   const cmd: Command = mod.default;
   if (!cmd?.name) return;
 
@@ -30,6 +32,13 @@ async function loadFile(path: string) {
   }
 
   if (!cmd.command) cmd.command = filenameTrigger;
+
+  // Clean up existing triggers for this command name before registering new ones
+  for (const [trigger, existingCmd] of commands.entries()) {
+    if (existingCmd.name === cmd.name) {
+      commands.delete(trigger);
+    }
+  }
 
   for (const trigger of triggerSet) {
     if (commands.has(trigger) && commands.get(trigger)?.name !== cmd.name) {

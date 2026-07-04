@@ -63,7 +63,7 @@ export default defineCommand({
     const botLatency = (performance.now() - handlerStart).toFixed(3);
 
     // Format final message
-    let text = `⚡ *${config.name} Agus — Ping Info* ⚡\n\n`;
+    let text = `⚡ *${config.name} — Ping Info* ⚡\n\n`;
     text += `📶 *Latensi:*\n`;
     text += `- Net Latency: ${netLatency !== null ? `${netLatency} ms` : "N/A"}\n`;
     text += `- DB Latency: ${dbLatency} ms\n`;
