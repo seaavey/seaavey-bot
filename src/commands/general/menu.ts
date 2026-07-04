@@ -96,7 +96,7 @@ export default defineCommand({
     try {
       await sendInteractive(sock, msg.jid, {
         body: caption,
-        footer: "SeaaveyBot Open Source",
+        footer: `${config.name} Open Source`,
         header: {
           image: readFileSync("src/assets/banner.png"),
         },
