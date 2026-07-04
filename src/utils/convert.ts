@@ -6,6 +6,8 @@
 import { execSync } from "node:child_process";
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 
+import { config } from "@/core/config";
+
 function ffmpeg(args: string): void {
   try {
     execSync(`ffmpeg -y ${args}`, { stdio: ["ignore", "ignore", "pipe"] });
@@ -63,7 +65,7 @@ export async function imageToSticker(buffer: Buffer, opts: StickerOptions = {}):
       `-i ${input} -vf "scale=512:512:force_original_aspect_ratio=decrease,pad=512:512:(ow-iw)/2:(oh-ih)/2:color=0x00000000" -vcodec libwebp -lossless 0 -quality 80 -compression_level 6 ${output}`,
     );
     const webp = readFileSync(output);
-    return addExif(webp, opts.pack || "SeaaveyBot", opts.author || "Seaavey");
+    return addExif(webp, opts.pack || config.name, opts.author || "Seaavey");
   } finally {
     rmSync(tmp, { recursive: true, force: true });
   }
@@ -83,7 +85,7 @@ export async function videoToSticker(buffer: Buffer, opts: StickerOptions = {}):
       `-i ${input} -t 10 -vf "scale=512:512:force_original_aspect_ratio=decrease,pad=512:512:(ow-iw)/2:(oh-ih)/2:color=0x00000000,fps=15" -vcodec libwebp -loop 0 -preset default -an -vsync 0 -quality 50 ${output}`,
     );
     const webp = readFileSync(output);
-    return addExif(webp, opts.pack || "SeaaveyBot", opts.author || "Seaavey");
+    return addExif(webp, opts.pack || config.name, opts.author || "Seaavey");
   } finally {
     rmSync(tmp, { recursive: true, force: true });
   }

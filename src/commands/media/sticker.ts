@@ -1,4 +1,5 @@
 import { downloadMediaMessage, type WAMessage } from "baileys";
+import { config } from "@/core/config";
 import { defineCommand } from "@/core/types";
 import { imageToSticker, videoToSticker } from "@/utils/convert";
 
@@ -26,7 +27,7 @@ export default defineCommand({
       host: "mmg.whatsapp.net",
     })) as Buffer;
 
-    const pack = msg.args[0] || "SeaaveyBot";
+    const pack = msg.args[0] || config.name;
     const author = msg.args[1] || "Seaavey";
 
     const sticker = videoMsg
