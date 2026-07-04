@@ -14,6 +14,7 @@ import { setGroup, updateMemberChat } from "@/infra/database";
 import { invalidateGroupMetadata } from "@/infra/group-metadata-cache";
 import { loadCommands } from "@/core/loader";
 import { startSchedulers } from "@/infra/scheduler";
+import { checkGitUpdate } from "@/utils/git-check";
 
 let isRestarting = false;
 let restartAttempts = 0;
@@ -201,6 +202,7 @@ async function startBot() {
 
 async function main() {
   await loadCommands();
+  checkGitUpdate();
   await startBot();
 }
 
