@@ -34,7 +34,7 @@ export function checkGitUpdate() {
     }).trim();
 
     logger.info(`Commit: ${current}`);
-  } catch (err) {
+  } catch {
     logger.warn("Git check skipped (not a git repo or no network)");
   }
 }
