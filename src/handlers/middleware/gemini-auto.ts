@@ -8,6 +8,24 @@ const BASE = "https://www.00cc.eu.cc/gemini";
 /** Active auto-AI sessions (TTL 5 min). Exported so gemini command can toggle. */
 export const geminiAutoSessions = new TtlMap<string, true>(5 * 60 * 1000);
 
+/** Current session ID per user. Key=number, Value=sessionId */
+export const geminiSessions = new Map<string, string>();
+
+export function getSessionId(sender: string): string {
+  let sid = geminiSessions.get(sender);
+  if (!sid) {
+    sid = "SE" + sender;
+    geminiSessions.set(sender, sid);
+  }
+  return sid;
+}
+
+export function newSessionId(sender: string): string {
+  const sid = `SE${sender}-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+  geminiSessions.set(sender, sid);
+  return sid;
+}
+
 export const geminiAutoMiddleware: MessageMiddleware = async (ctx) => {
   const { sock, raw, parse } = ctx;
 
@@ -19,7 +37,7 @@ export const geminiAutoMiddleware: MessageMiddleware = async (ctx) => {
   const sender = parse.sender.replace(/@.+/, "");
   if (!geminiAutoSessions.has(sender)) return "next";
 
-  const session = "SE" + sender;
+  const session = getSessionId(sender);
   let url = `${BASE}?sessions=${encodeURIComponent(session)}&message=${encodeURIComponent(parse.body || ".")}`;
 
   // ── Image support ────────────────────────────────────

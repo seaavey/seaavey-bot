@@ -1,6 +1,6 @@
 import { downloadMediaMessage, type WAMessage } from "baileys";
 import { defineCommand } from "@/core/types";
-import { geminiAutoSessions } from "@/handlers/middleware/gemini-auto";
+import { geminiAutoSessions, getSessionId, newSessionId } from "@/handlers/middleware/gemini-auto";
 
 const BASE = "https://www.00cc.eu.cc/gemini";
 
@@ -13,10 +13,17 @@ export default defineCommand({
     "  .gemini <teks> — chat teks (auto-activate AI session 5 menit)\n" +
     "  .gemini <teks> (reply foto) — chat + analisa gambar\n" +
     '  .gemini --img <prompt> [--ar 1:1|4:3|16:9|3:2] — generate gambar\n' +
+    "  .gemini --new — buat session baru (reset percakapan)\n" +
     "  .gemini --stop — matikan auto-AI session",
   handler: async (sock, msg) => {
     const text = msg.text.trim();
     const sender = msg.sender.replace(/@.+/, "");
+
+    // ── New session ─────────────────────────────────────
+    if (text === "--new") {
+      const sid = newSessionId(sender);
+      return msg.reply(`🆕 *Session baru!*\nID: \`${sid}\`\nPercakapan sebelumnya di-reset.`);
+    }
 
     // ── Stop auto-AI ────────────────────────────────────
     if (text === "--stop") {
@@ -29,7 +36,7 @@ export default defineCommand({
       msg.quoted?.imageMessage || msg.message?.imageMessage;
 
     if (!text && !quotedImg)
-      return msg.reply("❌ Format: .gemini <pesan> | .gemini --img <prompt> | .gemini --stop");
+      return msg.reply("❌ Format: .gemini <pesan> | .gemini --img <prompt> | .gemini --new | .gemini --stop");
 
     // ── Generate image ──────────────────────────────────
     if (isImageGen) {
@@ -81,7 +88,7 @@ export default defineCommand({
     }
 
     // ── Text / Vision chat ──────────────────────────────
-    const session = "SE" + sender;
+    const session = getSessionId(sender);
     let url = `${BASE}?sessions=${encodeURIComponent(session)}&message=${encodeURIComponent(text || ".")}`;
     if (imageBase64) url += `&image=${encodeURIComponent(imageBase64)}`;
 
