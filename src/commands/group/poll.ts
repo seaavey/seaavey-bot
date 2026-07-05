@@ -28,7 +28,7 @@ export default defineCommand({
       if (Number.isNaN(idx) || idx < 0 || idx >= options.length)
         return msg.reply(`🚩 Choose 1-${options.length}`);
       votePoll(poll.id, msg.sender, idx);
-      return msg.reply(`✅ Your vote: ${options[idx]!}`);
+      return msg.reply(`✅ Your vote: ${options[idx]}`);
     }
 
     // Close: .poll close
@@ -78,11 +78,13 @@ ${poll.question}`,
         "Format: .poll Question? | Option1 | Option2 | ...\n\nOthers:\n.poll vote <number>\n.poll result\n.poll close",
       );
 
-    const [question, ...options] = parts;
+    const question = parts[0];
+    const options = parts.slice(1);
+    if (!question) return msg.reply("🚩 Question cannot be empty.");
     const existing = getPoll(msg.jid);
     if (existing)
       return msg.reply("🚩 There's already an active poll. Close it with .poll close first");
-    createPoll(msg.jid, msg.sender, question as string, options);
+    createPoll(msg.jid, msg.sender, question, options);
 
     const buttons: Button[] = options.map((o: string, i: number) => ({
       name: "quick_reply",
@@ -95,7 +97,7 @@ ${poll.question}`,
     await sendInteractive(sock, msg.jid, {
       body: `📊 *Poll Created!*
 
-${question!}`,
+${question}`,
       footer: "Click the button below to vote",
       buttons,
     });

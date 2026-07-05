@@ -51,7 +51,8 @@ ${list}`);
     } else if (sub === "del") {
       const id = Number.parseInt(msg.args[1] ?? "", 10);
       if (!id) return msg.reply("Format: .schedule del <id>");
-      deleteSchedule(id);
+      const deleted = deleteSchedule(msg.jid, id);
+      if (!deleted) return msg.reply("🚩 Schedule not found in this group.");
       await msg.reply(`✅ Schedule #${String(id)} deleted.`);
     } else {
       await msg.reply("Format: .schedule add <waktu> | <pesan>");

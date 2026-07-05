@@ -20,26 +20,34 @@ export function startSchedulers(sock: WASocket) {
     try {
       const reminders = getPendingReminders();
       for (const r of reminders) {
-        markReminderDone(r.id);
-        await sock.sendMessage(r.chatJid, {
-          text: `⏰ *Reminder!*\n\n@${getNumber(r.jid)}: ${r.message}`,
-          mentions: [r.jid],
-        });
+        try {
+          await sock.sendMessage(r.chatJid, {
+            text: `⏰ *Reminder!*\n\n@${getNumber(r.jid)}: ${r.message}`,
+            mentions: [r.jid],
+          });
+          markReminderDone(r.id);
+        } catch (e) {
+          logger.error({ err: e, reminderId: r.id }, "Scheduler error (reminder)");
+        }
       }
     } catch (e) {
-      logger.error(`Scheduler error (reminder): ${e}`);
+      logger.error({ err: e }, "Scheduler query failed (reminder)");
     }
 
     try {
       const schedules = getPendingSchedules();
       for (const s of schedules) {
-        markScheduleDone(s.id);
-        await sock.sendMessage(s.chatJid, {
-          text: `📢 *Scheduled Message*\n\n${s.message}`,
-        });
+        try {
+          await sock.sendMessage(s.chatJid, {
+            text: `📢 *Scheduled Message*\n\n${s.message}`,
+          });
+          markScheduleDone(s.id);
+        } catch (e) {
+          logger.error({ err: e, scheduleId: s.id }, "Scheduler error (schedule)");
+        }
       }
     } catch (e) {
-      logger.error(`Scheduler error (schedule): ${e}`);
+      logger.error({ err: e }, "Scheduler query failed (schedule)");
     }
   }, 30_000);
 }

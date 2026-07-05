@@ -69,7 +69,7 @@ bun run start
 
 ```bash
 docker build -t seaaveybot .
-docker run -v ./auth:/app/auth -v ./data:/app/data seaaveybot
+docker run -v ./auth:/app/auth -v ./data.db:/app/data.db seaaveybot
 ```
 
 ## Development

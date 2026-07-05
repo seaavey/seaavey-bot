@@ -87,6 +87,12 @@ export function getSchedules(chatJid: string) {
   }[];
 }
 
-export function deleteSchedule(id: number) {
-  db.run("DELETE FROM schedules WHERE id = ?", [id]);
+export function deleteSchedule(chatJid: string, id: number): boolean {
+  const schedule = db
+    .query("SELECT id FROM schedules WHERE id = ? AND chatJid = ? AND done = 0")
+    .get(id, chatJid) as { id: number } | null;
+  if (!schedule) return false;
+
+  db.run("DELETE FROM schedules WHERE id = ? AND chatJid = ?", [id, chatJid]);
+  return true;
 }

@@ -11,11 +11,15 @@ export async function getCachedGroupMetadata(sock: WASocket, jid: string): Promi
   const existing = pending.get(jid);
   if (existing) return existing;
 
-  const promise = sock.groupMetadata(jid).then((metadata) => {
-    cache.set(jid, metadata);
-    pending.delete(jid);
-    return metadata;
-  });
+  const promise = sock
+    .groupMetadata(jid)
+    .then((metadata) => {
+      cache.set(jid, metadata);
+      return metadata;
+    })
+    .finally(() => {
+      pending.delete(jid);
+    });
   pending.set(jid, promise);
   return promise;
 }

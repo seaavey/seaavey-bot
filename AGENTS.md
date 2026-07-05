@@ -26,20 +26,20 @@ bun run dev
 bun run start
 ```
 
-- **Test runner**: `bun:test`. Tests in `src/game/__tests__/`. No test step in CI currently.
-- **CI** (`.github/workflows/ci.yml`): `bun install` → `bun run lint` → `bunx tsc --noEmit`. Triggers on push/PR to `main`.
+- **Test runner**: `bun:test`. Existing tests are in `src/infra/scrapers/__tests__/`.
+- **CI** (`.github/workflows/ci.yml`): `bun install` → `bun run lint` → `bunx tsc --noEmit` → `bun test`. Triggers on push/PR to `main`.
 
 ## Architecture
 
-| Directory                  | Purpose                                                                                     |
-| -------------------------- | ------------------------------------------------------------------------------------------- |
-| `src/commands/<category>/` | 13 categories, each file auto-loaded as a command                                           |
-| `src/core/`                | Config, types, logger                                                                       |
-| `src/handlers/`            | Message parsing, command dispatch, guards, group events                                     |
-| `src/middleware/`          | Pipeline: antiViewOnce → antiLink → antiSpam → afk → gameAnswer → autoReply (order matters) |
-| `src/infra/`               | Database client, loader, scheduler, repositories (one per domain)                           |
-| `src/game/`                | Game engine — 30 games, 17 use JSON data from `src/data/games/`                             |
-| `src/utils/`               | Message resolver, helpers, TTL map, converters                                              |
+| Directory                  | Purpose                                                                                                  |
+| -------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `src/commands/<category>/` | 13 categories, each file auto-loaded as a command                                                        |
+| `src/core/`                | Config, types, logger                                                                                    |
+| `src/handlers/`            | Message parsing, command dispatch, guards, group events                                                  |
+| `src/handlers/middleware/` | Pipeline: antiViewOnce → antiLink → antiSpam → afk → gameAnswer → geminiAuto → autoReply (order matters) |
+| `src/infra/`               | Database client, loader, scheduler, repositories (one per domain)                                        |
+| `src/game/`                | Game engine — 30 games, 17 use JSON data from `src/game/data/games/`                                     |
+| `src/utils/`               | Message resolver, helpers, TTL map, converters                                                           |
 
 ## Command system
 

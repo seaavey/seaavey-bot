@@ -14,10 +14,10 @@ export default defineCommand({
         "Tag or reply to the user you want to transfer to.\nExample: .transfer @user 1000",
       );
     if (amount <= 0) return msg.reply("Enter a valid amount.");
-    if (target === msg.jid) return msg.reply("You can't transfer to yourself.");
-    const success = transferMoney(msg.jid, target, amount);
+    if (target === msg.sender) return msg.reply("You can't transfer to yourself.");
+    const success = transferMoney(msg.sender, target, amount);
     if (!success) return msg.reply("🚩 Not enough balance.");
-    const eco = getEconomy(msg.jid);
+    const eco = getEconomy(msg.sender);
     await msg.reply(
       `✅ Successfully transferred ${amount.toLocaleString()} coins to @${getNumber(target)}\n💰 Remaining balance: ${eco.wallet.toLocaleString()}`,
     );
