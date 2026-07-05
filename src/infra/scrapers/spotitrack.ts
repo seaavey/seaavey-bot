@@ -13,6 +13,10 @@ const UA =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36";
 const HOST = "spotitrack.com";
 const BASE = `https://${HOST}`;
+export type SpotitrackFetcher = (
+  input: Parameters<typeof fetch>[0],
+  init?: Parameters<typeof fetch>[1],
+) => Promise<Response>;
 
 export interface SpotitrackTrack {
   id: string;
@@ -32,8 +36,8 @@ export interface SpotitrackPlaylist {
   downloadUrl: string;
 }
 
-async function getActionToken(): Promise<string> {
-  const res = await fetch(BASE, { headers: { "user-agent": UA } });
+async function getActionToken(fetcher: SpotitrackFetcher): Promise<string> {
+  const res = await fetcher(BASE, { headers: { "user-agent": UA } });
   if (!res.ok) throw new Error("Failed to load main page for token synchronization.");
   const html = await res.text();
   // ponytail: fragile regex — upstream might change inline script shape; upgrade to cheerio if it breaks often
@@ -41,11 +45,14 @@ async function getActionToken(): Promise<string> {
   return match?.[1] ?? "40140d41ab0803c936eac316edb1fbc6b036e5478f";
 }
 
-export async function spotitrackTrack(url: string): Promise<ScraperResult<SpotitrackTrack>> {
+export async function spotitrackTrack(
+  url: string,
+  fetcher: SpotitrackFetcher = fetch,
+): Promise<ScraperResult<SpotitrackTrack>> {
   try {
-    const token = await getActionToken();
+    const token = await getActionToken(fetcher);
 
-    const actionRes = await fetch(BASE, {
+    const actionRes = await fetcher(BASE, {
       method: "POST",
       headers: {
         accept: "text/x-component",
@@ -74,7 +81,7 @@ export async function spotitrackTrack(url: string): Promise<ScraperResult<Spotit
     const info = parsed.data;
     const artist = Array.isArray(info.artists) ? info.artists.join(", ") : String(info.artists);
 
-    const audioRes = await fetch(`${BASE}/api/proxy/download`, {
+    const audioRes = await fetcher(`${BASE}/api/proxy/download`, {
       method: "POST",
       headers: {
         accept: "*/*",
@@ -111,11 +118,14 @@ export async function spotitrackTrack(url: string): Promise<ScraperResult<Spotit
   }
 }
 
-export async function spotitrackPlaylist(url: string): Promise<ScraperResult<SpotitrackPlaylist>> {
+export async function spotitrackPlaylist(
+  url: string,
+  fetcher: SpotitrackFetcher = fetch,
+): Promise<ScraperResult<SpotitrackPlaylist>> {
   try {
-    const token = await getActionToken();
+    const token = await getActionToken(fetcher);
 
-    const actionRes = await fetch(BASE, {
+    const actionRes = await fetcher(BASE, {
       method: "POST",
       headers: {
         accept: "text/x-component",
@@ -143,7 +153,7 @@ export async function spotitrackPlaylist(url: string): Promise<ScraperResult<Spo
       imageUrl: meta.image || "",
     });
 
-    const sseRes = await fetch(`${BASE}/api/proxy/playlist?${qs}`, {
+    const sseRes = await fetcher(`${BASE}/api/proxy/playlist?${qs}`, {
       headers: { accept: "text/event-stream", "user-agent": UA },
     });
 

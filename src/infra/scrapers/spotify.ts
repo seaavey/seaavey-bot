@@ -1,9 +1,54 @@
 import axios from "axios";
+import type { AxiosRequestConfig } from "axios";
 
 import type { ScraperResult } from "./index";
 import { scraperError, scraperSuccess } from "./index";
 
 const UA = "Mozilla/5.0 (X11; Linux x86_64; rv:151.0) Gecko/20100101 Firefox/151.0";
+
+interface HttpResponse {
+  data: unknown;
+}
+
+export interface SpotifyHttpClient {
+  post(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<HttpResponse>;
+  get(url: string, config?: AxiosRequestConfig): Promise<HttpResponse>;
+}
+
+interface SpotifyDownloadResponse {
+  data?: {
+    metadata?: {
+      name?: string;
+      artist?: string;
+      album?: string;
+      duration?: string;
+      image?: string;
+      download?: string;
+    };
+  };
+}
+
+interface SpotifySearchApiTrack {
+  id?: string;
+  title?: string;
+  artist?: string;
+  artists?: string[];
+  album?: string;
+  url?: string;
+  thumbnail?: string;
+  duration?: string;
+  duration_ms?: number;
+  explicit?: boolean;
+}
+
+interface SpotifySearchApiResponse {
+  success?: boolean;
+  query?: string;
+  total?: number;
+  results?: SpotifySearchApiTrack[];
+}
+
+const httpClient = axios as SpotifyHttpClient;
 
 export interface SpotifyData {
   title: string;
@@ -33,9 +78,12 @@ export interface SpotifySearchResult {
   tracks: SpotifyTrack[];
 }
 
-export async function spotify(url: string): Promise<ScraperResult<SpotifyData>> {
+export async function spotify(
+  url: string,
+  client: SpotifyHttpClient = httpClient,
+): Promise<ScraperResult<SpotifyData>> {
   try {
-    const res = await axios.post(
+    const res = await client.post(
       "https://musicfab.io/api/spotify",
       { url },
       {
@@ -49,7 +97,8 @@ export async function spotify(url: string): Promise<ScraperResult<SpotifyData>> 
       },
     );
 
-    const meta = res.data?.data?.metadata;
+    const data = res.data as SpotifyDownloadResponse;
+    const meta = data.data?.metadata;
     if (!meta?.name) throw new Error("Track not found");
 
     return scraperSuccess({
@@ -69,17 +118,18 @@ export async function spotify(url: string): Promise<ScraperResult<SpotifyData>> 
 export async function spotifySearch(
   query: string,
   limit = 5,
+  client: SpotifyHttpClient = httpClient,
 ): Promise<ScraperResult<SpotifySearchResult>> {
   try {
-    const res = await axios.get("https://spotify.xwolf.space/api/search", {
+    const res = await client.get("https://spotify.xwolf.space/api/search", {
       params: { q: query, type: "track", limit },
       headers: { "user-agent": UA },
     });
 
-    const data = res.data;
+    const data = res.data as SpotifySearchApiResponse;
     if (!data?.success) throw new Error("Search failed");
 
-    const tracks: SpotifyTrack[] = (data.results || []).map((t: Record<string, unknown>) => ({
+    const tracks: SpotifyTrack[] = (data.results || []).map((t) => ({
       id: t.id || "",
       title: t.title || "",
       artist: t.artist || "",
