@@ -31,6 +31,8 @@ export const geminiAutoMiddleware: MessageMiddleware = async (ctx) => {
 
   // Private only — groups never auto-respond
   if (parse.isGroup) return "next";
+  // Don't process bot's own messages (prevents infinite loop)
+  if (parse.fromMe) return "next";
   // Don't intercept prefixed commands
   if (config.prefix.some((p) => parse.body.startsWith(p))) return "next";
 
