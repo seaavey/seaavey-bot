@@ -5,6 +5,7 @@ import { antiSpam } from "./anti-spam";
 import { antiViewOnce } from "./anti-viewonce";
 import { autoReplyMiddleware } from "./auto-reply";
 import { gameAnswerMiddleware } from "./game-answer";
+import { geminiAutoMiddleware } from "./gemini-auto";
 
 export const middlewares: MessageMiddleware[] = [
   antiViewOnce,
@@ -12,6 +13,7 @@ export const middlewares: MessageMiddleware[] = [
   antiSpam,
   afkMiddleware,
   gameAnswerMiddleware,
+  geminiAutoMiddleware,
   autoReplyMiddleware,
 ];
 
