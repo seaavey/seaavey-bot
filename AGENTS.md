@@ -1,91 +1,61 @@
-# SeaaveyBot — Agent Guide
+# Repository Guidelines
 
-## Stack
+## Project Structure & Module Organization
 
-- **Runtime**: Bun (not Node.js). All commands use `bun` not `npm`/`node`.
-- **Entrypoint**: `src/index.ts` — calls `loadCommands()` then `startBot()`.
-- **Database**: `bun:sqlite` with WAL mode, file `data.db`. Inline migrations via `safeMigrate()` — no migration tooling.
-- **WhatsApp library**: `baileys@^7.0.0-rc13` (v7, relatively new). Auth stored in `auth/` directory via `useMultiFileAuthState`.
-- **Logger**: Pino with daily file rotation (`logs/`) + pino-pretty console output.
+SeaaveyBot is a Bun-based WhatsApp bot. The entrypoint is `src/index.ts`, which loads
+commands and starts the bot. Commands live in `src/commands/<category>/<name>.ts`; each
+file is auto-registered by filename, with optional `triggers`, `command`, and `alias`
+fields. Core configuration, shared types, and logging live in `src/core/`. Message
+handling, dispatch, guards, and middleware live in `src/handlers/`; middleware order is
+significant. Infrastructure code is in `src/infra/`, including SQLite access,
+repositories, scrapers, and the scheduler. Game logic is in `src/game/`, with data under
+`src/game/data/` when present. Static media lives in `src/assets/`. Tests currently live
+under `src/infra/scrapers/__tests__/`.
 
-## Commands
+## Build, Test, and Development Commands
 
-```bash
-# required order when verifying: lint first, then typecheck
-bun run lint          # eslint . && bun tsc (tsc --noEmit with strict checks)
-bun run format        # prettier --write .
-bun run format:check  # prettier --check .
-
-# run tests (no package.json script — invoke directly)
-bun test
-
-# development (with hot-reload)
-bun run dev
-
-# production
-bun run start
-```
-
-- **Test runner**: `bun:test`. Existing tests are in `src/infra/scrapers/__tests__/`.
-- **CI** (`.github/workflows/ci.yml`): `bun install` → `bun run lint` → `bunx tsc --noEmit` → `bun test`. Triggers on push/PR to `main`.
-
-## Architecture
-
-| Directory                  | Purpose                                                                                                  |
-| -------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `src/commands/<category>/` | 13 categories, each file auto-loaded as a command                                                        |
-| `src/core/`                | Config, types, logger                                                                                    |
-| `src/handlers/`            | Message parsing, command dispatch, guards, group events                                                  |
-| `src/handlers/middleware/` | Pipeline: antiViewOnce → antiLink → antiSpam → afk → gameAnswer → geminiAuto → autoReply (order matters) |
-| `src/infra/`               | Database client, loader, scheduler, repositories (one per domain)                                        |
-| `src/game/`                | Game engine — 30 games, 17 use JSON data from `src/game/data/games/`                                     |
-| `src/utils/`               | Message resolver, helpers, TTL map, converters                                                           |
-
-## Command system
-
-- Commands export `defineCommand({...})` as default. File at `src/commands/<category>/<name>.ts` gets its filename (minus `.ts`) as a trigger automatically.
-- Triggers also come from `triggers[]`, `command`, and `alias[]` fields. All lowercased.
-- Guards (`command-guards.ts`): ownerOnly, groupOnly, privateOnly, adminOnly, botAdmin, cooldown, enabled.
-- Path alias `@/*` maps to `./src/*`.
-
-## TypeScript quirks
-
-- `verbatimModuleSyntax: true` — **must use `import type`** for type-only imports.
-- `strict: true` with `noUncheckedIndexedAccess` enabled.
-- `noUnusedLocals` / `noUnusedParameters` are **false** (relaxed for dev).
-- `noEmit: true` (Bun handles transpilation).
-
-## Config
-
-`.env` file (copy from `.env.example`):
-
-```env
-OWNER_NUMBER=62123456789       # comma-separated for multiple
-ACCESS_MODE=public             # public | private | self
-PREFIX=.                       # comma-separated for multiple
-NODE_ENV=production            # production | development
-```
-
-## Code style
-
-- **ESLint**: no unused vars (`_` prefix exempt), `no-explicit-any` error, `no-console` warn, `prefer-const` error.
-- **Prettier**: 100 printWidth, double quotes, trailing commas, LF line endings.
-- **Git hook** (`.githooks/pre-commit`): auto-formats staged `.ts/.js/.json/.md` files with prettier + eslint --fix.
-- ESLint ignores: `node_modules/`, `data/`, `auth/`, `dev/`, `logs/`.
-
-## Docker
-
-Multi-stage build (`oven/bun:1`). Requires volumes for `auth/` and `data/` (or `data.db`):
+Use Bun for all local commands.
 
 ```bash
-docker build -t seaaveybot .
-docker run -v ./auth:/app/auth -v ./data.db:/app/data.db seaaveybot
+bun install          # install dependencies
+bun run lint         # eslint . && bun tsc
+bun run format       # prettier --write .
+bun run format:check # verify formatting
+bun test             # run bun:test suites
+bun run dev          # run locally with NODE_ENV=development
+bun run start        # production entrypoint
 ```
 
-## Miscellaneous
+When verifying changes, run `bun run lint` before tests.
 
-- Commands support cooldowns via TtlMap (5-minute self-cleanup).
-- Game answer checking is a middleware — all 20 game checkers run sequentially per message in group chats.
-- Scheduler (`src/infra/scheduler.ts`) polls every 30s for pending reminders and scheduled messages.
-- PM2 config at `ecosystem.config.cjs` uses `bun` as interpreter.
-- `install.sh` supports both Linux VPS and Termux.
+## Coding Style & Naming Conventions
+
+This project uses TypeScript with `strict`, `noUncheckedIndexedAccess`, and
+`verbatimModuleSyntax`. Use `import type` for type-only imports. Prefer existing helpers
+from `src/utils/`, repository classes from `src/infra/repositories/`, and the `@/*` path
+alias for source imports. Command files should default-export `defineCommand({...})` and
+use lowercase trigger names. Formatting is Prettier with 100-character lines, double
+quotes, trailing commas, and LF endings. ESLint rejects explicit `any`; unused variables
+may be prefixed with `_`.
+
+## Testing Guidelines
+
+Tests use `bun:test`. Place new tests beside the relevant module in a `__tests__`
+directory and name files `*.test.ts`, following the existing scraper tests. Add focused
+tests for parser, scraper, repository, and command behavior when logic changes. Keep
+network-dependent tests deterministic by mocking responses or using stable fixtures.
+
+## Commit & Pull Request Guidelines
+
+Recent history mostly uses concise imperative subjects with prefixes such as `feat:`,
+`fix:`, and `refactor:`. Follow that style, for example `fix: handle empty scraper
+response`. Pull requests should describe the behavior change, list verification commands
+run, link related issues when available, and include screenshots or chat examples for
+visible WhatsApp behavior.
+
+## Security & Configuration Tips
+
+Copy `.env.example` to `.env` for local configuration. Do not commit `.env`, `auth/`,
+`logs/`, `data/`, or `data.db`. SQLite uses `bun:sqlite` with WAL mode and inline
+migrations in code. WhatsApp auth state is stored in `auth/`, so keep that directory
+private and mounted as persistent storage in deployments.
