@@ -1,5 +1,5 @@
 import type { WASocket } from "baileys";
-import db, { getGroup, updateMemberChat } from "@/infra/database";
+import { ensureGroupMember, getGroup, removeGroupMember } from "@/infra/database";
 import { invalidateGroupMetadata } from "@/infra/group-metadata-cache";
 import { getNumber } from "@/utils/helper";
 
@@ -15,9 +15,9 @@ export async function handleGroupParticipants(
   for (const p of participants) {
     const jid = `${getNumber(p)}@s.whatsapp.net`;
     if (action === "add") {
-      updateMemberChat(id, jid);
+      ensureGroupMember(id, jid);
     } else {
-      db.run("DELETE FROM group_members WHERE groupJid = ? AND memberJid = ?", [id, jid]);
+      removeGroupMember(id, jid);
     }
   }
 

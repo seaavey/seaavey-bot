@@ -4,9 +4,13 @@ import { proto, type WAMessage, type WASocket, isJidNewsletter, isJidBroadcast }
 import { isDev } from "@/core/config";
 import { dispatchCommand } from "@/handlers/command-dispatcher";
 import type { MessageContext } from "@/handlers/message-context";
-import db from "@/infra/client";
 import { getCachedGroupMetadata } from "@/infra/group-metadata-cache";
-import { getGroup, updateMemberChat } from "@/infra/repositories/group-repo";
+import {
+  countGroupMembers,
+  ensureGroupMember,
+  getGroup,
+  recordMemberChat,
+} from "@/infra/repositories/group-repo";
 import { runMiddlewares } from "@/handlers/middleware";
 import { getNumber } from "@/utils/helper";
 import { resolveMessage } from "@/utils/message-resolver";
@@ -39,16 +43,13 @@ export async function handleMessagesUpsert(sock: WASocket, messages: WAMessage[]
     }
 
     if (parse.isGroup) {
-      updateMemberChat(parse.jid, parse.sender);
+      recordMemberChat(parse.jid, parse.sender);
       const group = getGroup(parse.jid);
 
-      const count = db
-        .query("SELECT COUNT(*) as c FROM group_members WHERE groupJid = ?")
-        .get(parse.jid) as { c: number };
-      if (count.c <= 1) {
+      if (countGroupMembers(parse.jid) <= 1) {
         const metadata = await getCachedGroupMetadata(sock, parse.jid);
         for (const p of metadata.participants) {
-          updateMemberChat(parse.jid, p.phoneNumber || p.id);
+          ensureGroupMember(parse.jid, p.phoneNumber || p.id);
         }
       }
 

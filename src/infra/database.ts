@@ -8,17 +8,21 @@ export {
   removeAutoReply,
 } from "@/infra/repositories/autoreply-repo";
 export {
-  addWallet,
+  creditWallet,
+  debitWallet,
   getEconomy,
   setLastDaily,
   transferMoney,
 } from "@/infra/repositories/economy-repo";
 export {
+  countGroupMembers,
+  ensureGroupMember,
   type Group,
   getGroup,
   getSiders,
+  recordMemberChat,
+  removeGroupMember,
   setGroup,
-  updateMemberChat,
 } from "@/infra/repositories/group-repo";
 export {
   closePoll,

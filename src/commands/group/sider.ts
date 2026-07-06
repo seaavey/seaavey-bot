@@ -1,5 +1,5 @@
 import { defineCommand } from "@/core/types";
-import db, { getSiders, updateMemberChat } from "@/infra/database";
+import { ensureGroupMember, getSiders } from "@/infra/database";
 import { getNumber } from "@/utils/helper";
 export default defineCommand({
   name: "Sider",
@@ -11,23 +11,16 @@ export default defineCommand({
     const days = Number(msg.args[0]) || 3;
     const metadata = await sock.groupMetadata(msg.jid);
 
-    // Sync all members to DB (missing ones will be inserted with lastChat = now)
     for (const p of metadata.participants) {
       const memberJid = p.phoneNumber || p.id;
-      const exists = db
-        .query("SELECT 1 FROM group_members WHERE groupJid = ? AND memberJid = ?")
-        .get(msg.jid, memberJid);
-      if (!exists) updateMemberChat(msg.jid, memberJid);
+      ensureGroupMember(msg.jid, memberJid);
     }
 
-    // Get all members from participant list
     const allMembers = metadata.participants.map((p) => p.phoneNumber || p.id);
 
-    // Recorded members who haven't chatted in a while
     const inactive = getSiders(msg.jid, days).map((s) => s.memberJid);
     const inactiveSet = new Set(inactive);
 
-    // Filter only those in the participant list
     const allSiders = allMembers.filter((m) => inactiveSet.has(m));
 
     if (!allSiders.length) {

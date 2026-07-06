@@ -10,7 +10,7 @@ import * as QRCode from "qrcode";
 import { logger, createEventLogger } from "@/core/logger";
 import { handleGroupParticipants } from "@/handlers/group-handler";
 import { handleMessagesUpdate, handleMessagesUpsert } from "@/handlers/message-handler";
-import { setGroup, updateMemberChat } from "@/infra/database";
+import { ensureGroupMember, setGroup } from "@/infra/database";
 import { invalidateGroupMetadata } from "@/infra/group-metadata-cache";
 import { loadCommands } from "@/core/loader";
 import { startSchedulers } from "@/infra/scheduler";
@@ -171,7 +171,7 @@ async function startBot() {
       invalidateGroupMetadata(group.id);
       setGroup(group.id, "name", group.subject || "");
       for (const p of group.participants) {
-        updateMemberChat(group.id, p.phoneNumber || p.id);
+        ensureGroupMember(group.id, p.phoneNumber || p.id);
       }
       logger.info(`Registered members from ${group.subject}`);
     }

@@ -62,11 +62,29 @@ db.run(`
 
 safeMigrate("ALTER TABLE group_members ADD COLUMN chatCount INTEGER DEFAULT 0");
 
-export function updateMemberChat(groupJid: string, memberJid: string) {
+export function ensureGroupMember(groupJid: string, memberJid: string) {
+  db.run("INSERT OR IGNORE INTO group_members (groupJid, memberJid) VALUES (?, ?)", [
+    groupJid,
+    memberJid,
+  ]);
+}
+
+export function recordMemberChat(groupJid: string, memberJid: string) {
   db.run(
     "INSERT INTO group_members (groupJid, memberJid, lastChat, chatCount) VALUES (?, ?, ?, 1) ON CONFLICT(groupJid, memberJid) DO UPDATE SET lastChat = ?, chatCount = chatCount + 1",
     [groupJid, memberJid, Date.now(), Date.now()],
   );
+}
+
+export function removeGroupMember(groupJid: string, memberJid: string) {
+  db.run("DELETE FROM group_members WHERE groupJid = ? AND memberJid = ?", [groupJid, memberJid]);
+}
+
+export function countGroupMembers(groupJid: string): number {
+  const row = db
+    .query("SELECT COUNT(*) as count FROM group_members WHERE groupJid = ?")
+    .get(groupJid) as { count: number };
+  return row.count;
 }
 
 export function getSiders(groupJid: string, days = 3) {

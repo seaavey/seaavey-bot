@@ -1,5 +1,5 @@
 import { defineCommand } from "@/core/types";
-import { addWallet, getEconomy, setLastDaily } from "@/infra/database";
+import { creditWallet, getEconomy, setLastDaily } from "@/infra/database";
 import { getRandomNumber } from "@/utils/helper";
 
 export default defineCommand({
@@ -17,7 +17,7 @@ export default defineCommand({
       return msg.reply(`⏰ You already claimed today. Try again in ${hours}h ${mins}m.`);
     }
     const reward = getRandomNumber(3000, 7999);
-    addWallet(msg.sender, reward);
+    creditWallet(msg.sender, reward);
     setLastDaily(msg.sender);
     await msg.reply(
       `🎁 Daily reward: +${reward.toLocaleString()} coins!\n💰 Wallet: ${(eco.wallet + reward).toLocaleString()}`,

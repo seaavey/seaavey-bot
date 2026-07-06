@@ -1,5 +1,5 @@
 import { defineCommand } from "@/core/types";
-import { addWallet, getEconomy } from "@/infra/database";
+import { debitWallet } from "@/infra/database";
 
 const SHOP_ITEMS = [
   { id: "1", name: "🎣 Fishing Rod", price: 5000, desc: "Fishing tool" },
@@ -21,10 +21,9 @@ export default defineCommand({
     }
     const item = SHOP_ITEMS.find((i) => i.id === buyId);
     if (!item) return msg.reply("🚩 Item not found.");
-    const eco = getEconomy(msg.sender);
-    if (eco.wallet < item.price)
+    if (!debitWallet(msg.sender, item.price)) {
       return msg.reply(`🚩 Not enough balance. You need ${item.price.toLocaleString()} coins.`);
-    addWallet(msg.sender, -item.price);
+    }
     await msg.reply(`✅ Successfully bought ${item.name}!`);
   },
 });

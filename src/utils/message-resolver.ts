@@ -9,6 +9,17 @@ import {
 import { config } from "@/core/config";
 import { getCachedGroupMetadata } from "@/infra/group-metadata-cache";
 
+export interface QuotedMessage {
+  id: string | undefined;
+  sender: string;
+  mtype: keyof proto.Message | undefined;
+  body: string;
+  imageMessage: proto.Message.IImageMessage | null | undefined;
+  videoMessage: proto.Message.IVideoMessage | null | undefined;
+  audioMessage: proto.Message.IAudioMessage | null | undefined;
+  stickerMessage: proto.Message.IStickerMessage | null | undefined;
+}
+
 export interface MessageResolver {
   id: string | undefined;
   jid: string;
@@ -21,18 +32,7 @@ export interface MessageResolver {
   isOwner: boolean;
   mentioned: string[];
   mtype: keyof proto.Message | undefined;
-  quoted:
-    | {
-        id: MessageResolver["id"];
-        sender: string;
-        mtype: keyof proto.Message | undefined;
-        body: string;
-        imageMessage: proto.Message.IImageMessage | null | undefined;
-        videoMessage: proto.Message.IVideoMessage | null | undefined;
-        audioMessage: proto.Message.IAudioMessage | null | undefined;
-        stickerMessage: proto.Message.IStickerMessage | null | undefined;
-      }
-    | undefined;
+  quoted: QuotedMessage | undefined;
   args: string[];
   text: string;
   message: proto.IMessage | null | undefined;
@@ -44,13 +44,38 @@ export interface MessageResolver {
   send: (content: AnyMessageContent) => Promise<void>;
 }
 
-function extractBody(m: proto.IMessage | null | undefined): string {
-  if (m?.interactiveResponseMessage?.nativeFlowResponseMessage?.paramsJson) {
-    try {
-      const params = JSON.parse(m.interactiveResponseMessage.nativeFlowResponseMessage.paramsJson);
-      if (params.id) return params.id;
-    } catch {}
+interface MessageIdentity {
+  jid: string;
+  sender: string;
+  isGroup: boolean;
+}
+
+interface GroupRoles {
+  isAdmin: boolean;
+  isBotAdmin: boolean;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function readNativeFlowId(paramsJson: string): string | null {
+  try {
+    const params = JSON.parse(paramsJson) as unknown;
+    if (!isRecord(params)) return null;
+    return typeof params.id === "string" ? params.id : null;
+  } catch {
+    return null;
   }
+}
+
+function extractBody(m: proto.IMessage | null | undefined): string {
+  const paramsJson = m?.interactiveResponseMessage?.nativeFlowResponseMessage?.paramsJson;
+  if (paramsJson) {
+    const nativeFlowId = readNativeFlowId(paramsJson);
+    if (nativeFlowId) return nativeFlowId;
+  }
+
   return (
     m?.conversation ||
     m?.extendedTextMessage?.text ||
@@ -61,83 +86,110 @@ function extractBody(m: proto.IMessage | null | undefined): string {
   );
 }
 
-export async function resolveMessage(sock: WASocket, msg: WAMessage): Promise<MessageResolver> {
-  // Helper function to convert LID to JID
-  const LIDToJid = async (lid: string): Promise<string | null> => {
-    if (lid.endsWith("@g.us")) return lid;
-    if (lid.endsWith("@s.whatsapp.net")) return lid;
-    const jid = await sock.signalRepository.lidMapping.getPNForLID(lid);
-    return jidNormalizedUser(jid ?? undefined) || lid;
-  };
+function getMessageType(
+  message: proto.IMessage | null | undefined,
+): keyof proto.Message | undefined {
+  return message ? (Object.keys(message)[0] as keyof proto.Message) : undefined;
+}
 
+async function normalizeJid(sock: WASocket, jid: string): Promise<string> {
+  if (!jid) return "";
+  if (jid.endsWith("@g.us")) return jid;
+  if (jid.endsWith("@s.whatsapp.net")) return jid;
+
+  const phoneNumber = await sock.signalRepository.lidMapping.getPNForLID(jid);
+  return jidNormalizedUser(phoneNumber ?? undefined) || jid;
+}
+
+async function resolveIdentity(sock: WASocket, msg: WAMessage): Promise<MessageIdentity> {
   const key = msg.key;
-  const mid = key.id || "";
   const isGroup = isJidGroup(key.remoteJid ?? "") || false;
-  const jid = key.remoteJidAlt || (await LIDToJid(key.remoteJid || "")) || "";
+  const jid = key.remoteJidAlt || (await normalizeJid(sock, key.remoteJid || ""));
   const sender = isGroup
-    ? key.participantAlt || (await LIDToJid(key.participant || "")) || ""
+    ? key.participantAlt || (await normalizeJid(sock, key.participant || ""))
     : jid;
 
-  let isAdmin = false;
-  let isBotAdmin = false;
+  return { jid, sender, isGroup };
+}
 
-  if (isGroup) {
-    const metadata = await getCachedGroupMetadata(sock, jid);
-    const participant = metadata.participants.find((p) => (p.phoneNumber || p.id) === sender);
+async function resolveGroupRoles(sock: WASocket, identity: MessageIdentity): Promise<GroupRoles> {
+  if (!identity.isGroup) return { isAdmin: false, isBotAdmin: false };
 
-    isAdmin = !!participant?.admin;
-    const botId = jidNormalizedUser(sock.user?.id);
-    isBotAdmin = metadata.participants.some((p) => p.admin && (p.phoneNumber || p.id) === botId);
-  }
+  const metadata = await getCachedGroupMetadata(sock, identity.jid);
+  const participant = metadata.participants.find(
+    (p) => (p.phoneNumber || p.id) === identity.sender,
+  );
+  const botId = jidNormalizedUser(sock.user?.id);
+  const isBotAdmin = metadata.participants.some(
+    (p) => p.admin && (p.phoneNumber || p.id) === botId,
+  );
 
-  const contextInfo = msg.message?.extendedTextMessage?.contextInfo;
-  const mentioned = contextInfo?.mentionedJid || [];
+  return { isAdmin: !!participant?.admin, isBotAdmin };
+}
 
-  const body = extractBody(msg.message);
-  const args = body.split(" ").slice(1);
-  const qm = contextInfo?.quotedMessage;
-  const qKey = qm ? (Object.keys(qm)[0] as keyof proto.Message) : undefined;
-  const quoted = contextInfo?.stanzaId
-    ? {
-        id: contextInfo.stanzaId ?? undefined,
-        sender: (await LIDToJid(contextInfo.participant || "")) || "",
-        mtype: qKey,
-        body: extractBody(qm),
-        imageMessage: qm?.imageMessage,
-        videoMessage: qm?.videoMessage,
-        audioMessage: qm?.audioMessage,
-        stickerMessage: qm?.stickerMessage,
-      }
-    : undefined;
+async function resolveQuotedMessage(
+  sock: WASocket,
+  contextInfo: proto.IContextInfo | null | undefined,
+): Promise<QuotedMessage | undefined> {
+  const quotedMessage = contextInfo?.quotedMessage;
+  if (!contextInfo?.stanzaId || !quotedMessage) return undefined;
 
   return {
-    id: mid,
+    id: contextInfo.stanzaId ?? undefined,
+    sender: await normalizeJid(sock, contextInfo.participant || ""),
+    mtype: getMessageType(quotedMessage),
+    body: extractBody(quotedMessage),
+    imageMessage: quotedMessage.imageMessage,
+    videoMessage: quotedMessage.videoMessage,
+    audioMessage: quotedMessage.audioMessage,
+    stickerMessage: quotedMessage.stickerMessage,
+  };
+}
+
+function createMessageActions(sock: WASocket, jid: string, msg: WAMessage) {
+  return {
+    react: async (emoji: string) => {
+      await sock.sendMessage(jid, { react: { text: emoji, key: msg.key } });
+    },
+    reply: async (text: string) => {
+      const mentions = [...text.matchAll(/@(\d+)/g)].map((m) => `${m[1]}@s.whatsapp.net`);
+      await sock.sendMessage(jid, { text, mentions }, { quoted: msg });
+    },
+    send: async (content: AnyMessageContent) => {
+      await sock.sendMessage(jid, content, { quoted: msg });
+    },
+  };
+}
+
+export async function resolveMessage(sock: WASocket, msg: WAMessage): Promise<MessageResolver> {
+  const { jid, sender, isGroup } = await resolveIdentity(sock, msg);
+  const { isAdmin, isBotAdmin } = await resolveGroupRoles(sock, { jid, sender, isGroup });
+  const contextInfo = msg.message?.extendedTextMessage?.contextInfo;
+  const mentioned = contextInfo?.mentionedJid || [];
+  const body = extractBody(msg.message);
+  const args = body.split(" ").slice(1);
+  const quoted = await resolveQuotedMessage(sock, contextInfo);
+  const actions = createMessageActions(sock, jid, msg);
+
+  return {
+    id: msg.key.id || "",
     jid,
     sender,
     body,
-    fromMe: !!key.fromMe,
+    fromMe: !!msg.key.fromMe,
     isGroup,
     isAdmin,
     isBotAdmin,
     isOwner: config.owner.includes(sender.replace(/@.+/, "")),
     mentioned,
     quoted,
-    mtype: msg.message ? (Object.keys(msg.message)[0] as keyof proto.Message) : undefined,
+    mtype: getMessageType(msg.message),
     args,
     text: args.join(" "),
     message: msg.message,
     key: msg.key,
     pushName: msg.pushName,
     raw: msg,
-    react: async (emoji) => {
-      await sock.sendMessage(jid, { react: { text: emoji, key: msg.key } });
-    },
-    reply: async (text) => {
-      const mentions = [...text.matchAll(/@(\d+)/g)].map((m) => `${m[1]}@s.whatsapp.net`);
-      await sock.sendMessage(jid, { text, mentions }, { quoted: msg });
-    },
-    send: async (content) => {
-      await sock.sendMessage(jid, content, { quoted: msg });
-    },
+    ...actions,
   };
 }
