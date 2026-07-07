@@ -4,33 +4,34 @@ import { getGroup } from "@/infra/repositories/group-repo";
 import { getNumber } from "@/utils/helper";
 
 export const antiViewOnce: MessageMiddleware = async (ctx) => {
-  const { sock, raw } = ctx;
+  const { sock, parse } = ctx;
 
-  const viewOnce = raw.message?.viewOnceMessage?.message || raw.message?.viewOnceMessageV2?.message;
+  const viewOnce =
+    parse.message?.viewOnceMessage?.message || parse.message?.viewOnceMessageV2?.message;
   if (!viewOnce) return "next";
 
   const ownerJid = `${config.owner[0]}@s.whatsapp.net`;
-  const sender = raw.key.participant || raw.key.remoteJid || "";
+  const sender = parse.sender;
 
   await sock.sendMessage(ownerJid, {
     text: `👁️ *View Once Detected*
 
 👤 ${sender}
-📍 ${raw.key.remoteJid ?? ""}`,
+📍 ${parse.jid}`,
   });
-  await sock.sendMessage(ownerJid, { forward: { key: raw.key, message: viewOnce } });
+  await sock.sendMessage(ownerJid, { forward: { key: parse.key, message: viewOnce } });
 
-  if (raw.key.remoteJid?.endsWith("@g.us")) {
-    const grp = getGroup(raw.key.remoteJid);
+  if (parse.isGroup) {
+    const grp = getGroup(parse.jid);
     if (grp.antiviewonce) {
-      await sock.sendMessage(raw.key.remoteJid, {
+      await sock.sendMessage(parse.jid, {
         text: `👁️ *View Once Opened*
 
 👤 @${getNumber(sender)} sent a view once message:`,
         mentions: [sender],
       });
-      await sock.sendMessage(raw.key.remoteJid, {
-        forward: { key: raw.key, message: viewOnce },
+      await sock.sendMessage(parse.jid, {
+        forward: { key: parse.key, message: viewOnce },
       });
     }
   }

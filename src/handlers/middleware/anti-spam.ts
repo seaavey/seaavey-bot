@@ -5,7 +5,7 @@ import { TtlMap } from "@/utils/ttl-map";
 const spamTracker = new TtlMap<string, number[]>(15_000);
 
 export const antiSpam: MessageMiddleware = async (ctx) => {
-  const { sock, raw, parse, group } = ctx;
+  const { sock, parse, group } = ctx;
   if (!parse.isGroup || !group?.antispam) return "next";
   if (parse.isAdmin) return "next";
 
@@ -18,7 +18,7 @@ export const antiSpam: MessageMiddleware = async (ctx) => {
 
   if (recent.length >= 5) {
     spamTracker.delete(key);
-    await sock.sendMessage(parse.jid, { delete: raw.key });
+    await sock.sendMessage(parse.jid, { delete: parse.key });
     await sock.sendMessage(parse.jid, {
       text: `⚠️ @${getNumber(parse.sender)} don't spam!`,
       mentions: [parse.sender],

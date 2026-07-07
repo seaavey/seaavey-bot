@@ -1,5 +1,6 @@
 import {
   type AnyMessageContent,
+  downloadMediaMessage,
   isJidGroup,
   jidNormalizedUser,
   type proto,
@@ -18,6 +19,25 @@ export interface QuotedMessage {
   videoMessage: proto.Message.IVideoMessage | null | undefined;
   audioMessage: proto.Message.IAudioMessage | null | undefined;
   stickerMessage: proto.Message.IStickerMessage | null | undefined;
+  documentMessage: proto.Message.IDocumentMessage | null | undefined;
+}
+
+export type MediaMessageType =
+  "imageMessage" | "videoMessage" | "audioMessage" | "stickerMessage" | "documentMessage";
+
+export interface MediaMessageByType {
+  imageMessage: proto.Message.IImageMessage;
+  videoMessage: proto.Message.IVideoMessage;
+  audioMessage: proto.Message.IAudioMessage;
+  stickerMessage: proto.Message.IStickerMessage;
+  documentMessage: proto.Message.IDocumentMessage;
+}
+
+export interface ResolvedMediaMessage<T extends MediaMessageType = MediaMessageType> {
+  type: T;
+  message: MediaMessageByType[T];
+  isQuoted: boolean;
+  download: () => Promise<Buffer>;
 }
 
 export interface MessageResolver {
@@ -38,7 +58,9 @@ export interface MessageResolver {
   message: proto.IMessage | null | undefined;
   key: WAMessage["key"];
   pushName: string | null | undefined;
-  raw: WAMessage;
+  messageTimestamp: number | null;
+  findMedia: <T extends MediaMessageType>(...types: T[]) => ResolvedMediaMessage<T> | undefined;
+  downloadMedia: <T extends MediaMessageType>(...types: T[]) => Promise<Buffer>;
   react: (emoji: string) => Promise<void>;
   reply: (text: string) => Promise<void>;
   send: (content: AnyMessageContent) => Promise<void>;
@@ -55,8 +77,20 @@ interface GroupRoles {
   isBotAdmin: boolean;
 }
 
+const MEDIA_MESSAGE_TYPES = [
+  "imageMessage",
+  "videoMessage",
+  "audioMessage",
+  "stickerMessage",
+  "documentMessage",
+] as const satisfies readonly MediaMessageType[];
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
+}
+
+function hasToNumber(value: unknown): value is { toNumber: () => number } {
+  return isRecord(value) && typeof value.toNumber === "function";
 }
 
 function readNativeFlowId(paramsJson: string): string | null {
@@ -90,6 +124,76 @@ function getMessageType(
   message: proto.IMessage | null | undefined,
 ): keyof proto.Message | undefined {
   return message ? (Object.keys(message)[0] as keyof proto.Message) : undefined;
+}
+
+function resolveMessageTimestamp(timestamp: unknown): number | null {
+  if (typeof timestamp === "number") return timestamp;
+  if (typeof timestamp === "bigint") return Number(timestamp);
+
+  if (hasToNumber(timestamp)) {
+    return timestamp.toNumber();
+  }
+
+  if (!timestamp) return null;
+
+  const value = Number(timestamp);
+  return Number.isFinite(value) ? value : null;
+}
+
+function getMediaByType<T extends MediaMessageType>(
+  message: proto.IMessage | null | undefined,
+  type: T,
+): MediaMessageByType[T] | null | undefined {
+  switch (type) {
+    case "imageMessage":
+      return (message?.imageMessage ||
+        message?.viewOnceMessage?.message?.imageMessage ||
+        message?.viewOnceMessageV2?.message?.imageMessage ||
+        message?.viewOnceMessageV2Extension?.message?.imageMessage) as
+        MediaMessageByType[T] | null | undefined;
+    case "videoMessage":
+      return (message?.videoMessage ||
+        message?.viewOnceMessage?.message?.videoMessage ||
+        message?.viewOnceMessageV2?.message?.videoMessage ||
+        message?.viewOnceMessageV2Extension?.message?.videoMessage) as
+        MediaMessageByType[T] | null | undefined;
+    case "audioMessage":
+      return message?.audioMessage as MediaMessageByType[T] | null | undefined;
+    case "stickerMessage":
+      return message?.stickerMessage as MediaMessageByType[T] | null | undefined;
+    case "documentMessage":
+      return (message?.documentMessage ||
+        message?.documentWithCaptionMessage?.message?.documentMessage) as
+        MediaMessageByType[T] | null | undefined;
+  }
+}
+
+function findMediaInMessage<T extends MediaMessageType>(
+  message: proto.IMessage | null | undefined,
+  types: readonly T[],
+): { type: T; message: MediaMessageByType[T] } | undefined {
+  for (const type of types) {
+    const media = getMediaByType(message, type);
+    if (media) return { type, message: media };
+  }
+
+  return undefined;
+}
+
+function createMediaDownloadMessage<T extends MediaMessageType>(
+  key: WAMessage["key"],
+  media: { type: T; message: MediaMessageByType[T] },
+): WAMessage {
+  return {
+    key,
+    message: { [media.type]: media.message },
+  } as WAMessage;
+}
+
+async function downloadMediaBuffer(message: WAMessage): Promise<Buffer> {
+  return (await downloadMediaMessage(message, "buffer", {
+    host: "mmg.whatsapp.net",
+  })) as Buffer;
 }
 
 async function normalizeJid(sock: WASocket, jid: string): Promise<string> {
@@ -143,6 +247,7 @@ async function resolveQuotedMessage(
     videoMessage: quotedMessage.videoMessage,
     audioMessage: quotedMessage.audioMessage,
     stickerMessage: quotedMessage.stickerMessage,
+    documentMessage: quotedMessage.documentMessage,
   };
 }
 
@@ -161,6 +266,41 @@ function createMessageActions(sock: WASocket, jid: string, msg: WAMessage) {
   };
 }
 
+function createMediaActions(msg: WAMessage, quoted: QuotedMessage | undefined) {
+  const quotedMessage = msg.message?.extendedTextMessage?.contextInfo?.quotedMessage;
+
+  const findMedia = <T extends MediaMessageType>(
+    ...types: T[]
+  ): ResolvedMediaMessage<T> | undefined => {
+    const selectedTypes = (types.length ? types : MEDIA_MESSAGE_TYPES) as readonly T[];
+    const currentMedia = findMediaInMessage(msg.message, selectedTypes);
+    const quotedMedia = findMediaInMessage(quotedMessage, selectedTypes);
+    const media = currentMedia || quotedMedia;
+
+    if (!media) return undefined;
+
+    const isQuoted = !currentMedia && !!quotedMedia;
+    const key = isQuoted
+      ? { ...msg.key, id: quoted?.id ?? null, participant: quoted?.sender ?? null }
+      : msg.key;
+    const mediaMessage = createMediaDownloadMessage(key, media);
+
+    return {
+      ...media,
+      isQuoted,
+      download: () => downloadMediaBuffer(mediaMessage),
+    };
+  };
+
+  const downloadMedia = async <T extends MediaMessageType>(...types: T[]): Promise<Buffer> => {
+    const media = findMedia(...types);
+    if (!media) throw new Error("No downloadable media found.");
+    return media.download();
+  };
+
+  return { findMedia, downloadMedia };
+}
+
 export async function resolveMessage(sock: WASocket, msg: WAMessage): Promise<MessageResolver> {
   const { jid, sender, isGroup } = await resolveIdentity(sock, msg);
   const { isAdmin, isBotAdmin } = await resolveGroupRoles(sock, { jid, sender, isGroup });
@@ -170,6 +310,7 @@ export async function resolveMessage(sock: WASocket, msg: WAMessage): Promise<Me
   const args = body.split(" ").slice(1);
   const quoted = await resolveQuotedMessage(sock, contextInfo);
   const actions = createMessageActions(sock, jid, msg);
+  const mediaActions = createMediaActions(msg, quoted);
 
   return {
     id: msg.key.id || "",
@@ -189,7 +330,8 @@ export async function resolveMessage(sock: WASocket, msg: WAMessage): Promise<Me
     message: msg.message,
     key: msg.key,
     pushName: msg.pushName,
-    raw: msg,
+    messageTimestamp: resolveMessageTimestamp(msg.messageTimestamp),
+    ...mediaActions,
     ...actions,
   };
 }

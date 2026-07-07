@@ -53,11 +53,11 @@ export async function handleMessagesUpsert(sock: WASocket, messages: WAMessage[]
         }
       }
 
-      const ctx: MessageContext = { sock, raw: msg, parse, group };
+      const ctx: MessageContext = { sock, parse, group };
       const result = await runMiddlewares(ctx);
       if (result === "stop") continue;
     } else {
-      const ctx: MessageContext = { sock, raw: msg, parse };
+      const ctx: MessageContext = { sock, parse };
       const result = await runMiddlewares(ctx);
       if (result === "stop") continue;
     }

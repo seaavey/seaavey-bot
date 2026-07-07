@@ -1,4 +1,3 @@
-import { downloadMediaMessage, type WAMessage } from "baileys";
 import { defineCommand } from "@/core/types";
 import { geminiAutoSessions, getSessionId, newSessionId } from "@/handlers/middleware/gemini-auto";
 
@@ -12,7 +11,7 @@ export default defineCommand({
     "Usage:\n" +
     "  .gemini <teks> — chat teks (auto-activate AI session 5 menit)\n" +
     "  .gemini <teks> (reply foto) — chat + analisa gambar\n" +
-    '  .gemini --img <prompt> [--ar 1:1|4:3|16:9|3:2] — generate gambar\n' +
+    "  .gemini --img <prompt> [--ar 1:1|4:3|16:9|3:2] — generate gambar\n" +
     "  .gemini --new — buat session baru (reset percakapan)\n" +
     "  .gemini --stop — matikan auto-AI session",
   handler: async (sock, msg) => {
@@ -32,11 +31,12 @@ export default defineCommand({
     }
 
     const isImageGen = text.startsWith("--img");
-    const quotedImg =
-      msg.quoted?.imageMessage || msg.message?.imageMessage;
+    const imageMedia = msg.findMedia("imageMessage");
 
-    if (!text && !quotedImg)
-      return msg.reply("❌ Format: .gemini <pesan> | .gemini --img <prompt> | .gemini --new | .gemini --stop");
+    if (!text && !imageMedia)
+      return msg.reply(
+        "❌ Format: .gemini <pesan> | .gemini --img <prompt> | .gemini --new | .gemini --stop",
+      );
 
     // ── Generate image ──────────────────────────────────
     if (isImageGen) {
@@ -57,7 +57,7 @@ export default defineCommand({
 
       try {
         const res = await fetch(url);
-        const json = await res.json() as { success?: boolean; image?: string };
+        const json = (await res.json()) as { success?: boolean; image?: string };
         if (!json.success || !json.image) return msg.reply("❌ Gagal generate gambar.");
         const buf = Buffer.from(json.image.replace(/^data:image\/\w+;base64,/, ""), "base64");
         await msg.send({ image: buf, caption: `🎨 *${prompt}*` });
@@ -69,18 +69,10 @@ export default defineCommand({
 
     // ── Vision (reply to image) ──────────────────────────
     let imageBase64: string | undefined;
-    if (quotedImg) {
+    if (imageMedia) {
       try {
         await msg.reply("⏳ *Processing image...*");
-        const mediaMsg = msg.quoted
-          ? {
-              key: { ...msg.key, id: msg.quoted.id, participant: msg.quoted.sender },
-              message: { imageMessage: quotedImg },
-            }
-          : msg.raw;
-        const buffer = (await downloadMediaMessage(mediaMsg as WAMessage, "buffer", {
-          host: "mmg.whatsapp.net",
-        })) as Buffer;
+        const buffer = await imageMedia.download();
         imageBase64 = buffer.toString("base64");
       } catch {
         return msg.reply("❌ Gagal download gambar.");
@@ -96,7 +88,7 @@ export default defineCommand({
 
     try {
       const res = await fetch(url);
-      const json = await res.json() as { success?: boolean; response?: string; error?: string };
+      const json = (await res.json()) as { success?: boolean; response?: string; error?: string };
       if (!json.success) return msg.reply(`❌ ${json.error || "Gagal merespons."}`);
       await msg.reply(json.response || "_(no response)_");
     } catch {

@@ -1,4 +1,3 @@
-import { downloadMediaMessage, type WAMessage } from "baileys";
 import { defineCommand } from "@/core/types";
 import { stickerToImage } from "@/utils/convert";
 
@@ -7,11 +6,13 @@ export default defineCommand({
   alias: ["toimage"],
   description: "Convert sticker to image",
   handler: async (sock, msg) => {
-    const sticker = msg.quoted?.stickerMessage;
+    const media = msg.findMedia("stickerMessage");
 
-    if (!sticker) {
+    if (!media) {
       return msg.reply("Reply to a sticker with caption .toimg");
     }
+
+    const sticker = media.message;
 
     if (sticker.mimetype && sticker.mimetype !== "image/webp") {
       return msg.reply("Only WebP stickers (image/webp) are supported.");
@@ -31,14 +32,7 @@ export default defineCommand({
 
     await msg.reply("⏳ Converting sticker to image...");
 
-    const message = {
-      key: { ...msg.key, id: msg.quoted?.id, participant: msg.quoted?.sender },
-      message: { stickerMessage: sticker },
-    } as WAMessage;
-
-    const buffer = (await downloadMediaMessage(message, "buffer", {
-      host: "mmg.whatsapp.net",
-    })) as Buffer;
+    const buffer = await media.download();
     const image = stickerToImage(buffer);
 
     await msg.send({ image });

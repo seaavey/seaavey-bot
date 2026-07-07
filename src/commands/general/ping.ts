@@ -36,17 +36,9 @@ export default defineCommand({
     const dbLatency = (performance.now() - dbStart).toFixed(3);
 
     // 2. Network / Message Latency
-    const rawTime = msg.raw.messageTimestamp;
-    let msgTime: number | null = null;
-    if (typeof rawTime === "number") {
-      msgTime = rawTime;
-    } else if (rawTime && typeof rawTime === "object" && "toNumber" in rawTime) {
-      msgTime = (rawTime as { toNumber: () => number }).toNumber();
-    } else if (rawTime) {
-      msgTime = Number(rawTime);
-    }
-
-    const netLatency = msgTime ? Math.max(0, Date.now() - msgTime * 1000) : null;
+    const netLatency = msg.messageTimestamp
+      ? Math.max(0, Date.now() - msg.messageTimestamp * 1000)
+      : null;
 
     // 3. System stats
     const totalMem = totalmem();

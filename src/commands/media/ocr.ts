@@ -1,4 +1,3 @@
-import { downloadMediaMessage } from "baileys";
 import { defineCommand } from "@/core/types";
 
 export default defineCommand({
@@ -6,14 +5,10 @@ export default defineCommand({
   alias: ["ocr"],
   description: "Extract text from image. Reply image with .ocr",
   handler: async (sock, msg) => {
-    const imgMsg = msg.message?.imageMessage || msg.quoted?.imageMessage;
-    if (!imgMsg) return msg.reply("🚩 Reply to an image with .ocr");
+    const media = msg.findMedia("imageMessage");
+    if (!media) return msg.reply("🚩 Reply to an image with .ocr");
     await msg.reply("⏳ Reading text from image...");
-    const buffer = await downloadMediaMessage(
-      { message: { imageMessage: imgMsg }, key: msg.key },
-      "buffer",
-      { host: "mmg.whatsapp.net" },
-    );
+    const buffer = await media.download();
     const form = new FormData();
     form.append("file", new Blob([buffer], { type: "image/png" }), "image.png");
     form.append("apikey", "K89642968388957");

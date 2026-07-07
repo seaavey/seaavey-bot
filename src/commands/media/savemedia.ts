@@ -1,14 +1,6 @@
-import { downloadMediaMessage, type WAMessage, type proto } from "baileys";
 import { defineCommand } from "@/core/types";
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-
-type MediaMessage =
-  | proto.Message.IImageMessage
-  | proto.Message.IVideoMessage
-  | proto.Message.IAudioMessage
-  | proto.Message.IStickerMessage
-  | proto.Message.IDocumentMessage;
 
 export default defineCommand({
   name: "Save Media",
@@ -19,106 +11,24 @@ export default defineCommand({
   tags: ["media"],
   ownerOnly: true,
   handler: async (sock, msg) => {
-    const rawQuoted = msg.raw.message?.extendedTextMessage?.contextInfo?.quotedMessage;
+    const media = msg.findMedia(
+      "imageMessage",
+      "videoMessage",
+      "audioMessage",
+      "stickerMessage",
+      "documentMessage",
+    );
 
-    let mediaType: string | null = null;
-    let mediaObject: MediaMessage | null | undefined = null;
-    let isQuoted = false;
-
-    if (msg.message?.imageMessage) {
-      mediaType = "imageMessage";
-      mediaObject = msg.message.imageMessage;
-    } else if (msg.message?.videoMessage) {
-      mediaType = "videoMessage";
-      mediaObject = msg.message.videoMessage;
-    } else if (msg.message?.audioMessage) {
-      mediaType = "audioMessage";
-      mediaObject = msg.message.audioMessage;
-    } else if (msg.message?.stickerMessage) {
-      mediaType = "stickerMessage";
-      mediaObject = msg.message.stickerMessage;
-    } else if (msg.message?.documentMessage) {
-      mediaType = "documentMessage";
-      mediaObject = msg.message.documentMessage;
-    } else if (msg.message?.documentWithCaptionMessage?.message?.documentMessage) {
-      mediaType = "documentMessage";
-      mediaObject = msg.message.documentWithCaptionMessage.message.documentMessage;
-    } else if (msg.message?.viewOnceMessage?.message?.imageMessage) {
-      mediaType = "imageMessage";
-      mediaObject = msg.message.viewOnceMessage.message.imageMessage;
-    } else if (msg.message?.viewOnceMessage?.message?.videoMessage) {
-      mediaType = "videoMessage";
-      mediaObject = msg.message.viewOnceMessage.message.videoMessage;
-    } else if (msg.message?.viewOnceMessageV2?.message?.imageMessage) {
-      mediaType = "imageMessage";
-      mediaObject = msg.message.viewOnceMessageV2.message.imageMessage;
-    } else if (msg.message?.viewOnceMessageV2?.message?.videoMessage) {
-      mediaType = "videoMessage";
-      mediaObject = msg.message.viewOnceMessageV2.message.videoMessage;
-    } else if (msg.message?.viewOnceMessageV2Extension?.message?.imageMessage) {
-      mediaType = "imageMessage";
-      mediaObject = msg.message.viewOnceMessageV2Extension.message.imageMessage;
-    } else if (msg.message?.viewOnceMessageV2Extension?.message?.videoMessage) {
-      mediaType = "videoMessage";
-      mediaObject = msg.message.viewOnceMessageV2Extension.message.videoMessage;
-    } else if (rawQuoted) {
-      isQuoted = true;
-      if (rawQuoted.imageMessage) {
-        mediaType = "imageMessage";
-        mediaObject = rawQuoted.imageMessage;
-      } else if (rawQuoted.videoMessage) {
-        mediaType = "videoMessage";
-        mediaObject = rawQuoted.videoMessage;
-      } else if (rawQuoted.audioMessage) {
-        mediaType = "audioMessage";
-        mediaObject = rawQuoted.audioMessage;
-      } else if (rawQuoted.stickerMessage) {
-        mediaType = "stickerMessage";
-        mediaObject = rawQuoted.stickerMessage;
-      } else if (rawQuoted.documentMessage) {
-        mediaType = "documentMessage";
-        mediaObject = rawQuoted.documentMessage;
-      } else if (rawQuoted.documentWithCaptionMessage?.message?.documentMessage) {
-        mediaType = "documentMessage";
-        mediaObject = rawQuoted.documentWithCaptionMessage.message.documentMessage;
-      } else if (rawQuoted.viewOnceMessage?.message?.imageMessage) {
-        mediaType = "imageMessage";
-        mediaObject = rawQuoted.viewOnceMessage.message.imageMessage;
-      } else if (rawQuoted.viewOnceMessage?.message?.videoMessage) {
-        mediaType = "videoMessage";
-        mediaObject = rawQuoted.viewOnceMessage.message.videoMessage;
-      } else if (rawQuoted.viewOnceMessageV2?.message?.imageMessage) {
-        mediaType = "imageMessage";
-        mediaObject = rawQuoted.viewOnceMessageV2.message.imageMessage;
-      } else if (rawQuoted.viewOnceMessageV2?.message?.videoMessage) {
-        mediaType = "videoMessage";
-        mediaObject = rawQuoted.viewOnceMessageV2.message.videoMessage;
-      } else if (rawQuoted.viewOnceMessageV2Extension?.message?.imageMessage) {
-        mediaType = "imageMessage";
-        mediaObject = rawQuoted.viewOnceMessageV2Extension.message.imageMessage;
-      } else if (rawQuoted.viewOnceMessageV2Extension?.message?.videoMessage) {
-        mediaType = "videoMessage";
-        mediaObject = rawQuoted.viewOnceMessageV2Extension.message.videoMessage;
-      }
-    }
-
-    if (!mediaType || !mediaObject) {
+    if (!media) {
       return msg.reply("🚩 Reply/send media with caption .savemedia");
     }
 
     await msg.reply("⏳ Downloading media...");
 
     try {
-      const downloadMsg = isQuoted
-        ? {
-            message: { [mediaType]: mediaObject },
-            key: { ...msg.key, id: msg.quoted?.id, participant: msg.quoted?.sender },
-          }
-        : msg.raw;
-
-      const buffer = (await downloadMediaMessage(downloadMsg as WAMessage, "buffer", {
-        host: "mmg.whatsapp.net",
-      })) as Buffer;
+      const mediaType = media.type;
+      const mediaObject = media.message;
+      const buffer = await media.download();
 
       if (!buffer) {
         throw new Error("Failed to download media from WhatsApp server.");

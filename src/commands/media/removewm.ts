@@ -1,4 +1,3 @@
-import { downloadMediaMessage, type WAMessage } from "baileys";
 import { defineCommand } from "@/core/types";
 import { removeWatermark } from "@/infra/scrapers";
 
@@ -8,24 +7,16 @@ export default defineCommand({
   description: "Remove watermark from an image using EzRemove",
   tags: ["media"],
   handler: async (sock, msg) => {
-    const imageMsg = msg.message?.imageMessage || msg.quoted?.imageMessage;
+    const media = msg.findMedia("imageMessage");
 
-    if (!imageMsg) {
+    if (!media) {
       return msg.reply("🚩 Reply or send an image with caption .removewm");
     }
 
     await msg.reply("⏳ Removing watermark...");
 
     try {
-      const message = msg.quoted
-        ? ({
-            key: { ...msg.key, id: msg.quoted.id, participant: msg.quoted.sender },
-            message: { imageMessage: msg.quoted.imageMessage },
-          } as WAMessage)
-        : msg.raw;
-      const buffer = (await downloadMediaMessage(message, "buffer", {
-        host: "mmg.whatsapp.net",
-      })) as Buffer;
+      const buffer = await media.download();
 
       const result = await removeWatermark(buffer);
 
@@ -33,13 +24,7 @@ export default defineCommand({
         return msg.reply(`🚩 Failed: ${result.error || "Unknown error"}`);
       }
 
-      await sock.sendMessage(
-        msg.jid,
-        {
-          image: result.data.buffer,
-        },
-        { quoted: msg.raw },
-      );
+      await msg.send({ image: result.data.buffer });
     } catch (e: unknown) {
       const errMsg = e instanceof Error ? e.message : String(e);
       await msg.reply(`🚩 Failed: ${errMsg}`);

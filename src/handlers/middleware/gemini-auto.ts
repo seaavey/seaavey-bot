@@ -1,4 +1,3 @@
-import { downloadMediaMessage, type WAMessage } from "baileys";
 import { TtlMap } from "@/utils/ttl-map";
 import { config } from "@/core/config";
 import type { MessageMiddleware } from "@/handlers/message-context";
@@ -27,7 +26,7 @@ export function newSessionId(sender: string): string {
 }
 
 export const geminiAutoMiddleware: MessageMiddleware = async (ctx) => {
-  const { sock, raw, parse } = ctx;
+  const { parse } = ctx;
 
   // Private only — groups never auto-respond
   if (parse.isGroup) return "next";
@@ -43,12 +42,10 @@ export const geminiAutoMiddleware: MessageMiddleware = async (ctx) => {
   let url = `${BASE}?sessions=${encodeURIComponent(session)}&message=${encodeURIComponent(parse.body || ".")}`;
 
   // ── Image support ────────────────────────────────────
-  const imgMsg = parse.message?.imageMessage;
-  if (imgMsg) {
+  const imageMedia = parse.findMedia("imageMessage");
+  if (imageMedia) {
     try {
-      const buffer = (await downloadMediaMessage({ key: raw.key, message: { imageMessage: imgMsg } } as WAMessage, "buffer", {
-        host: "mmg.whatsapp.net",
-      })) as Buffer;
+      const buffer = await imageMedia.download();
       const b64 = buffer.toString("base64");
       url += `&image=${encodeURIComponent(b64)}`;
     } catch {
@@ -56,16 +53,16 @@ export const geminiAutoMiddleware: MessageMiddleware = async (ctx) => {
     }
   }
 
-  await sock.sendMessage(parse.jid, { text: "💬 *Auto AI is thinking...*" }, { quoted: raw });
+  await parse.reply("💬 *Auto AI is thinking...*");
 
   try {
     const res = await fetch(url);
-    const json = await res.json() as { success?: boolean; response?: string };
+    const json = (await res.json()) as { success?: boolean; response?: string };
     if (json.success && json.response) {
-      await sock.sendMessage(parse.jid, { text: json.response }, { quoted: raw });
+      await parse.reply(json.response);
     }
   } catch {
-    await sock.sendMessage(parse.jid, { text: "❌ Gagal merespons." }, { quoted: raw });
+    await parse.reply("❌ Gagal merespons.");
   }
 
   return "stop";
