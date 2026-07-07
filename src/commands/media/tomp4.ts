@@ -1,5 +1,4 @@
 import { defineCommand } from "@/core/types";
-import { config } from "@/core/config";
 import { stickerToImage, stickerToVideo } from "@/utils/convert";
 
 export default defineCommand({
@@ -29,10 +28,7 @@ export default defineCommand({
       return msg.reply("🚩 Sticker is empty or corrupted.");
     }
 
-    // Parse the actual trigger invoked by the user
-    const body = msg.body || "";
-    const prefix = config.prefix.find((p) => body.startsWith(p)) || "";
-    const trigger = (body.slice(prefix.length).split(" ")[0] || "").toLowerCase();
+    const trigger = msg.commandName?.toLowerCase() || "";
 
     try {
       // Determine conversion type: static image vs animated video

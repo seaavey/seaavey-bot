@@ -7,7 +7,7 @@ export default defineCommand({
   description: "Eval JavaScript code",
   ownerOnly: true,
   handler: async (sock, msg) => {
-    const code = msg.body.slice(2).trim();
+    const code = msg.text;
     if (!code) return msg.reply("Masukkan kode!");
     try {
       void sock; // available in eval scope

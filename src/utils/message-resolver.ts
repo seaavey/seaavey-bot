@@ -9,6 +9,7 @@ import {
 } from "baileys";
 import { config } from "@/core/config";
 import { getCachedGroupMetadata } from "@/infra/group-metadata-cache";
+import { parseCommandBody } from "@/utils/command-parser";
 
 export interface QuotedMessage {
   id: string | undefined;
@@ -55,6 +56,9 @@ export interface MessageResolver {
   quoted: QuotedMessage | undefined;
   args: string[];
   text: string;
+  isCommand: boolean;
+  prefix: string | undefined;
+  commandName: string | undefined;
   message: proto.IMessage | null | undefined;
   key: WAMessage["key"];
   pushName: string | null | undefined;
@@ -307,7 +311,7 @@ export async function resolveMessage(sock: WASocket, msg: WAMessage): Promise<Me
   const contextInfo = msg.message?.extendedTextMessage?.contextInfo;
   const mentioned = contextInfo?.mentionedJid || [];
   const body = extractBody(msg.message);
-  const args = body.split(" ").slice(1);
+  const command = parseCommandBody(body, config.prefix);
   const quoted = await resolveQuotedMessage(sock, contextInfo);
   const actions = createMessageActions(sock, jid, msg);
   const mediaActions = createMediaActions(msg, quoted);
@@ -325,8 +329,11 @@ export async function resolveMessage(sock: WASocket, msg: WAMessage): Promise<Me
     mentioned,
     quoted,
     mtype: getMessageType(msg.message),
-    args,
-    text: args.join(" "),
+    args: command.args,
+    text: command.text,
+    isCommand: command.isCommand,
+    prefix: command.prefix,
+    commandName: command.commandName,
     message: msg.message,
     key: msg.key,
     pushName: msg.pushName,

@@ -14,12 +14,14 @@ db.run(`
     onlyAdmin INTEGER DEFAULT 0,
     welcomeMsg TEXT DEFAULT '',
     goodbyeMsg TEXT DEFAULT '',
+    rulesMsg TEXT DEFAULT '',
     warnMax INTEGER DEFAULT 3,
     antiviewonce INTEGER DEFAULT 0
   )
 `);
 
 safeMigrate("ALTER TABLE groups ADD COLUMN antiviewonce INTEGER DEFAULT 0");
+safeMigrate("ALTER TABLE groups ADD COLUMN rulesMsg TEXT DEFAULT ''");
 
 export interface Group {
   jid: string;
@@ -34,6 +36,7 @@ export interface Group {
   onlyAdmin: number;
   welcomeMsg: string;
   goodbyeMsg: string;
+  rulesMsg: string;
   warnMax: number;
   antiviewonce: number;
 }

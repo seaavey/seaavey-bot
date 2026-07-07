@@ -4,7 +4,7 @@ import { setGroup } from "@/infra/database";
 export default defineCommand({
   name: "Set",
   alias: ["set"],
-  description: "Set group settings (welcomeMsg, goodbyeMsg, warnMax)",
+  description: "Set group settings",
   groupOnly: true,
   adminOnly: true,
   handler: async (_sock, msg) => {
@@ -12,12 +12,10 @@ export default defineCommand({
     const value = rest.join(" ");
 
     if (!key || !value) {
-      return msg.reply(
-        "📝 Usage:\n• !set welcomeMsg Welcome @user!\n• !set goodbyeMsg Goodbye @user!\n• !set warnMax 5",
-      );
+      return msg.reply("📝 Usage:\n• .set warnMax 5");
     }
 
-    const allowed = ["welcomeMsg", "goodbyeMsg", "warnMax"] as const;
+    const allowed = ["warnMax"] as const;
     type AllowedKey = (typeof allowed)[number];
     if (!allowed.includes(key as AllowedKey)) {
       return msg.reply(`🚩 Invalid key. Choose: ${allowed.join(", ")}`);

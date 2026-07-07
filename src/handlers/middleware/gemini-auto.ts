@@ -1,5 +1,4 @@
 import { TtlMap } from "@/utils/ttl-map";
-import { config } from "@/core/config";
 import type { MessageMiddleware } from "@/handlers/message-context";
 
 const BASE = "https://www.00cc.eu.cc/gemini";
@@ -32,8 +31,8 @@ export const geminiAutoMiddleware: MessageMiddleware = async (ctx) => {
   if (parse.isGroup) return "next";
   // Don't process bot's own messages (prevents infinite loop)
   if (parse.fromMe) return "next";
-  // Don't intercept prefixed commands
-  if (config.prefix.some((p) => parse.body.startsWith(p))) return "next";
+  // Don't intercept commands
+  if (parse.isCommand) return "next";
 
   const sender = parse.sender.replace(/@.+/, "");
   if (!geminiAutoSessions.has(sender)) return "next";

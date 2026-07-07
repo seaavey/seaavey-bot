@@ -1,8 +1,9 @@
-import { toggleCommand } from "@/utils/group-toggle";
+import { groupMessageCommand } from "@/utils/group-message-command";
 
-export default toggleCommand({
+export default groupMessageCommand({
   name: "Goodbye",
   alias: ["bye", "goodbye"],
   field: "goodbye",
-  description: "Toggle goodbye message on/off",
+  messageField: "goodbyeMsg",
+  label: "Goodbye",
 });

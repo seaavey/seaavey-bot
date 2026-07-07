@@ -13,7 +13,7 @@ export default defineCommand({
   alias: ["tiktokdl"],
   description: "Download TikTok video/images via tikwm.com",
   handler: async (_sock, msg) => {
-    const url = msg.body.split(" ").slice(1).join(" ").trim();
+    const url = msg.text;
     if (!url) return msg.reply("Format: .ttdl <url>");
 
     await msg.reply("⏳ Downloading...");

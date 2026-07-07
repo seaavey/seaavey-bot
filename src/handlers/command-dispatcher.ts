@@ -9,23 +9,13 @@ import { getNumber } from "@/utils/helper";
 import type { MessageResolver } from "@/utils/message-resolver";
 
 export async function dispatchCommand(sock: WASocket, parse: MessageResolver) {
-  let cmdName: string | undefined;
-  if (parse.body.startsWith("=> ") || parse.body === "=>") cmdName = "=>";
-  else if (parse.body.startsWith("> ") || parse.body === ">") cmdName = ">";
-  else {
-    const matchedPrefix = config.prefix.find((p) => parse.body.startsWith(p));
-    if (matchedPrefix) {
-      [cmdName] = parse.body.slice(matchedPrefix.length).split(" ");
-    }
-  }
-
-  if (!cmdName) return;
+  if (!parse.commandName) return;
   if (isBanned(parse.sender)) return;
   if (config.accessMode === "self" && !parse.fromMe) return;
   if (config.accessMode === "private" && !parse.fromMe && !parse.isOwner) return;
   if (parse.isGroup && getGroup(parse.jid)?.mute && !parse.isAdmin) return;
 
-  const cmd = commands.get(cmdName.toLowerCase());
+  const cmd = commands.get(parse.commandName.toLowerCase());
   if (!cmd) return;
 
   const guardResult = await checkGuards(sock, parse, cmd);

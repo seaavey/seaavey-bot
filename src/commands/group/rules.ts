@@ -13,12 +13,12 @@ export default defineCommand({
       if (!msg.isAdmin) return msg.reply("🚩 Admin only.");
       const text = msg.args.slice(1).join(" ");
       if (!text) return msg.reply("Format: .rules set <group rules>");
-      setGroup(msg.jid, "welcomeMsg", text);
+      setGroup(msg.jid, "rulesMsg", text);
       return msg.reply("✅ Rules saved successfully!");
     }
 
     const group = getGroup(msg.jid);
-    const rules = group.welcomeMsg;
+    const rules = group.rulesMsg;
     if (!rules) return msg.reply("🚩 No rules yet. Admin can set with: .rules set <text>");
     await msg.reply(`📋 *Rules*
 

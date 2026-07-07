@@ -1,4 +1,3 @@
-import { config } from "@/core/config";
 import type { MessageMiddleware } from "@/handlers/message-context";
 import { getAfk, removeAfk } from "@/infra/repositories/afk-repo";
 import { formatTime, getNumber } from "@/utils/helper";
@@ -15,8 +14,7 @@ export const afkMiddleware: MessageMiddleware = async (ctx) => {
     });
   }
 
-  const hasPrefix = config.prefix.some((p) => parse.body.startsWith(p));
-  if (parse.body && !hasPrefix) {
+  if (parse.body && !parse.isCommand) {
     for (const m of parse.mentioned) {
       const afk = getAfk(m);
       if (afk) {
