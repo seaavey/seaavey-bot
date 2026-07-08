@@ -112,7 +112,10 @@ async function epsilonDownload(
     const title = step.title || "Unknown";
     const thumbnail = `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
 
-    if (!downloadURL && progressURL) {
+    // Always poll progress when available — initial downloadURL may
+    // not be ready yet (especially for mp4).  The progress endpoint
+    // eventually returns the final ready-to-download URL.
+    if (progressURL) {
       for (let i = 0; i < 20; i++) {
         await new Promise((r) => setTimeout(r, 3000));
         try {
