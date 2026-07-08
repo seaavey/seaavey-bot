@@ -28,6 +28,26 @@ const BASE_HEADERS: Record<string, string> = {
   "Sec-Fetch-Site": "cross-site",
 };
 
+interface AuthResponse {
+  key?: string;
+}
+
+interface InitResponse {
+  convertURL?: string;
+}
+
+interface ConvertStep {
+  redirectURL?: string;
+  progressURL?: string;
+  downloadURL?: string;
+  title?: string;
+}
+
+interface ProgressResponse {
+  progress?: number;
+  downloadURL?: string;
+}
+
 function extractVideoId(url: string): string {
   const normalized = url
     .replace("music.youtube.com", "www.youtube.com")
@@ -36,18 +56,17 @@ function extractVideoId(url: string): string {
   return m?.[1] ?? "";
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function call(url: string, auth?: string, retry = 0): Promise<any> {
+async function call<T>(url: string, auth?: string, retry = 0): Promise<T> {
   const h = { ...BASE_HEADERS };
   if (auth) h["Authorization"] = `Bearer ${auth}`;
   const r = await fetch(url, { headers: h });
   if (r.status === 403 && retry < 3) {
     await new Promise((r) => setTimeout(r, 2000));
-    return call(url, auth, retry + 1);
+    return call<T>(url, auth, retry + 1);
   }
   const body = await r.text();
   if (!r.ok) throw new Error(`Epsilon ${r.status}`);
-  return JSON.parse(body);
+  return JSON.parse(body) as T;
 }
 
 async function downloadFile(url: string): Promise<string> {
@@ -67,25 +86,25 @@ async function epsilonDownload(
     const id = extractVideoId(url);
     if (!id) return scraperError("Invalid YouTube URL");
 
-    const { key } = await call(
+    const { key } = await call<AuthResponse>(
       `https://${API_HOST}/api/v1/auth?_=${Date.now()}`,
-    ) as { key?: string };
+    );
     if (!key) return scraperError("No auth key");
 
-    const session = await call(
+    const session = await call<InitResponse>(
       `https://${API_HOST}/api/v1/init?_=${Date.now()}`,
       key,
-    ) as { convertURL?: string };
+    );
     if (!session.convertURL) return scraperError("No convert URL");
 
-    let step = await call(
+    let step = await call<ConvertStep>(
       `${session.convertURL}&v=${id}&f=${format}&_=${Date.now()}`,
-    ) as { redirectURL?: string; progressURL?: string; downloadURL?: string; title?: string };
+    );
 
     while (step.redirectURL) {
-      step = await call(
+      step = await call<ConvertStep>(
         `${step.redirectURL}&v=${id}&f=${format}&_=${Date.now()}`,
-      ) as typeof step;
+      );
     }
 
     const progressURL = step.progressURL;
@@ -97,10 +116,12 @@ async function epsilonDownload(
       for (let i = 0; i < 20; i++) {
         await new Promise((r) => setTimeout(r, 3000));
         try {
-          const p = await call(`${progressURL}&_=${Date.now()}`) as { progress?: number; downloadURL?: string };
+          const p = await call<ProgressResponse>(`${progressURL}&_=${Date.now()}`);
           if (p.downloadURL) downloadURL = p.downloadURL;
           if ((p.progress ?? 0) >= 3) break;
-        } catch { /* retry */ }
+        } catch {
+          /* retry */
+        }
       }
     }
 
