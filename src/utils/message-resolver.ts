@@ -10,6 +10,7 @@ import {
 import { config } from "@/core/config";
 import { getCachedGroupMetadata } from "@/infra/group-metadata-cache";
 import { parseCommandBody } from "@/utils/command-parser";
+import { getNumber } from "@/utils/helper";
 
 export interface QuotedMessage {
   id: string | undefined;
@@ -224,13 +225,24 @@ async function resolveGroupRoles(sock: WASocket, identity: MessageIdentity): Pro
   if (!identity.isGroup) return { isAdmin: false, isBotAdmin: false };
 
   const metadata = await getCachedGroupMetadata(sock, identity.jid);
-  const normalizedSender = jidNormalizedUser(identity.sender) ?? "";
-  const participant = metadata.participants.find(
-    (p) => jidNormalizedUser(p.id) === normalizedSender,
+  const senderNum = getNumber(identity.sender);
+
+  const participants = await Promise.all(
+    metadata.participants.map(async (p) => {
+      const resolvedId = p.id.endsWith("@lid")
+        ? await normalizeJid(sock, p.id)
+        : p.id;
+      return { ...p, resolvedId };
+    }),
   );
-  const botId = jidNormalizedUser(sock.user?.id) ?? "";
-  const isBotAdmin = metadata.participants.some(
-    (p) => p.admin && jidNormalizedUser(p.id) === botId,
+
+  const participant = participants.find(
+    (p) => getNumber(p.resolvedId) === senderNum,
+  );
+  // sock.user?.id format: "62859...:72@s.whatsapp.net" — strip device suffix
+  const botNum = getNumber(sock.user?.id ?? "").replace(/:.*$/, "");
+  const isBotAdmin = participants.some(
+    (p) => p.admin && getNumber(p.resolvedId) === botNum,
   );
 
   return { isAdmin: !!participant?.admin, isBotAdmin };
