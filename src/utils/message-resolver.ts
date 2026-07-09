@@ -224,12 +224,13 @@ async function resolveGroupRoles(sock: WASocket, identity: MessageIdentity): Pro
   if (!identity.isGroup) return { isAdmin: false, isBotAdmin: false };
 
   const metadata = await getCachedGroupMetadata(sock, identity.jid);
+  const normalizedSender = jidNormalizedUser(identity.sender) ?? "";
   const participant = metadata.participants.find(
-    (p) => (p.phoneNumber || p.id) === identity.sender,
+    (p) => jidNormalizedUser(p.id) === normalizedSender,
   );
-  const botId = jidNormalizedUser(sock.user?.id);
+  const botId = jidNormalizedUser(sock.user?.id) ?? "";
   const isBotAdmin = metadata.participants.some(
-    (p) => p.admin && (p.phoneNumber || p.id) === botId,
+    (p) => p.admin && jidNormalizedUser(p.id) === botId,
   );
 
   return { isAdmin: !!participant?.admin, isBotAdmin };
