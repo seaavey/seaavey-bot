@@ -20,8 +20,7 @@ const API_HOST = "epsilon.epsiloncloud.org";
 const BASE_HEADERS: Record<string, string> = {
   Origin: "https://convertytmp3.org",
   Referer: "https://convertytmp3.org/",
-  "User-Agent":
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:152.0) Gecko/20100101 Firefox/152.0",
+  "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:152.0) Gecko/20100101 Firefox/152.0",
   Accept: "*/*",
   "Sec-Fetch-Dest": "empty",
   "Sec-Fetch-Mode": "cors",
@@ -86,9 +85,7 @@ async function epsilonDownload(
     const id = extractVideoId(url);
     if (!id) return scraperError("Invalid YouTube URL");
 
-    const { key } = await call<AuthResponse>(
-      `https://${API_HOST}/api/v1/auth?_=${Date.now()}`,
-    );
+    const { key } = await call<AuthResponse>(`https://${API_HOST}/api/v1/auth?_=${Date.now()}`);
     if (!key) return scraperError("No auth key");
 
     const session = await call<InitResponse>(
@@ -97,14 +94,10 @@ async function epsilonDownload(
     );
     if (!session.convertURL) return scraperError("No convert URL");
 
-    let step = await call<ConvertStep>(
-      `${session.convertURL}&v=${id}&f=${format}&_=${Date.now()}`,
-    );
+    let step = await call<ConvertStep>(`${session.convertURL}&v=${id}&f=${format}&_=${Date.now()}`);
 
     while (step.redirectURL) {
-      step = await call<ConvertStep>(
-        `${step.redirectURL}&v=${id}&f=${format}&_=${Date.now()}`,
-      );
+      step = await call<ConvertStep>(`${step.redirectURL}&v=${id}&f=${format}&_=${Date.now()}`);
     }
 
     const progressURL = step.progressURL;
@@ -130,9 +123,7 @@ async function epsilonDownload(
 
     if (!downloadURL) return scraperError("No download URL obtained");
 
-    const localFile = await downloadFile(
-      `${downloadURL}&v=${id}&f=${format}&r=cli`,
-    );
+    const localFile = await downloadFile(`${downloadURL}&v=${id}&f=${format}&r=cli`);
 
     return scraperSuccess({ title, thumbnail, downloadUrl: downloadURL, format, localFile });
   } catch (e: unknown) {

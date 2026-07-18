@@ -16,6 +16,7 @@ export {
 } from "@/infra/repositories/economy-repo";
 export {
   countGroupMembers,
+  ensureGroup,
   ensureGroupMember,
   type Group,
   getGroup,

@@ -36,9 +36,13 @@ export default defineCommand({
             text: `Undangan untuk bergabung ke grup WhatsApp saya`,
           },
         });
-        await msg.reply(`❌ Can't add directly (privacy: 403).\n📩 Invite card sent to @${getNumber(target)} via DM.`);
+        await msg.reply(
+          `❌ Can't add directly (privacy: 403).\n📩 Invite card sent to @${getNumber(target)} via DM.`,
+        );
       } catch {
-        await msg.reply(`❌ Can't add (privacy: 403). 📎 Invite link: https://chat.whatsapp.com/${code}\nSend this to @${getNumber(target)} manually.`);
+        await msg.reply(
+          `❌ Can't add (privacy: 403). 📎 Invite link: https://chat.whatsapp.com/${code}\nSend this to @${getNumber(target)} manually.`,
+        );
       }
     }
   },

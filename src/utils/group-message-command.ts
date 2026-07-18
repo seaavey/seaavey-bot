@@ -1,5 +1,5 @@
 import { defineCommand } from "@/core/types";
-import { getGroup, setGroup, type Group } from "@/infra/database";
+import { ensureGroup, setGroup, type Group } from "@/infra/database";
 
 type ToggleField = "welcome" | "goodbye";
 type MessageField = "welcomeMsg" | "goodbyeMsg";
@@ -47,7 +47,7 @@ export function groupMessageCommand({
     groupOnly: true,
     adminOnly: true,
     handler: async (_sock, msg) => {
-      const group = getGroup(msg.jid);
+      const group = ensureGroup(msg.jid);
       const command = msg.commandName || alias[0] || name.toLowerCase();
       const subcommand = msg.args[0]?.toLowerCase();
 

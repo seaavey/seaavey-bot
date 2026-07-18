@@ -41,15 +41,19 @@ export interface Group {
   antiviewonce: number;
 }
 
-export function getGroup(jid: string): Group {
-  const row = db.query("SELECT * FROM groups WHERE jid = ?").get(jid) as Group | null;
-  if (row) return row;
+/** Get group — returns undefined if not yet registered. No side-effects. */
+export function getGroup(jid: string): Group | undefined {
+  return db.query("SELECT * FROM groups WHERE jid = ?").get(jid) as Group | undefined;
+}
+
+/** Ensure group row exists, then return it. */
+export function ensureGroup(jid: string): Group {
   db.run("INSERT OR IGNORE INTO groups (jid) VALUES (?)", [jid]);
   return db.query("SELECT * FROM groups WHERE jid = ?").get(jid) as Group;
 }
 
 export function setGroup(jid: string, key: keyof Omit<Group, "jid">, value: string | number) {
-  db.run("INSERT OR IGNORE INTO groups (jid) VALUES (?)", [jid]);
+  ensureGroup(jid);
   db.run(`UPDATE groups SET ${key} = ? WHERE jid = ?`, [value, jid]);
 }
 

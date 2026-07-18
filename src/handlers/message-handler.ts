@@ -7,8 +7,8 @@ import type { MessageContext } from "@/handlers/message-context";
 import { getCachedGroupMetadata } from "@/infra/group-metadata-cache";
 import {
   countGroupMembers,
+  ensureGroup,
   ensureGroupMember,
-  getGroup,
   recordMemberChat,
 } from "@/infra/repositories/group-repo";
 import { runMiddlewares } from "@/handlers/middleware";
@@ -44,7 +44,7 @@ export async function handleMessagesUpsert(sock: WASocket, messages: WAMessage[]
 
     if (parse.isGroup) {
       recordMemberChat(parse.jid, parse.sender);
-      const group = getGroup(parse.jid);
+      const group = ensureGroup(parse.jid);
 
       if (countGroupMembers(parse.jid) <= 1) {
         const metadata = await getCachedGroupMetadata(sock, parse.jid);
@@ -77,7 +77,7 @@ export async function handleMessagesUpdate(
     const jid = key.remoteJid;
     if (!jid.endsWith("@g.us")) continue;
 
-    const group = getGroup(jid);
+    const group = ensureGroup(jid);
     if (!group.antidelete) continue;
 
     const stored = messageStore.get(key.id);

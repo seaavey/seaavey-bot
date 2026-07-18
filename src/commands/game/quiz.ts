@@ -43,22 +43,23 @@ const questions = [
   },
 ];
 
-const sessions = new Map<string, { answer: number; timeout: Timer; sender?: string }>();
+const sessions = new Map<string, { answer: number; timeout: Timer; sender: string }>();
 
 export default defineCommand({
   name: "Quiz",
   alias: ["quiz"],
   description: "Multiple choice quiz",
   handler: async (sock, msg) => {
-    if (sessions.has(msg.jid)) {
-      const session = sessions.get(msg.jid);
+    const sessionKey = `${msg.jid}:${msg.sender}`;
+    if (sessions.has(sessionKey)) {
+      const session = sessions.get(sessionKey);
       if (!session) return;
       const input = msg.args[0]?.toUpperCase();
       if (!input || !["A", "B", "C", "D"].includes(input)) return msg.reply("Answer with A/B/C/D!");
 
       const idx = input.charCodeAt(0) - 65;
       clearTimeout(session.timeout);
-      sessions.delete(msg.jid);
+      sessions.delete(sessionKey);
 
       if (idx === session.answer) {
         addXp(msg.sender, 15);
@@ -70,14 +71,14 @@ export default defineCommand({
     const item = getRandomItem(questions) as (typeof questions)[number];
     const options = item.o.map((o, i) => `${String.fromCharCode(65 + i)}. ${o}`).join("\n");
 
-    const jid = msg.jid;
+    const key = `${msg.jid}:${msg.sender}`;
     const timeout = setTimeout(() => {
-      sessions.delete(jid);
-      sock.sendMessage(jid, {
+      sessions.delete(key);
+      sock.sendMessage(msg.jid, {
         text: `⏰ Time's up! The answer is *${String.fromCharCode(65 + item.a)}*`,
       });
     }, 30_000);
-    sessions.set(msg.jid, { answer: item.a, timeout });
+    sessions.set(key, { answer: item.a, timeout, sender: msg.sender });
 
     await msg.reply(`📝 *Quiz*
 

@@ -1,5 +1,5 @@
 import { defineCommand } from "@/core/types";
-import { addWarn, getGroup, getWarns } from "@/infra/database";
+import { addWarn, ensureGroup, getWarns } from "@/infra/database";
 import { getNumber } from "@/utils/helper";
 export default defineCommand({
   name: "Warn",
@@ -13,7 +13,7 @@ export default defineCommand({
     const reason = msg.args.filter((a: string) => !a.startsWith("@")).join(" ") || "No reason";
     addWarn(msg.jid, target, reason);
     const warns = getWarns(msg.jid, target);
-    const group = getGroup(msg.jid);
+    const group = ensureGroup(msg.jid);
     const max = group.warnMax || 3;
     if (warns.length >= max) {
       await sock.groupParticipantsUpdate(msg.jid, [target], "remove");

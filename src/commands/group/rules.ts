@@ -1,5 +1,5 @@
 import { defineCommand } from "@/core/types";
-import { getGroup, setGroup } from "@/infra/database";
+import { ensureGroup, setGroup } from "@/infra/database";
 
 export default defineCommand({
   name: "Rules",
@@ -17,7 +17,7 @@ export default defineCommand({
       return msg.reply("✅ Rules saved successfully!");
     }
 
-    const group = getGroup(msg.jid);
+    const group = ensureGroup(msg.jid);
     const rules = group.rulesMsg;
     if (!rules) return msg.reply("🚩 No rules yet. Admin can set with: .rules set <text>");
     await msg.reply(`📋 *Rules*

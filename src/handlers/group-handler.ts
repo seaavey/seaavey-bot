@@ -1,5 +1,5 @@
 import type { WASocket } from "baileys";
-import { ensureGroupMember, getGroup, removeGroupMember } from "@/infra/database";
+import { ensureGroup, ensureGroupMember, removeGroupMember } from "@/infra/database";
 import { invalidateGroupMetadata } from "@/infra/group-metadata-cache";
 import { getNumber } from "@/utils/helper";
 
@@ -27,7 +27,7 @@ export async function handleGroupParticipants(
   if (action !== "add" && action !== "remove") return;
 
   invalidateGroupMetadata(id);
-  const group = getGroup(id);
+  const group = ensureGroup(id);
 
   for (const p of participants) {
     const jid = `${getNumber(p)}@s.whatsapp.net`;

@@ -55,7 +55,10 @@ export const geminiAutoMiddleware: MessageMiddleware = async (ctx) => {
   await parse.reply("💬 *Auto AI is thinking...*");
 
   try {
-    const res = await fetch(url);
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15_000);
+    const res = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeout);
     const json = (await res.json()) as { success?: boolean; response?: string };
     if (json.success && json.response) {
       await parse.reply(json.response);

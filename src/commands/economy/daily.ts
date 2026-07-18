@@ -19,8 +19,9 @@ export default defineCommand({
     const reward = getRandomNumber(3000, 7999);
     creditWallet(msg.sender, reward);
     setLastDaily(msg.sender);
+    const after = getEconomy(msg.sender);
     await msg.reply(
-      `🎁 Daily reward: +${reward.toLocaleString()} coins!\n💰 Wallet: ${(eco.wallet + reward).toLocaleString()}`,
+      `🎁 Daily reward: +${reward.toLocaleString()} coins!\n💰 Wallet: ${after.wallet.toLocaleString()}`,
     );
   },
 });

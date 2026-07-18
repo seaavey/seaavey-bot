@@ -229,21 +229,15 @@ async function resolveGroupRoles(sock: WASocket, identity: MessageIdentity): Pro
 
   const participants = await Promise.all(
     metadata.participants.map(async (p) => {
-      const resolvedId = p.id.endsWith("@lid")
-        ? await normalizeJid(sock, p.id)
-        : p.id;
+      const resolvedId = p.id.endsWith("@lid") ? await normalizeJid(sock, p.id) : p.id;
       return { ...p, resolvedId };
     }),
   );
 
-  const participant = participants.find(
-    (p) => getNumber(p.resolvedId) === senderNum,
-  );
+  const participant = participants.find((p) => getNumber(p.resolvedId) === senderNum);
   // sock.user?.id format: "62859...:72@s.whatsapp.net" — strip device suffix
   const botNum = getNumber(sock.user?.id ?? "").replace(/:.*$/, "");
-  const isBotAdmin = participants.some(
-    (p) => p.admin && getNumber(p.resolvedId) === botNum,
-  );
+  const isBotAdmin = participants.some((p) => p.admin && getNumber(p.resolvedId) === botNum);
 
   return { isAdmin: !!participant?.admin, isBotAdmin };
 }
